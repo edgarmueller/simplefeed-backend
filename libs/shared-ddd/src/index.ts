@@ -1,0 +1,8 @@
+export * from './lib/shared-ddd.module'
+export { AggregateRoot } from './lib/aggregate-root'
+export { Props } from './lib/props.interface'
+export { IDomainEvent } from './lib/events/domain-event.interface'
+export { DomainEvents } from './lib/events/domain-events'
+export { Entity } from './lib/entity.interface'
+export { nullify } from './lib/nullify'
+export { createId } from './lib/id'

@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "auth": {
+      "description": "Generate a auth module.",
+      "factory": "./dist/auth/auth.factory#main"
+    },
+    "ddd-model": {
+      "description": "Generate a model.",
+      "factory": "./dist/ddd/model/model.factory#main"
+    },
+    "ddd-agg-root": {
+      "description": "Generate an aggregate.",
+      "factory": "./dist/ddd/aggregate-root/aggregate-root.factory#main"
+    },
+    "ddd-entity": {
+      "description": "Generate an entity.",
+      "factory": "./dist/ddd/entity/entity.factory#main"
+    },
+    "ddd-usecase": {
+      "description": "Generate a single usecase.",
+      "factory": "./dist/ddd/usecase/usecase.factory#main"
+    },
+    "ddd-error": {
+      "description": "Generate a domain error.",
+      "factory": "./dist/ddd/error/error.factory#main"
+    }
+  }
+}

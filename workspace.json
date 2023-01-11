@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "realworld-nest": "apps/realworld-nest",
+    "schematics": "libs/schematics",
+    "shared-ddd": "libs/shared-ddd"
+  }
+}

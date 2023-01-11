@@ -1,0 +1,56 @@
+{
+  "modules": {
+    "user": {
+      "type": "domain",
+      "User": {
+        "type": "AggregateRoot",
+        "props": {
+          "email": {
+            "type": "string",
+            "required": true
+          },
+          "password": {
+            "type": "string",
+            "required": true
+          },
+          "profile": {
+            "type": "Profile",
+            "required": true
+          },
+          "createdAt": { "type": "Date" },
+          "updatedAt": { "type": "Date" }
+        }
+      },
+      "Profile": {
+        "type": "Entity",
+        "props": {
+          "username": {
+            "type": "string",
+            "required": true
+          },
+          "bio": { "type": "string" },
+          "image": { "type": "string" },
+          "follows": {
+            "type": "Profile",
+            "many": true
+          },
+          "user": { "type": "User" },
+          "createdAt": { "type": "Date" },
+          "updatedAt": { "type": "Date" }
+        }
+      }
+    },
+    "auth": {
+      "dependsOn": ["user"],
+      "type": "auth",
+      "accessToken": {
+        "name": "accessToken"
+      },
+      "refreshToken": {
+        "enabled": true,
+        "name": "refreshToken"
+      },
+      "storage": "localStorage"
+    }
+  }
+}
