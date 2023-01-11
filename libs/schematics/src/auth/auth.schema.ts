@@ -1,4 +1,6 @@
 export interface AuthSchema {
-	model: any;
-	path: string
+  name: string
+  model?: any
+  path: string
+  project?: string
 }

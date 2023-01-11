@@ -1,6 +1,6 @@
-import { IEvent } from '@nestjs/cqrs';
+import { IEvent } from '@nestjs/cqrs'
 
 export interface IDomainEvent extends IEvent {
-  timestamp: Date;
-  getAggregateId(): string;
+  timestamp: Date
+  getAggregateId(): string
 }

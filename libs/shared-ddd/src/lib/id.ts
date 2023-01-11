@@ -1,3 +1,6 @@
-import { uuid } from 'short-uuid';
+import { uuid } from 'short-uuid'
 
-export const createId =  (prefix: string): () => string => () => `${prefix}-${uuid()}`
+export const createId =
+  (prefix: string): (() => string) =>
+  () =>
+    `${prefix}-${uuid()}`

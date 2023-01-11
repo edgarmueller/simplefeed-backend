@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { EventPublisher } from '@nestjs/cqrs';
-import { AggregateRoot } from '../aggregate-root';
+import { EventPublisher } from '@nestjs/cqrs'
+import { AggregateRoot } from '../aggregate-root'
 
 export class DomainEvents {
-  private static markedAggregates: AggregateRoot<any>[] = [];
+  private static markedAggregates: AggregateRoot<any>[] = []
 
   /**
    * @method markAggregateForDispatch
@@ -14,9 +14,9 @@ export class DomainEvents {
    */
 
   public static markAggregateForDispatch(aggregate: AggregateRoot<any>): void {
-    const aggregateFound = !!this.findMarkedAggregateByID(aggregate.id);
+    const aggregateFound = !!this.findMarkedAggregateByID(aggregate.id)
     if (!aggregateFound) {
-      this.markedAggregates.push(aggregate);
+      this.markedAggregates.push(aggregate)
     }
   }
 
@@ -25,35 +25,34 @@ export class DomainEvents {
   ): AggregateRoot<any> | undefined {
     for (const aggregate of this.markedAggregates) {
       if (aggregate.id === id) {
-        return aggregate;
+        return aggregate
       }
     }
 
-    return undefined;
+    return undefined
   }
 
   public static dispatchEventsForAggregate(
     id: string,
     publisher: EventPublisher
   ): void {
-    const aggregate = this.findMarkedAggregateByID(id);
+    const aggregate = this.findMarkedAggregateByID(id)
 
     if (aggregate) {
-      const aggregateWithPendingEvents =
-        publisher.mergeObjectContext(aggregate);
-      aggregateWithPendingEvents.commit();
-      this.removeAggregateFromMarkedDispatchList(aggregate);
+      const aggregateWithPendingEvents = publisher.mergeObjectContext(aggregate)
+      aggregateWithPendingEvents.commit()
+      this.removeAggregateFromMarkedDispatchList(aggregate)
     }
   }
 
   private static removeAggregateFromMarkedDispatchList(
     aggregate: AggregateRoot<any>
   ): void {
-    const index = this.markedAggregates.findIndex((a) => a.equals(aggregate));
-    this.markedAggregates.splice(index, 1);
+    const index = this.markedAggregates.findIndex((a) => a.equals(aggregate))
+    this.markedAggregates.splice(index, 1)
   }
 
   public static clearMarkedAggregates(): void {
-    this.markedAggregates = [];
+    this.markedAggregates = []
   }
 }

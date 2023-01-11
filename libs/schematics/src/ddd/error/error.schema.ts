@@ -1,4 +1,4 @@
 export interface ErrorSchema {
-  name: string;
-  aggregate: string;
+  name: string
+  aggregate: string
 }

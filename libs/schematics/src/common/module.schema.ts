@@ -1,41 +1,41 @@
-import { Path } from '@angular-devkit/core';
+import { Path } from '@angular-devkit/core'
 
 // copied from nestjs-schematics
 export interface ModuleOptions {
   /**
    * The name of the module.
    */
-  name: string;
+  name: string
   /**
    * The path to create the module.
    */
-  path?: string;
+  path?: string
   /**
    * The path to insert the module declaration.
    */
-  module?: Path;
+  module?: Path
   /**
    * Directive to insert declaration in module.
    */
-  skipImport?: boolean;
+  skipImport?: boolean
   /**
    * Metadata name affected by declaration insertion.
    */
-  metadata?: string;
+  metadata?: string
   /**
    * Nest element type name
    */
-  type?: string;
+  type?: string
   /**
    * Application language.
    */
-  language?: string;
+  language?: string
   /**
    * The source root path
    */
-  sourceRoot?: string;
+  sourceRoot?: string
   /**
    * Flag to indicate if a directory is created.
    */
-  flat?: boolean;
+  flat?: boolean
 }

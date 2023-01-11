@@ -1,6 +1,6 @@
-export interface AggregateRootSchema {
-  module: string;
-  name: string;
-  path: string;
-  model?: any;
+import { ModuleOptions } from '../../common/module.schema'
+
+export interface AggregateRootOptions extends ModuleOptions {
+  model?: any
+  genContext: any
 }

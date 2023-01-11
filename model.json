@@ -7,50 +7,85 @@
         "props": {
           "email": {
             "type": "string",
-            "required": true
+            "queryable": true,
+            "unique": true
           },
           "password": {
-            "type": "string",
-            "required": true
+            "type": "string"
           },
           "profile": {
             "type": "Profile",
-            "required": true
+            "multiplicity": "one-to-one",
+            "inverseSide": "user",
+            "meta": {
+              "orm": {
+                "eager": true,
+                "cascade": true
+              }
+            }
           },
-          "createdAt": { "type": "Date" },
-          "updatedAt": { "type": "Date" }
+          "createdAt": { 
+            "type": "Date" ,
+            "meta": {
+              "orm": {
+                "createdAt": true
+              }
+            }
+          },
+          "updatedAt": { 
+            "type": "Date", 
+            "meta": {
+              "orm": {
+                "updatedAt": true
+              }
+            }
+          }
         }
       },
       "Profile": {
         "type": "Entity",
         "props": {
           "username": {
-            "type": "string",
-            "required": true
+            "type": "string"
           },
-          "bio": { "type": "string" },
-          "image": { "type": "string" },
+          "bio": { 
+            "type": "string", 
+            "optional": true
+          },
+          "image": { 
+            "type": "string",
+            "optional": true
+          },
           "follows": {
             "type": "Profile",
-            "many": true
+            "multiplicity": "many-to-many",
+            "inverseSide": "followedBy",
+            "optional": true
           },
-          "user": { "type": "User" },
-          "createdAt": { "type": "Date" },
-          "updatedAt": { "type": "Date" }
+          "user": { 
+            "type": "User",
+            "multiplicity": "one-to-one",
+            "inverseSide": "profile",
+            "optional": true,
+            "onDelete": "CASCADE"
+          },
+          "createdAt": { 
+            "type": "Date",
+            "metadata": "createdAt"
+          },
+          "updatedAt": { 
+            "type": "Date",
+            "metadata": "updatedAt"
+          }
         }
       }
     },
     "auth": {
-      "dependsOn": ["user"],
       "type": "auth",
-      "accessToken": {
-        "name": "accessToken"
-      },
       "refreshToken": {
-        "enabled": true,
-        "name": "refreshToken"
-      },
-      "storage": "localStorage"
+        "enabled": true
+      }
     }
-  }
+  },
+  "routes": {}
 }

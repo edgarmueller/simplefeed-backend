@@ -17,9 +17,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@realworld/auth": ["libs/auth/src/index.ts"],
-      "@realworld/shared-ddd": ["libs/shared-ddd/src/index.ts"],
-      "@realworld/user": ["libs/user/src/index.ts"]
+      "@kittgen/shared-ddd": ["libs/shared-ddd/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

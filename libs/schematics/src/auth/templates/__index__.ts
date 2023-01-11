@@ -1,0 +1,8 @@
+export { AuthService } from './lib/auth.service'
+export { AuthModule } from './lib/auth.module'
+export { JwtStrategy } from './lib/strategies/jwt.strategy'
+export { JwtRefreshGuard } from './lib/strategies/jwt-refresh.guard'
+export { LocalAuthGuard } from './lib/strategies/local-auth.guard'
+export { RequestWithUser } from './lib/interfaces/request-with-user.interface'
+export { authConfig } from './lib/auth.config'
+export { AuthConfigKeys } from './lib/auth.config'

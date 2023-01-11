@@ -29,7 +29,8 @@ const createSchema = async () => {
     }
 
     const queryRunner = connection.createQueryRunner();
-    await queryRunner.createSchema('realworld', true);
+    // TODO: schema name
+    await queryRunner.createSchema('kittgen', true);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Database schema could not be created!')

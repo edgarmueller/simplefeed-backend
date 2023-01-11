@@ -1,9 +1,124 @@
 {
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
-  "version": 2,
+  "version": 1,
   "projects": {
-    "realworld-nest": "apps/realworld-nest",
-    "schematics": "libs/schematics",
-    "shared-ddd": "libs/shared-ddd"
+    "app": {
+      "root": "apps/app",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "apps/app-name/src",
+      "projectType": "application",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/node:webpack",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/apps/app",
+            "main": "apps/app-name/src/main.ts",
+            "tsConfig": "apps/app-name/tsconfig.app.json",
+            "assets": [
+              "apps/app-name/src/assets"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "extractLicenses": true,
+              "inspect": false,
+              "fileReplacements": [
+                {
+                  "replace": "apps/app-name/src/environments/environment.ts",
+                  "with": "apps/app-name/src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@nrwl/node:node",
+          "options": {
+            "buildTarget": "app:build"
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": [
+            "{options.outputFile}"
+          ],
+          "options": {
+            "lintFilePatterns": [
+              "apps/app-name/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/apps/app"
+          ],
+          "options": {
+            "jestConfig": "apps/app-name/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": [],
+      "configFilePath": "apps/app-name/project.json"
+    },
+    "schematics": {
+      "root": "libs/schematics",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "libs/schematics/src",
+      "projectType": "library",
+      "tags": [],
+      "configFilePath": "libs/schematics/project.json"
+    },
+    "shared-ddd": {
+      "root": "libs/shared-ddd",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "libs/shared-ddd/src",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/js:tsc",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/libs/shared-ddd",
+            "tsConfig": "libs/shared-ddd/tsconfig.lib.json",
+            "packageJson": "libs/shared-ddd/package.json",
+            "main": "libs/shared-ddd/src/index.ts",
+            "assets": [
+              "libs/shared-ddd/*.md"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": [
+            "{options.outputFile}"
+          ],
+          "options": {
+            "lintFilePatterns": [
+              "libs/shared-ddd/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/shared-ddd"
+          ],
+          "options": {
+            "jestConfig": "libs/shared-ddd/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": [],
+      "configFilePath": "libs/shared-ddd/project.json"
+    }
   }
 }

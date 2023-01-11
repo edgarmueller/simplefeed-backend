@@ -1,3 +1,4 @@
+import { Path } from '@angular-devkit/core'
 import {
   externalSchematic,
   branchAndMerge,
@@ -12,10 +13,17 @@ import { main as authRule } from '../../auth/auth.factory'
 import { ModelSchema } from './model.schema.'
 import * as fs from 'fs'
 
+const collectTypes = (targetType: string) => (module: any) =>
+  Object.keys(module).filter((key) => module[key].type === targetType)
+
+const collectEntities = collectTypes('Entity')
+const collectAggregateRoots = collectTypes('AggregateRoot')
+
 function collectRules(tree: Tree, model: any): Rule[] {
   const rules: Rule[] = []
   Object.keys(model.modules).forEach((moduleName) => {
-    const moduleType = model.modules[moduleName].type
+    const currentModule = model.modules[moduleName]
+    const moduleType = currentModule.type
     if (moduleType === 'domain') {
       if (!tree.exists(`libs/${moduleName}/src/lib/${moduleName}.module.ts`)) {
         rules.push(
@@ -25,46 +33,48 @@ function collectRules(tree: Tree, model: any): Rule[] {
           })
         )
       }
+      const genContext = {
+        crossReferences: {}
+      };
       // aggregates --
-      const aggregates = Object.keys(model.modules[moduleName]).filter(
-        (key) => {
-          return model.modules[moduleName][key].type === 'AggregateRoot'
-        }
-      )
+      const aggregates = collectAggregateRoots(currentModule)
       aggregates.forEach((aggregate) => {
         rules.push(
           aggregateRootRule({
-            module: moduleName,
+            module: moduleName as Path,
             name: aggregate,
-            path: `libs/${moduleName}/src/lib`,
+            path: `libs/${moduleName}/src`,
             model,
+            genContext
           })
         )
       })
       // entities --
-      const entities = Object.keys(model.modules[moduleName]).filter((key) => {
-        return model.modules[moduleName][key].type === 'Entity'
-      })
-      entities.forEach((aggregate) => {
+      const entities = collectEntities(currentModule)
+      entities.forEach((entity) => {
         rules.push(
           entityRule({
             module: moduleName,
-            name: aggregate,
-            path: `libs/${moduleName}/src/lib`,
+            name: entity,
+            path: `libs/${moduleName}/src`,
             model,
+            genContext
           })
         )
       })
     }
-
-    if (moduleType === "auth") {
-      console.log('auth module found')
-      rules.push(authRule({
-        model,
-        path: `libs/${moduleName}/src/lib`,
-      }))
-    }
   })
+
+  if (model.modules.auth) {
+    rules.push(
+      authRule({
+        name: 'auth',
+        model,
+        path: 'libs/auth/src',
+      })
+    )
+  }
+
   return rules
 }
 
@@ -72,7 +82,7 @@ export function main(options: ModelSchema): Rule {
   const input = fs.readFileSync(options.inputFile as string, 'utf8')
   const model = JSON.parse(input)
   return async (tree: Tree, _context: SchematicContext): Promise<Rule> => {
-    const rules = collectRules(tree, model)
+    const rules = collectRules(tree, model);
     return branchAndMerge(chain(rules))
   }
 }

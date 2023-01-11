@@ -1,8 +1,5 @@
-import { DatabaseModule } from './../../apps/realworld-nest/src/app/infra/database/database.module';
-import { authConfig, AuthConfigSchema } from './../../libs/auth/src/lib/auth.config';
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config";
-import { DatabaseConfigSchema } from '../../apps/realworld-nest/src/app/infra/database/database.config';
 import Joi from "joi";
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -13,7 +10,7 @@ export const databaseConfig = registerAs('database', () => ({
 	password: process.env.POSTGRES_PASSWORD,
 	db: process.env.POSTGRES_DB,
 	type: 'postgres',
-	schema: 'realworld',
+	schema: 'kittgen',
 	ssl: process.env.DATABASE_SSL === 'true'
 }))
 
@@ -36,7 +33,7 @@ export const databaseConfig = registerAs('database', () => ({
         username: configService.get('database.user'),
         password: configService.get('database.password'),
         database: configService.get('database.db'),
-        schema: 'realworld',
+        schema: 'kittgen',
         ssl: configService.get('database.ssl'),
       })
     }),

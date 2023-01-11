@@ -1,5 +1,5 @@
 {
-  "name": "realworld-workspace",
+  "name": "kittgen-workspace",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -8,7 +8,9 @@
     "test": "nx test",
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
-    "schema:create": "ts-node --project tsconfig.script.json tools/scripts/create-schema"
+    "schema:create": "ts-node --project tsconfig.script.json tools/scripts/create-schema",
+    "lint": "eslint '**/*.ts'",
+    "lint:fix": "npm run lint -- --fix"
   },
   "schematics": "./libs/schematics/collection.json",
   "private": true,
@@ -67,11 +69,12 @@
     "copyfiles": "^2.4.1",
     "eslint": "~8.15.0",
     "eslint-config-prettier": "8.1.0",
+    "eslint-plugin-import": "^2.27.5",
     "jasmine": "^4.5.0",
     "jest": "27.5.1",
     "nx": "14.5.8",
     "pluralize": "^8.0.0",
-    "prettier": "^2.6.2",
+    "prettier": "2.8.3",
     "supertest": "^6.2.4",
     "ts-jest": "27.1.4",
     "ts-node": "~10.8.0",

@@ -1,5 +1,5 @@
 export interface ModelSchema {
-  path: string;
-  sourceRoot: string;
-  inputFile: string;
+  path: string
+  sourceRoot: string
+  inputFile: string
 }

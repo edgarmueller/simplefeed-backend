@@ -1,8 +1,10 @@
 
 
-# realworld
+# kittgen nest mono template
 
-This project was generated using [Nx](https://nx.dev).
+## Run schematics
+
+`npx nx build schematics && schematics .:ddd-model --input-file model.json --dry-run=false`
 ## Geting started
 
 1. Start required infra: `npm infra:up`
@@ -22,13 +24,13 @@ Libraries are shareable across libraries and applications. They can be imported 
 
 ## Development server
 
-Run `nx serve realworld-nest` for a dev server. Navigate to http://localhost:5000/. The app will automatically reload if you change any of the source files.
+Run `nx serve app` for a dev server. Navigate to http://localhost:5000/. The app will automatically reload if you change any of the source files.
 component.
 
 ## Build
 
 ### App 
-Run `nx build realworld-nest` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Run `nx build app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
 ### Libraries
 

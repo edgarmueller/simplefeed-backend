@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "realworld",
+  "npmScope": "kittgen",
   "affected": {
-    "defaultBase": "main"
+    "defaultBase": "app"
   },
   "implicitDependencies": {
     "package.json": {
@@ -15,14 +15,21 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e"
+        ]
       }
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
-  "defaultProject": "realworld-nest"
+  "defaultProject": "app"
 }

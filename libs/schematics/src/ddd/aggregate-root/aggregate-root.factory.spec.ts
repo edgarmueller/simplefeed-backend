@@ -1,16 +1,16 @@
-import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import * as path from 'path';
+import { Tree } from '@angular-devkit/schematics'
+import { SchematicTestRunner } from '@angular-devkit/schematics/testing'
+import * as path from 'path'
 
-const collectionPath = path.join(__dirname, '../collection.json');
+const collectionPath = path.join(__dirname, '../collection.json')
 
 describe('aggregate root factory', () => {
   it('works', async () => {
-    const runner = new SchematicTestRunner('schematics', collectionPath);
+    const runner = new SchematicTestRunner('schematics', collectionPath)
     const tree = await runner
       .runSchematicAsync('ch-lib.schematics', {}, Tree.empty())
-      .toPromise();
+      .toPromise()
 
-    expect(tree.files).toEqual([]);
-  });
-});
+    expect(tree.files).toEqual([])
+  })
+})
