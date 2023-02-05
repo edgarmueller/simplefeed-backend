@@ -66,6 +66,52 @@
       "tags": [],
       "configFilePath": "apps/app-name/project.json"
     },
+    "auth": {
+      "root": "libs/auth",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "libs/auth/src",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/js:tsc",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/libs/auth",
+            "tsConfig": "libs/auth/tsconfig.lib.json",
+            "packageJson": "libs/auth/package.json",
+            "main": "libs/auth/src/index.ts",
+            "assets": [
+              "libs/auth/*.md"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": [
+            "{options.outputFile}"
+          ],
+          "options": {
+            "lintFilePatterns": [
+              "libs/auth/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/auth"
+          ],
+          "options": {
+            "jestConfig": "libs/auth/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": [],
+      "configFilePath": "libs/auth/project.json"
+    },
     "schematics": {
       "root": "libs/schematics",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",
@@ -119,6 +165,52 @@
       },
       "tags": [],
       "configFilePath": "libs/shared-ddd/project.json"
+    },
+    "user": {
+      "root": "libs/user",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "libs/user/src",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/js:tsc",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/libs/user",
+            "tsConfig": "libs/user/tsconfig.lib.json",
+            "packageJson": "libs/user/package.json",
+            "main": "libs/user/src/index.ts",
+            "assets": [
+              "libs/user/*.md"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": [
+            "{options.outputFile}"
+          ],
+          "options": {
+            "lintFilePatterns": [
+              "libs/user/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/user"
+          ],
+          "options": {
+            "jestConfig": "libs/user/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": [],
+      "configFilePath": "libs/user/project.json"
     }
   }
 }

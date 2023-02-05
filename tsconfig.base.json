@@ -20,8 +20,14 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@kittgen/auth": [
+        "libs/auth/src/index.ts"
+      ],
       "@kittgen/shared-ddd": [
         "libs/shared-ddd/src/index.ts"
+      ],
+      "@kittgen/user": [
+        "libs/user/src/index.ts"
       ]
     }
   },
