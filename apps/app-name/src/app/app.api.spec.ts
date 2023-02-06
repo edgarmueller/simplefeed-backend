@@ -51,7 +51,7 @@ describe('realworld app', () => {
 
   async function login(email: string, password: string, expectedStatus = 200) {
     const { body } = await request(app.getHttpServer())
-      .post('/api/users/login')
+      .post('/api/auth/login')
       .send({
         user: {
           email,
@@ -130,7 +130,7 @@ describe('realworld app', () => {
     );
     const body = await login('fry@example.com', 'secret');
     const { body: updatedBody } = await request(app.getHttpServer())
-      .post('/api/users/refresh')
+      .post('/api/auth/refresh')
       .send({
         refreshToken: body.refreshToken,
       })

@@ -50,7 +50,7 @@ export class AuthController {
 
   @HttpCode(200)
   @UseGuards(LocalAuthGuard)
-  @Post('users/login')
+  @Post('login')
   async logIn(@Req() request: RequestWithUser): Promise<{ user: GetUserDto }> {
     const { user } = request
     const { accessToken, refreshToken } = await this.usecases.login(user)
@@ -62,7 +62,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Post('users/refresh')
+  @Post('refresh')
   @HttpCode(200)
   async refresh(
     @Req()
