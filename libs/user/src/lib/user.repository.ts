@@ -42,9 +42,22 @@ export class UsersRepository {
     }
   }
 
+  async findOneByUsernameOrFail(username: string): Promise<User> {
+    try {
+      const foundUser = await this.userRepository.findOneOrFail({
+        where: { profile: { username } }
+      });
+      return foundUser;
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new UserNotFoundError();
+      }
+      throw error;
+    }
+  }
   
   async findOneByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { email } })
+    const user = await this.userRepository.findOne({ where: { email }, relations: { profile: true } })
     if (user) {
       return user;
     }
