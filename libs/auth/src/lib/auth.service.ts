@@ -49,6 +49,9 @@ export class AuthService {
     const payload: TokenPayload = {
       userId: user.id.toString(),
       username: user.profile.username,
+      firstName: user.profile.firstName,
+      lastName: user.profile.lastName,
+      imageUrl: user.profile.imageUrl,
     }
     const expiresIn = this.options.accessTokenExpirationInSeconds
     const token = this.jwtService.sign(payload, {
@@ -82,6 +85,9 @@ export class AuthService {
     const payload: TokenPayload = {
       userId: user.id.toString(),
       username: user.profile.username,
+      firstName: user.profile.firstName,
+      lastName: user.profile.lastName,
+      imageUrl: user.profile.imageUrl,
     }
     const expiresIn = this.options.refreshTokenExpirationInSeconds
     const refreshToken = this.jwtService.sign(payload, {

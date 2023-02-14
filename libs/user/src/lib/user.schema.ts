@@ -10,21 +10,18 @@ export const UserSchema = new EntitySchema<User>({
       type: String,
       primary: true,
     },
-
     email: {
       type: String,
       unique: true,
       nullable: false,
       name: 'email',
     },
-
     password: {
       type: String,
       unique: false,
       nullable: false,
       name: 'password',
     },
-
     createdAt: {
       type: Date,
       unique: false,
@@ -32,7 +29,6 @@ export const UserSchema = new EntitySchema<User>({
       name: 'created_at',
       createDate: true,
     },
-
     updatedAt: {
       type: Date,
       unique: false,

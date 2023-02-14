@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsObject,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator'
@@ -11,6 +12,18 @@ export class UserDto {
   @IsString()
   @IsNotEmpty()
   username: string
+
+  @IsString()
+  @IsNotEmpty()
+  firstName: string
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string
 
   @IsEmail()
   @IsNotEmpty()

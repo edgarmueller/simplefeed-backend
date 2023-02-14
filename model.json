@@ -52,7 +52,13 @@
             "type": "string", 
             "optional": true
           },
-          "image": { 
+          "firstName": { 
+            "type": "string", 
+          },
+          "lastName": { 
+            "type": "string", 
+          },
+          "imageUrl": { 
             "type": "string",
             "optional": true
           },

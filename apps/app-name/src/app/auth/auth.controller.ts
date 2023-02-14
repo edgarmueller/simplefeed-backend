@@ -36,7 +36,12 @@ export class AuthController {
         User.create({
           email: user.email,
           password: user.password,
-          profile: Profile.create({ username: user.username }),
+          profile: Profile.create({ 
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            imageUrl: user.imageUrl,
+          }),
         })
       )
       return { user: GetUserDto.fromDomain(registeredUser).withToken(null) }

@@ -6,14 +6,14 @@ export class GetUserDto {
   refreshToken?: string
   username: string
   bio?: string
-  image?: string
+  imageUrl?: string
 
   static fromDomain(user: User): GetUserDto {
     return new GetUserDto({
       email: user.email,
       username: user.profile.username,
       bio: user.profile.bio,
-      image: user.profile.image,
+      imageUrl: user.profile.imageUrl,
     })
   }
 

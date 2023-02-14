@@ -13,7 +13,7 @@ export class GetUserDto {
       email: user.email,
       username: user.profile.username,
       bio: user.profile.bio,
-      image: user.profile.image,
+      image: user.profile.imageUrl,
     })
   }
 
