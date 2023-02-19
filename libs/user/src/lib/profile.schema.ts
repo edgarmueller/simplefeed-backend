@@ -41,6 +41,12 @@ export const ProfileSchema = new EntitySchema<Profile>({
 			nullable: true,
       default: 0
     },
+    nrOfLikes: {
+			type: Number,
+			unique: false,
+			nullable: true,
+      default: 0
+    },
 		createdAt: {
 			type: Date,
 			unique: false,

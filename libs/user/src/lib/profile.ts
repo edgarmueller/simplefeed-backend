@@ -14,6 +14,7 @@ export class Profile implements Entity {
   bio?: string 
   imageUrl?: string 
   nrOfPosts?: number
+  nrOfLikes?: number
 
   createdAt?: Date 
   updatedAt?: Date 
