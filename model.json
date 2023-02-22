@@ -53,10 +53,10 @@
             "optional": true
           },
           "firstName": { 
-            "type": "string", 
+            "type": "string"
           },
           "lastName": { 
-            "type": "string", 
+            "type": "string" 
           },
           "imageUrl": { 
             "type": "string",
