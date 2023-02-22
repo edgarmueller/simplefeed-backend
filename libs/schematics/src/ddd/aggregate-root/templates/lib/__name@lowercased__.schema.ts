@@ -30,7 +30,7 @@ export const <%= typeName %>Schema = new EntitySchema<<%= typeName %>>({
       target: "<%= props[relation].type %>",
       inverseSide: "<%= lowercased(name) %>",
       <%   if (props[relation]?.meta?.orm?.eager === true) { %> eager: true,
-      <% } else if (props[relation].meta?.orm?.cascade === true) { %> cascade: true
+      <% } if (props[relation].meta?.orm?.cascade === true) { %> cascade: true
 		  <% } %>
     }
     <% } %>

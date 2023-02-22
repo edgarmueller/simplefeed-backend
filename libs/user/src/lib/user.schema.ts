@@ -43,7 +43,7 @@ export const UserSchema = new EntitySchema<User>({
       target: 'Profile',
       inverseSide: 'user',
       eager: true,
-      cascade: true
+      cascade: true,
     },
   },
 })
