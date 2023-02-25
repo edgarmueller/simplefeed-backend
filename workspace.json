@@ -112,6 +112,52 @@
       "tags": [],
       "configFilePath": "libs/auth/project.json"
     },
+    "post": {
+      "root": "libs/post",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "libs/post/src",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/js:tsc",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/libs/post",
+            "tsConfig": "libs/post/tsconfig.lib.json",
+            "packageJson": "libs/post/package.json",
+            "main": "libs/post/src/index.ts",
+            "assets": [
+              "libs/post/*.md"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "outputs": [
+            "{options.outputFile}"
+          ],
+          "options": {
+            "lintFilePatterns": [
+              "libs/post/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/post"
+          ],
+          "options": {
+            "jestConfig": "libs/post/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": [],
+      "configFilePath": "libs/post/project.json"
+    },
     "schematics": {
       "root": "libs/schematics",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",

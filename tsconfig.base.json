@@ -23,6 +23,9 @@
       "@kittgen/auth": [
         "libs/auth/src/index.ts"
       ],
+      "@kittgen/post": [
+        "libs/post/src/index.ts"
+      ],
       "@kittgen/shared-ddd": [
         "libs/shared-ddd/src/index.ts"
       ],

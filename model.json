@@ -46,7 +46,8 @@
         "type": "Entity",
         "props": {
           "username": {
-            "type": "string"
+            "type": "string",
+            "queryable": true
           },
           "bio": { 
             "type": "string", 
@@ -61,6 +62,16 @@
           "imageUrl": { 
             "type": "string",
             "optional": true
+          },  
+          "nrOfPosts": {
+            "type": "number",
+            "optional": true,
+            "default": 0
+          },
+          "nrOfLikes": {
+            "type": "number",
+            "optional": true,
+            "default": 0
           },
           "follows": {
             "type": "Profile",
@@ -83,6 +94,75 @@
             "type": "Date",
             "metadata": "updatedAt"
           }
+        }
+      }
+    },
+    "post": {
+      "type": "domain",
+      "Post": {
+        "type": "AggregateRoot",
+        "props": {
+          "addedBy": {
+            "type": "string"
+          },
+          "postedTo": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "Date",
+            "meta": {
+              "orm": {
+                "createdAt": true
+              }
+            }
+          },
+          "userClosed": {
+            "type": "boolean",
+            "default": false
+          },
+          "likes": {
+            "type": "number"
+          },
+          "user": {
+            "type": "User",
+            "multiplicity": "many-to-one"
+          }
+        }
+      },
+      "Comment": {
+        "type": "Entity",
+        "props": {
+          "postedBy": {
+            "type": "string"
+          },
+          "postedTo": {
+            "type": "string"
+          },
+          "removed": {
+            "type": "boolean",
+            "default": false
+          },
+          "createdAt": {
+            "type": "Date",
+            "meta": {
+              "orm": {
+                "createdAt": true
+              }
+            }
+          },
+          "post": {
+            "type": "Post",
+            "multiplicity": "many-to-one"
+          }
+        }
+      },
+      "Like": {
+        "username": {
+          "type": "string"
+        },
+        "post": {
+          "type": "Post",
+          "multiplicity": "many-to-one"
         }
       }
     },

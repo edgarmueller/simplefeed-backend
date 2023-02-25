@@ -1,4 +1,3 @@
-import { authConfig } from './../../../../libs/schematics/src/auth/templates/lib/auth.config';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -9,6 +8,8 @@ import { DatabaseModule } from './infra/database/database.module';
 import { DatabaseConfigSchema } from './infra/database/database.config';
 import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module';
+import { PostModule } from '@kittgen/post';
+import { authConfig } from '@kittgen/auth';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { UserModule } from './user/user.module';
     DatabaseModule,
     ScheduleModule.forRoot(),
     AuthModule,
-    UserModule
+    UserModule,
+    PostModule
   ],
   controllers: [AppController],
   providers: [AppService],
