@@ -88,9 +88,8 @@ export function main(options: AggregateRootOptions): Rule {
 }
 function aggregateRootTemplate(options: AggregateRootOptions) {
   return () => {
-    const m = options.model.modules[options.module!]
-    const aggregate =
-      options.model.modules[options.module!][classify(options.name)]
+    const declaredModule = options.model.modules[options.module!]
+    const aggregate = declaredModule[classify(options.name)]
     const typeName = classify(options.name)
     const domainRefSerializer = new DomainReferenceSerializer()
     return template({
@@ -100,19 +99,12 @@ function aggregateRootTemplate(options: AggregateRootOptions) {
       capitalize,
       typeName,
       aggregateName: options.name && classify(options.name),
-      entities: Object.keys(m).filter((key) => {
-        return m[key].type === 'Entity'
-      }),
-      // entities: aggregate.filter((key) => {
-      //   return options.model.modules[agg][key].type === 'Entity'
-      // }),
+      entities: Object.keys(declaredModule).filter((key) => declaredModule[key].type === 'Entity'),
       dot: '.',
-      // TODO
       props: aggregate.props,
       snakeCase: (name: string) => dasherize(name).replace(/-/g, '_'),
-      queryableProps: Object.keys(aggregate.props).filter((key) => {
-        return aggregate.props[key].queryable
-      }),
+      // TODO: should include entities
+      queryableProps: Object.keys(aggregate.props).filter((key) => aggregate.props[key].queryable),
       simpleProps: Object.keys(aggregate.props).filter((key) => {
         // TODO: generalize relation types
         const type = aggregate.props[key].type
@@ -128,7 +120,8 @@ function aggregateRootTemplate(options: AggregateRootOptions) {
       }),
       relations: Object.keys(aggregate.props).filter((key) => {
         // TODO: generalize relation types
-        return aggregate.props[key].multiplicity === 'one-to-one'
+        return aggregate.props[key].multiplicity === 'one-to-one' 
+          || aggregate.props[key].multiplicity === 'many-to-one'
       }),
       imports: collectImports(options.name, aggregate),
       lowercased: (name: string) => {

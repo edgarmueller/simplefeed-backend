@@ -28,9 +28,9 @@ export const <%= typeName %>Schema = new EntitySchema<<%= typeName %>>({
     <%= relation %>: {
       type: "<%= props[relation].multiplicity %>",
       target: "<%= props[relation].type %>",
-      inverseSide: "<%= lowercased(name) %>",
-      <%   if (props[relation]?.meta?.orm?.eager === true) { %> eager: true,
-      <% } if (props[relation].meta?.orm?.cascade === true) { %> cascade: true
+      <%   if (props[relation]?.inverseSide) { %> inverseSide: "<%= lowercased(name) %>",
+      <% } if (props[relation]?.meta?.orm?.eager === true) { %> eager: true,
+      <% }  if (props[relation].meta?.orm?.cascade === true) { %> cascade: true
 		  <% } %>
     }
     <% } %>

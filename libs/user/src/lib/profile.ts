@@ -7,15 +7,14 @@ export type ProfileId = string
 const createProfileId = createId(PREFIX)
 
 export class Profile implements Entity {
- 
-  username: string
-  firstName: string 
-  lastName: string 
+  
+  username?: string 
   bio?: string 
+  firstName?: string 
+  lastName?: string 
   imageUrl?: string 
-  nrOfPosts?: number
-  nrOfLikes?: number
-
+  nrOfPosts?: number 
+  nrOfLikes?: number 
   createdAt?: Date 
   updatedAt?: Date 
   
