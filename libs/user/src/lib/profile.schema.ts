@@ -12,8 +12,13 @@ export const ProfileSchema = new EntitySchema<Profile>({
     },
 		username: {
 			type: String,
-			unique: true,
+			unique: false,
 			nullable: false,
+		},
+		bio: {
+			type: String,
+			unique: false,
+			nullable: true,
 		},
 		firstName: {
 			type: String,
@@ -25,33 +30,25 @@ export const ProfileSchema = new EntitySchema<Profile>({
 			unique: false,
 			nullable: false,
 		},
-		bio: {
-			type: String,
-			unique: false,
-			nullable: true,
-		},
 		imageUrl: {
 			type: String,
 			unique: false,
 			nullable: true,
 		},
-    nrOfPosts: {
+		nrOfPosts: {
 			type: Number,
 			unique: false,
 			nullable: true,
-      default: 0
-    },
-    nrOfLikes: {
+		},
+		nrOfLikes: {
 			type: Number,
 			unique: false,
 			nullable: true,
-      default: 0
-    },
+		},
 		createdAt: {
 			type: Date,
 			unique: false,
 			nullable: false,
-      
       createDate: true,
       
 		},
@@ -61,6 +58,7 @@ export const ProfileSchema = new EntitySchema<Profile>({
 			nullable: false,
       updateDate: true
 		},
+		
   },
   relations: {
     follows: {
