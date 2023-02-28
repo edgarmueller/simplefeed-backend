@@ -7,7 +7,6 @@ export type UserId = string
 const createUserId = createId(PREFIX)
 
 export class User extends AggregateRoot {
-  
   email?: string 
   password?: string 
   createdAt?: Date 
@@ -29,6 +28,4 @@ export class User extends AggregateRoot {
   private constructor(props: Props<User>, id?: string) {
     super(props, id || createUserId());
   }
-
-  // TODO: add domain logic
 }

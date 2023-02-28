@@ -7,16 +7,23 @@ export type PostId = string
 const createPostId = createId(PREFIX)
 
 export class Post extends AggregateRoot {
-  
-  addedBy?: string 
-  postedTo?: string 
+ 
+  body: string
+  author: User 
+  postedTo?: User
   createdAt?: Date 
-  
-  user: User[] 
 
   public static create(props: Props<Post>, id?: string): Post {
     const isNewPost = !!id === false;
     const post = new Post({ ...props }, id);
+    
+    const trimmedBody = props.body.trim();
+    if (trimmedBody.length === 0) {
+      throw new Error('Post body is empty');
+    }
+    if (!props.author) {
+      throw new Error("Author must be provided");
+    }
 
     if (isNewPost) {
       post.emitDomainEvent(new PostCreatedEvent(post));

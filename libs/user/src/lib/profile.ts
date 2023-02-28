@@ -32,5 +32,7 @@ export class Profile implements Entity {
     this.id = id || createProfileId()
   }
 
-  // TODO: add domain logic
+  incrementPostCount() {
+    this.nrOfLikes++;
+  }
 }

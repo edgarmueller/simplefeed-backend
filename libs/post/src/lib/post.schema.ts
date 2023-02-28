@@ -10,16 +10,13 @@ export const PostSchema = new EntitySchema<Post>({
       type: String,
       primary: true,
     },
-    addedBy: {
-      type: String,
-      unique: false,
-      nullable: false,
-      name: 'added_by',
+    body: {
+      type: String
     },
     postedTo: {
       type: String,
       unique: false,
-      nullable: false,
+      nullable: true,
       name: 'posted_to',
     },
     createdAt: {
@@ -31,9 +28,12 @@ export const PostSchema = new EntitySchema<Post>({
     },
   },
   relations: {
-    user: {
+    author: {
       type: 'many-to-one',
       target: 'User',
+      joinColumn: {
+        name: 'author_id'
+      }
     },
   },
 })
