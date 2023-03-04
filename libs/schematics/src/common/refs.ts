@@ -33,7 +33,6 @@ export class DomainReferenceSerializer implements IReferenceSerializer {
 }
 
 export function generateRefDescriptors(entity: { props: { [name: string]: any } }, typeName: string, genContext: any): ReferenceDescriptor[] {
-  console.log({ genContext }, entity, typeName)
   return Object
     .entries(entity.props)
     .filter(([_, value]) => !isSimpleProp(value.type))

@@ -123,7 +123,7 @@ function aggregateRootTemplate(options: AggregateRootOptions) {
         return aggregate.props[key].multiplicity === 'one-to-one' 
           || aggregate.props[key].multiplicity === 'many-to-one'
       }),
-      imports: collectImports(options.name, aggregate),
+      imports: collectImports(options, aggregate),
       lowercased: (name: string) => {
         const classifiedName = classify(name)
         return classifiedName.charAt(0).toLowerCase() + classifiedName.slice(1)

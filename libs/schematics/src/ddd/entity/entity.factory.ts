@@ -88,7 +88,7 @@ function entityTemplateRule(options: EntitySchema) {
         }
         return refs;
       }),
-      imports: collectImports(options.name, entity),
+      imports: collectImports(options, entity),
       classify,
       capitalize,
       typeName,
