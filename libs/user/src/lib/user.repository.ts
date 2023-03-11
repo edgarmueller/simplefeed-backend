@@ -31,7 +31,12 @@ export class UsersRepository {
   async findOneByIdOrFail(id: UserId): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
-        where: { id }
+        where: { id },
+        relations: {
+          profile: {
+            friends: true,
+          }
+        }
       });
       return foundUser;
     } catch (error) {

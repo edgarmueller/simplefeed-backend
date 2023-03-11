@@ -18,8 +18,7 @@ export class Profile implements Entity {
   createdAt?: Date 
   updatedAt?: Date 
   
-  follows?: Profile[] 
-  followedBy?: Profile[] 
+  friends?: Profile[] 
   user?: User 
 
   public static create(props: Props<Profile>, id?: string): Profile {
