@@ -34,4 +34,8 @@ export class Profile implements Entity {
   incrementPostCount() {
     this.nrOfLikes++;
   }
+
+  isFriend(user: User) {
+    return this.friends.find(friend => friend.user.id === user.id) !== undefined;
+  }
 }

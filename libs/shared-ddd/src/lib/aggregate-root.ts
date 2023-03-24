@@ -14,7 +14,7 @@ export abstract class AggregateRoot<
     this.id = id ? id : uuid()
   }
 
-  protected emitDomainEvent<T extends EventBase = EventBase>(
+  public emitDomainEvent<T extends EventBase = EventBase>(
     event: T,
     isFromHistory?: boolean
   ): void {

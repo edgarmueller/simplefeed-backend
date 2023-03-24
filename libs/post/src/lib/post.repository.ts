@@ -7,20 +7,38 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { EventPublisher } from '@nestjs/cqrs'
 import { PostNotFoundError } from './errors/post-not-found.error'
 import { Post, PostId } from './post'
-import { IPaginationOptions, paginate, Pagination } from 'nestjs-typeorm-paginate'
+import { Comment } from './comment'
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate'
+import { CommentNotFoundError } from './errors/comment-not-found.error'
 
 @Injectable()
 export class PostsRepository {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
     private readonly publisher: EventPublisher
   ) {}
 
   @Transactional()
-  async save(post: Post): Promise<Post> {
+  async savePost(post: Post): Promise<Post> {
     const savedPost = await this.postRepository.save(post)
     DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
     return savedPost
+  }
+
+  @Transactional()
+  async saveComment(comment: Comment): Promise<Comment> {
+    const savedComment = await this.commentRepository.save(comment)
+    DomainEvents.dispatchEventsForAggregate(
+      savedComment.post.id,
+      this.publisher
+    )
+    return savedComment
   }
 
   async findAll(): Promise<Post[]> {
@@ -42,14 +60,63 @@ export class PostsRepository {
     }
   }
 
-  async findPostsByUsers(userIds: string[], paginationOpts: IPaginationOptions): Promise<Pagination<Post>> {
+  async findOneCommentByIdOrFail(commentId: string): Promise<Comment> {
+    try {
+      const foundComment = await this.commentRepository.findOneOrFail({
+        where: { id: commentId },
+      })
+      return foundComment
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new CommentNotFoundError()
+      }
+      throw error
+    }
+  }
+
+  async findComments(postId: string, commentId?: string): Promise<Pagination<Comment>> {
+    try {
+      const query = this.commentRepository.createQueryBuilder('comment')
+        .select('comment')
+        .innerJoinAndSelect('comment.post', 'post', "comment.post_id = :postId", { postId })
+        .innerJoinAndSelect('comment.author', 'user', "comment.author_id = user.id")
+      if (commentId) {
+        query.where('comment.path LIKE :commentId', { commentId: `%${commentId}%` })
+      } else {
+        query.where('comment.path IS NULL')
+      }
+      // TODO
+      query
+        .skip(0)
+        .limit(10)
+        .getMany()
+      const comments = await paginate(query, { page: 1, limit: 10 })
+      return comments;
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new CommentNotFoundError()
+      }
+      throw error
+    }
+  }
+
+  async findPostsByUsers(
+    userIds: string[],
+    paginationOpts: IPaginationOptions
+  ): Promise<Pagination<Post>> {
     const posts = await paginate(this.postRepository, paginationOpts, {
       where: { author: { id: In(userIds) } },
       relations: {
         author: true,
-        postedTo: true
-      }
+        postedTo: true,
+      },
     })
     return posts
+  }
+
+  findCommentsByPost(postId: string): Promise<Comment[]> {
+    return this.commentRepository.find({
+      where: { post: { id: postId } },
+    })
   }
 }

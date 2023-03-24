@@ -3,42 +3,47 @@ import { Comment } from './comment'
 
 export const CommentSchema = new EntitySchema<Comment>({
   target: Comment,
-  name: "Comment",
-  tableName: "comment",
+  name: 'Comment',
+  tableName: 'comment',
   columns: {
     id: {
       type: String,
       primary: true,
     },
-		postedBy: {
-			type: String,
-			unique: false,
-			nullable: false,
-      
-		},
-		postedTo: {
-			type: String,
-			unique: false,
-			nullable: false,
-      
-		},
-		removed: {
-			type: Boolean,
-			unique: false,
-			nullable: false,
-		},
-		createdAt: {
-			type: Date,
-			unique: false,
-			nullable: false,
-      
-		},
+    content: {
+      type: String,
+    },
+    path: {
+      type: String,
+      nullable: true,
+    },
+    createdAt: {
+      type: Date,
+      unique: false,
+      nullable: false,
+      name: 'created_at',
+      createDate: true,
+    },
+    updatedAt: {
+      type: Date,
+      unique: false,
+      nullable: false,
+      name: 'updated_at',
+      updateDate: true,
+    },
   },
   relations: {
-    post: {
-      type: "many-to-one",
-      target: "Post",
-      joinColumn: { name: "post_id", }
+    author: {
+      type: 'many-to-one',
+      target: 'User',
+      joinColumn: {
+        name: 'author_id'
+      }
     },
-  }
+    post: {
+      type: 'many-to-one',
+      target: 'Post',
+      joinColumn: { name: 'post_id' },
+    },
+  },
 })

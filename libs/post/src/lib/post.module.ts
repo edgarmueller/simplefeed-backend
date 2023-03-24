@@ -1,3 +1,4 @@
+import { CommentSchema } from './comment.schema';
 import { PostUsecases } from './usecases/post.usecases';
 import { CqrsModule } from '@nestjs/cqrs';
 import { Module } from '@nestjs/common';
@@ -10,7 +11,7 @@ import { PostController } from './adapters/post.controller';
 @Module({
   imports: [
 		UserModule,
-		TypeOrmModule.forFeature([PostSchema]),
+		TypeOrmModule.forFeature([PostSchema, CommentSchema]),
 		CqrsModule
 	],
 	controllers: [PostController],
