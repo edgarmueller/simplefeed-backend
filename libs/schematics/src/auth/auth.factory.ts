@@ -35,7 +35,6 @@ function transformOptions(options: AuthSchema): AuthSchema {
   //target.path = dasherize(location.path)
 
   //target.path = join(target.path as Path, target.name)
-  console.log(target.path)
   return target
 }
 

@@ -124,7 +124,6 @@ export function addDeclarationToModule(options: AuthAppOptions): Rule {
 export function main(options: AuthAppOptions): Rule {
   return async (tree: Tree, _context: SchematicContext): Promise<Rule> => {
     options = transformOptions(tree, options)
-    console.log({ options })
     const rules = collectRules(tree, options)
 
     return chain(rules)

@@ -69,8 +69,6 @@ function generate(
   return (context: SchematicContext) => {
     // const ws = readWorkspace(_tree as any)
     // const writePath = `${ws.projects.app.sourceRoot}/${options.name}`
-    console.log(filesPath)
-    console.log(__dirname + '/' + filesPath)
     const source = apply(url(__dirname + '/' + filesPath), [
       templateRule(options),
       move(options.path!),

@@ -53,7 +53,6 @@ export function generateRefDescriptors(entity: { props: { [name: string]: any } 
       } as ReferenceDescriptor
       if (ref.inverseSide && !isSelfReference && genContext.crossReferences[`${typeName}.${refName}`]) {
         const inverseSide = genContext.crossReferences[`${typeName}.${refName}`]
-        console.log(`${typeName}.${refName}:`, { inverseSide })
         // TODO: compare reference types
       } else if (ref.inverseSide && !isSelfReference) {
         // Profile.user
