@@ -15,6 +15,8 @@ import {
 } from 'nestjs-typeorm-paginate'
 import { CommentNotFoundError } from './errors/comment-not-found.error'
 
+export const DEFAULT_COMMENTS_LIMIT = 10;
+
 @Injectable()
 export class PostsRepository {
   constructor(
@@ -74,24 +76,40 @@ export class PostsRepository {
     }
   }
 
-  async findComments(postId: string, commentId?: string): Promise<Pagination<Comment>> {
+  async findComments(
+    postId: string,
+    commentId?: string,
+    paginationOpts: IPaginationOptions = { page: 1, limit: DEFAULT_COMMENTS_LIMIT }
+  ): Promise<Pagination<Comment>> {
     try {
-      const query = this.commentRepository.createQueryBuilder('comment')
+      const query = this.commentRepository
+        .createQueryBuilder('comment')
         .select('comment')
-        .innerJoinAndSelect('comment.post', 'post', "comment.post_id = :postId", { postId })
-        .innerJoinAndSelect('comment.author', 'user', "comment.author_id = user.id")
+        .innerJoinAndSelect(
+          'comment.post',
+          'post',
+          'comment.post_id = :postId',
+          { postId }
+        )
+        .innerJoinAndSelect(
+          'comment.author',
+          'user',
+          'comment.author_id = user.id'
+        )
+        .leftJoinAndSelect(
+          'user.profile',
+          'profile',
+          'profile.user_id = user.id'
+        )
       if (commentId) {
-        query.where('comment.path LIKE :commentId', { commentId: `%${commentId}%` })
+        query.where('comment.path LIKE :commentId', {
+          commentId: `%${commentId}%`,
+        })
       } else {
-        query.where('comment.path IS NULL')
+        query.where('comment.path LIKE :postId', { postId })
       }
-      // TODO
-      query
-        .skip(0)
-        .limit(10)
-        .getMany()
-      const comments = await paginate(query, { page: 1, limit: 10 })
-      return comments;
+      query.orderBy('comment.createdAt', 'ASC')
+      return await paginate(query, paginationOpts)
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
         throw new CommentNotFoundError()

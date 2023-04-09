@@ -39,15 +39,6 @@ export class PostController {
     return this.usecases.findPosts(req.user, { page, limit })
   }
 
-  @Get(':postId/comments')
-  @UseGuards(JwtAuthGuard)
-  async fetchComments(
-    @Req() req: RequestWithUser,
-    @Param('postId') postId: string,
-  ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(postId)
-  }
-
   @Post(':postId/comments')
   @UseGuards(JwtAuthGuard)
   async postComment(
@@ -58,13 +49,24 @@ export class PostController {
     return this.usecases.postComment(req.user, postId, dto)
   }
 
+  @Get(':postId/comments')
+  @UseGuards(JwtAuthGuard)
+  async fetchComments(
+    @Req() req: RequestWithUser,
+    @Param('page') page: number,
+    @Param('postId') postId: string,
+  ): Promise<Pagination<GetCommentDto>> {
+    return this.usecases.fetchComments(postId, postId, page)
+  }
+
   @Get(':postId/comments/:commentId')
   @UseGuards(JwtAuthGuard)
   async fetchNestedComments(
     @Req() req: RequestWithUser,
     @Param('postId') postId: string,
+    @Query('page') page: number,
     @Param('commentId') commentId: string,
   ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(postId, commentId)
+    return this.usecases.fetchComments(postId, commentId, Number(page))
   }
 }
