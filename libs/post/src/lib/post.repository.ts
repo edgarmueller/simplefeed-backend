@@ -101,14 +101,10 @@ export class PostsRepository {
           'profile',
           'profile.user_id = user.id'
         )
-      if (commentId) {
-        query.where('comment.path LIKE :commentId', {
-          commentId: `%${commentId}%`,
-        })
-      } else {
-        query.where('comment.path LIKE :postId', { postId })
-      }
-      query.orderBy('comment.createdAt', 'ASC')
+      query.where('comment.path LIKE :commentId', {
+        commentId: `%${commentId || postId}%`,
+      })
+      query.orderBy('comment.path')
       return await paginate(query, paginationOpts)
     } catch (error) {
       if (error instanceof EntityNotFoundError) {

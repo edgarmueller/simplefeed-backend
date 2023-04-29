@@ -1,3 +1,4 @@
+import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
 import {
   Body,
   Controller,
@@ -9,15 +10,17 @@ import {
   Query,
   Req,
   UseGuards,
+  UsePipes
 } from '@nestjs/common'
-import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
+import { Pagination } from 'nestjs-typeorm-paginate'
+import { Comment } from '../comment'
+import { Post as PostEntity } from '../post'
+import { CommentPostDto } from '../usecases/dto/comment-post.dto'
+import { GetCommentDto } from '../usecases/dto/get-comment.dto'
 import { SubmitPostDto } from '../usecases/dto/submit-post.dto'
 import { PostUsecases } from '../usecases/post.usecases'
-import { Post as PostEntity } from '../post'
-import { Comment } from '../comment'
-import { Pagination } from 'nestjs-typeorm-paginate'
-import { CommentPostDto } from '../usecases/dto/comment-post.dto'
-import { GetCommentDto } from '../usecases/dto/get-comment.dto';
+import { PaginatedQueryPipe } from './paginated-query.pipe'
+import { PaginatedQueryDto } from './paginated-query.dto'
 
 @Controller('posts')
 export class PostController {
@@ -49,24 +52,14 @@ export class PostController {
     return this.usecases.postComment(req.user, postId, dto)
   }
 
-  @Get(':postId/comments')
+  @Get(':postId/comments/:commentId')
   @UseGuards(JwtAuthGuard)
   async fetchComments(
     @Req() req: RequestWithUser,
-    @Param('page') page: number,
     @Param('postId') postId: string,
-  ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(postId, postId, page)
-  }
-
-  @Get(':postId/comments/:commentId')
-  @UseGuards(JwtAuthGuard)
-  async fetchNestedComments(
-    @Req() req: RequestWithUser,
-    @Param('postId') postId: string,
-    @Query('page') page: number,
     @Param('commentId') commentId: string,
+    @Query(new PaginatedQueryPipe()) paginationOpts: PaginatedQueryDto
   ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(postId, commentId, Number(page))
+    return this.usecases.fetchComments(postId, commentId, paginationOpts)
   }
 }
