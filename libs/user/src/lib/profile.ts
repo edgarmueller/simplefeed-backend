@@ -7,7 +7,6 @@ export type ProfileId = string
 const createProfileId = createId(PREFIX)
 
 export class Profile implements Entity {
-  
   username?: string 
   bio?: string 
   firstName?: string 
@@ -18,7 +17,6 @@ export class Profile implements Entity {
   createdAt?: Date 
   updatedAt?: Date 
   
-  friends?: Profile[] 
   user?: User 
 
   public static create(props: Props<Profile>, id?: string): Profile {
@@ -35,7 +33,4 @@ export class Profile implements Entity {
     this.nrOfLikes++;
   }
 
-  isFriend(user: User) {
-    return this.friends.find(friend => friend.user.id === user.id) !== undefined;
-  }
 }

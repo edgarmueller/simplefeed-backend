@@ -1,13 +1,11 @@
-import { User, UsersRepository } from '@kittgen/user';
-import { Injectable, Logger } from "@nestjs/common"
+import { User, UsersRepository } from '@kittgen/user'
+import { Injectable, Logger } from '@nestjs/common'
 
 @Injectable()
 export class UserUsecases {
   private logger = new Logger(UserUsecases.name)
 
-  constructor(
-    private readonly userRepository: UsersRepository,
-  ) {}
+  constructor(private readonly userRepository: UsersRepository) {}
 
   // async followUser(follower: User, followeeUsername: string): Promise<User> {
   //   const followee = await this.userRepository.findOneByUsername(followeeUsername)
@@ -16,13 +14,12 @@ export class UserUsecases {
   //   return followee
   // }
 
-
   // async unfollowUser(follower: User, followeeUsername: string): Promise<User> {
   //   const followee = await this.userRepository.findOneByUsername(followeeUsername)
   //   follower.unfollow(followee)
   //   return await this.userRepository.update(follower)
   // }
-  
+
   // async getUser(userId: string) {
   //   return this.userRepository.findOneById(userId)
   // }

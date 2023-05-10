@@ -1,7 +1,5 @@
-import { UserId } from '../user';
-
 export class UserNotFoundError extends Error {
-  constructor() {
-    super(`User not found`);
+  constructor(criteria?: string) {
+    super(criteria ? `User ${criteria} not found` : `User not found`);
   }
 }
