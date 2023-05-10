@@ -7,11 +7,12 @@ import { PostsRepository } from './post.repository';
 import { PostSchema } from './post.schema';
 import { UserModule } from '@kittgen/user';
 import { PostController } from './adapters/post.controller';
+import { LikeSchema } from './like.schema';
 
 @Module({
   imports: [
 		UserModule,
-		TypeOrmModule.forFeature([PostSchema, CommentSchema]),
+		TypeOrmModule.forFeature([PostSchema, CommentSchema, LikeSchema]),
 		CqrsModule
 	],
 	controllers: [PostController],

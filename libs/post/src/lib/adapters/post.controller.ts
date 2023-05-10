@@ -62,4 +62,24 @@ export class PostController {
   ): Promise<Pagination<GetCommentDto>> {
     return this.usecases.fetchComments(postId, commentId, paginationOpts)
   }
+
+  @Get(':postId/comments')
+  @UseGuards(JwtAuthGuard)
+  async fetchRootComments(
+    @Req() req: RequestWithUser,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Query(new PaginatedQueryPipe()) paginationOpts: PaginatedQueryDto
+  ): Promise<Pagination<GetCommentDto>> {
+    return this.usecases.fetchRootComments(postId, commentId, paginationOpts)
+  }
+
+  @Post(':postId/like')
+  @UseGuards(JwtAuthGuard)
+  async likePost(
+    @Req() req: RequestWithUser,
+    @Param('postId') postId: string
+  ): Promise<void> {
+    return this.usecases.likePost(postId, req.user)
+  }
 }

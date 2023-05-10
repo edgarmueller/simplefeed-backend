@@ -37,5 +37,10 @@ export const PostSchema = new EntitySchema<Post>({
         name: 'posted_to',
       }
     },
+    likes: {
+      type: 'one-to-many',
+      target: 'Like',
+      inverseSide: 'post',
+    },
   },
 })

@@ -14,6 +14,7 @@ import {
   Pagination,
 } from 'nestjs-typeorm-paginate'
 import { CommentNotFoundError } from './errors/comment-not-found.error'
+import { Like } from './like'
 
 export const DEFAULT_COMMENTS_LIMIT = 10;
 
@@ -23,6 +24,8 @@ export class PostsRepository {
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     private readonly publisher: EventPublisher
   ) {}
 
@@ -123,6 +126,9 @@ export class PostsRepository {
       relations: {
         author: true,
         postedTo: true,
+        likes: {
+          user: true,
+        }
       },
     })
     return posts
@@ -132,5 +138,12 @@ export class PostsRepository {
     return this.commentRepository.find({
       where: { post: { id: postId } },
     })
+  }
+
+  @Transactional()
+  async deleteAll() {
+    await this.likeRepository.delete({})
+    await this.commentRepository.delete({})
+    await this.postRepository.delete({})
   }
 }

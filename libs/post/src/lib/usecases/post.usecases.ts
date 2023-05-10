@@ -42,10 +42,9 @@ export class PostUsecases {
     user: User,
     paginationOpts: IPaginationOptions
   ): Promise<Pagination<Post>> {
-    const { profile } = await this.usersRepository.findOneByIdOrFail(user.id)
-    const friends = profile.friends.map((friend) => friend.user.id)
+    const { friends } = await this.usersRepository.findOneByIdOrFail(user.id)
     const posts = await this.postsRepository.findPostsByUsers(
-      [user.id, ...friends],
+      [user.id, ...friends.map(friend => friend.id)],
       paginationOpts
     )
     return posts
@@ -80,5 +79,28 @@ export class PostUsecases {
       ...res,
       items: res.items.map(GetCommentDto.fromDomain),
     }
+  }
+
+
+  async fetchRootComments(
+    postId: string,
+    commentId?: string,
+    paginationOpts: IPaginationOptions = { page: 1, limit: DEFAULT_COMMENTS_LIMIT }
+  ): Promise<Pagination<GetCommentDto>> {
+    const res = await this.postsRepository.findComments(
+      postId,
+      commentId,
+      paginationOpts
+    )
+    return {
+      ...res,
+      items: res.items.map(GetCommentDto.fromDomain),
+    }
+  }
+
+  async likePost(postId: string, likedBy: User) {
+    const post = await this.postsRepository.findOneByIdOrFail(postId)
+    post.like(likedBy)
+    await this.postsRepository.savePost(post)
   }
 }

@@ -1,6 +1,7 @@
 import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd';
 import { PostCreatedEvent } from './events/post-created.event';
 import { User } from "@kittgen/user";
+import { Like } from './like';
 
 const PREFIX = 'pos'
 export type PostId = string
@@ -12,6 +13,7 @@ export class Post extends AggregateRoot {
   author: User 
   postedTo?: User
   createdAt?: Date 
+  likes?: Like[]
 
   public static create(props: Props<Post>, id?: string): Post {
     const isNewPost = !!id === false;
@@ -37,4 +39,14 @@ export class Post extends AggregateRoot {
   }
 
   // TODO: add domain logic
+  like(likedBy: User) {[]
+    // this.nrOfLikes = this.nrOfLikes + 1;
+    likedBy.profile.nrOfLikes = likedBy.profile.nrOfLikes + 1;
+    const like = Like.create({ post: this, user: likedBy })
+    if (!this.likes) {
+      this.likes = [];
+    }
+    this.likes.push(like);
+    return like;
+  }
 }
