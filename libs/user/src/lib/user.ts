@@ -1,6 +1,7 @@
 import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd';
 import { UserCreatedEvent } from './events/user-created.event';
 import { Profile } from "./profile" 
+import { FriendRequest } from './friend-request';
 
 const PREFIX = 'use'
 export type UserId = string
@@ -13,8 +14,11 @@ export class User extends AggregateRoot {
   updatedAt?: Date 
   
   profile: Profile 
+  friends?: User[] 
+  incomingFriendRequests?: FriendRequest[];
+  outgoingFriendRequests?: FriendRequest[];
 
-  public static create(props: Props<User>, id?: string): User {
+  public static create(props: Omit<Props<User>, 'sentFriendRequests' | 'receivedFriendRequests' | 'friends'>, id?: string): User {
     const isNewUser = !!id === false;
     const user = new User({ ...props }, id);
 
@@ -25,7 +29,43 @@ export class User extends AggregateRoot {
     return user;
   }
 
-  private constructor(props: Props<User>, id?: string) {
+  private constructor(props: Omit<Props<User>, 'sentFriendRequests' | 'receivedFriendRequests' | 'friends'>, id?: string) {
     super(props, id || createUserId());
+  }
+
+  sendFriendRequestTo(otherUser: User): FriendRequest {
+    //if (this.isFriend(otherUser) || this.hasSentFriendRequestTo(otherUser)) {
+    //  throw new Error("already friends or request has been sent");
+    //}
+    const friendRequest = FriendRequest.create({ from: this, to: otherUser });
+    this.outgoingFriendRequests = [...this.sentFriendRequests, friendRequest]
+    otherUser.incomingFriendRequests = [...otherUser.receivedFriendRequests, friendRequest]
+    return friendRequest;
+  }
+
+  isFriend(user: User) {
+    return this.friends?.find(friend => friend.id === user.id) !== undefined;
+  }
+
+  addFriend(user: User) {
+    if (!this.friends) {
+      this.friends = [];
+    }
+    this.friends.push(user);
+    user.friends?.push(this);
+  }
+
+  get sentFriendRequests() {
+    if (!this.outgoingFriendRequests) {
+      this.outgoingFriendRequests = [];
+    }
+    return this.outgoingFriendRequests;
+  }
+
+  get receivedFriendRequests() {
+    if (!this.incomingFriendRequests) {
+      this.incomingFriendRequests = [];
+    }
+    return this.incomingFriendRequests;
   }
 }
