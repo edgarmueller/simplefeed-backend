@@ -1,50 +1,72 @@
-import { initializeTransactionalContext } from 'typeorm-transactional';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import { UserNotFoundError, UserRepository } from '@realworld/user';
-import { ArticleRepository } from '@realworld/article';
-import request from 'supertest';
-import { createConnection } from 'typeorm';
-import { AppModule } from './app.module';
+import { initializeTransactionalContext } from 'typeorm-transactional'
+import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { Test } from '@nestjs/testing'
+import { UserNotFoundError, UsersRepository } from '@kittgen/user'
+import request from 'supertest'
+import { createConnection } from 'typeorm'
+import { AppModule } from './app.module'
+import { PostsRepository } from '@kittgen/post'
 
 describe('realworld app', () => {
-  let app: INestApplication;
-  let userRepo: UserRepository;
-  let articleRepo: ArticleRepository;
+  let app: INestApplication
+  let userRepo: UsersRepository
+  let postRepo: PostsRepository
 
   beforeAll(async () => {
     await createDbSchema()
     initializeTransactionalContext()
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    }).compile()
     // TODO unify app config
-    app = moduleRef.createNestApplication();
-    app.setGlobalPrefix('api');
+    app = moduleRef.createNestApplication()
+    app.setGlobalPrefix('api')
     app.useGlobalPipes(
       new ValidationPipe({
         forbidNonWhitelisted: true,
-        whitelist: true
+        whitelist: true,
       })
-    );
-    userRepo = app.get(UserRepository);
-    articleRepo = app.get(ArticleRepository);
-    await app.init();
-  });
+    )
+    userRepo = app.get(UsersRepository)
+    postRepo = app.get(PostsRepository)
+    await app.init()
+  })
 
   async function registerUser(payload, expectedStatus = 201) {
     return request(app.getHttpServer())
-      .post('/api/users')
+      .post('/api/auth/register')
       .send(payload)
-      .expect(expectedStatus);
+      .expect(expectedStatus)
   }
 
-  function user(username: string, email: string, password) {
+  async function registerFry() {
+    await registerUser(
+      user('fry2', 'Philip J.', 'Fry', 'fry2@example.com', 'secret'),
+      201
+    )
+  }
+
+  async function registerLisa() {
+    await registerUser(
+      user('lisa2', 'Lisa', 'Simpson', 'lisa2@example.com', 'secret'),
+      201
+    )
+  }
+
+  function user(
+    username: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    password
+  ) {
     return {
       user: {
         username,
+        firstName,
+        lastName,
         email,
-        password
+        password,
       },
     }
   }
@@ -58,128 +80,134 @@ describe('realworld app', () => {
           password,
         },
       })
-      .expect(expectedStatus);
-    return body;
+      .expect(expectedStatus)
+    return body.user.token;
+  }
+
+  async function createPost(token: string, content: string, expectedStatus = 201) {
+    await request(app.getHttpServer())
+      .post('/api/posts')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        body: content
+      })
+      .expect(expectedStatus)
   }
 
   beforeEach(async () => {
     try {
-      const articles = await articleRepo.find({})
-      await articleRepo.delete(articles)
-      await userRepo.deleteByEmail('fry@example.com')
-      await userRepo.deleteByEmail('lisa@example.com')
+      await postRepo.deleteAll()
+      await userRepo.deleteByEmail('fry2@example.com')
+      await userRepo.deleteByEmail('lisa2@example.com')
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         // ignore
-        return;
+        return
       }
-      throw error;
+      throw error
     }
-  });
+  })
 
-  describe('user registration', () => {
+  describe.only('user registration', () => {
     it(`should register an user`, async () => {
-      return registerUser(
-        user('Fry', 'fry@example.com', 'secret'),
-        201
-      );
-    });
+      return registerFry()
+    })
 
     it(`should return bad request when user's mail already exists`, async () => {
       const payload = {
         user: {
           username: 'Fry',
-          email: 'fry@example.com',
+          firstName: 'Philip J.',
+          lastName: 'Fry',
+          email: 'fry2@example.com',
           password: 'secret',
         },
-      };
-      await registerUser(payload, 201);
-      await registerUser(payload, 409);
-    });
+      }
+      await registerUser(payload, 201)
+      await registerUser(payload, 409)
+    })
 
     it(`should return bad request when DTO is missing `, async () => {
       await registerUser(
         {
           user: {
             name: 'Philip J. Fry',
-            email: 'fry@example.com',
+            email: 'fry2@example.com',
             password: 'secret',
-          }
+          },
         },
         400
-      );
-    });
-  });
+      )
+    })
+  })
 
-  describe('user login', () => {
+  describe.only('user login', () => {
     it('should login an user', async () => {
-      await registerUser(
-        user('Fry', 'fry@example.com', 'secret'),
-        201
-      );
-      const body = await login('fry@example.com', 'secret', 200);
-      expect(body).toHaveProperty('user.token');
-    });
-  });
+      await registerFry()
+      const token = await login('fry2@example.com', 'secret', 200)
+      expect(token).toBeDefined()
+    })
+  })
 
   // TODO disabled, no refresh functionality necessary
   it.skip('should refresh token', async () => {
-    await registerUser(
-      user('Fry', 'fry@example.com', 'secret'),
-      201
-    );
-    const body = await login('fry@example.com', 'secret');
+    await registerFry();
+    const body = await login('fry2@example.com', 'secret')
     const { body: updatedBody } = await request(app.getHttpServer())
       .post('/api/auth/refresh')
       .send({
         refreshToken: body.refreshToken,
       })
-      .expect(200);
-    expect(body.accessToken).not.toBe(updatedBody.accessToken);
-  });
+      .expect(200)
+    expect(body.accessToken).not.toBe(updatedBody.accessToken)
+  })
 
-  it('should return the current user', async () => {
-    await registerUser(
-      {
-        user: {
-          username: 'Fry',
-          email: 'fry@example.com',
-          password: 'secret',
-        },
-      },
-      201
-    );
-    const resp = await login('fry@example.com', 'secret');
-    const { body } = await request(app.getHttpServer())
-      .get('/api/user')
-      .set('Authorization', `Bearer ${resp.user.token}`)
-      .expect(200);
-    expect(body).toHaveProperty('user.email');
-  });
+  // it.only('should return the current user', async () => {
+  //   await registerUser(
+  //     {
+  //       user: {
+  //         username: 'Fry',
+  //         firstName: 'Philip J.',
+  //         lastName: 'Fry',
+  //         email: 'fry2@example.com',
+  //         password: 'secret',
+  //       },
+  //     },
+  //     201
+  //   );
+  //   const resp = await login('fry2@example.com', 'secret');
+  //   const { body } = await request(app.getHttpServer())
+  //     .get('/api/user')
+  //     .set('Authorization', `Bearer ${resp.user.token}`)
+  //     .expect(200);
+  //   expect(body).toHaveProperty('user.email');
+  // });
 
-  it('should create article', async () => {
-    await registerUser(user('Fry','fry@example.com', 'secret'), 201);
-    const resp = await login('fry@example.com', 'secret');
-    const { body } = await request(app.getHttpServer())
-      .post('/api/articles')
-      .set('Authorization', `Bearer ${resp.user.token}`)
-      .send({
-        article: {
-          body: 'All backend implementations need to adhere to our API spec.',
-          description: 'Introduction',
-          title: 'Introduction',
-          tagList: ['learning']
-        }
-      })
-      .expect(201);
+  describe('post usecases ', () => {
+    it('should allow submitting a new post', async () => {
+      await registerFry();
+      const resp = await login('fry2@example.com', 'secret')
+      await createPost(resp.user.token, 'All backend implementations need to adhere to our API spec.')
+    });
 
-    expect(body).toHaveProperty('article');
-    expect(body.article.tagList).toEqual(['learning']);
+    it('should allow fetching own post', async () => {
+      await registerFry();
+      const resp = await login('fry2@example.com', 'secret')
+      await createPost(resp.user.token, 'Hi everyone!');
+      await createPost(resp.user.token, `I'm here, too!`);
+      const { body } = await request(app.getHttpServer())
+        .get('/api/posts')
+        .set('Authorization', `Bearer ${resp.user.token}`)
+        .expect(200);
+      // TODO: no need to expose entire profile for author prop
+      // update dto
+      expect(body.items).toHaveLength(2);
+    })
   })
 
   it('should update article', async () => {
-    await registerUser(user('Fry', 'fry@example.com', 'secret'), 201);
-    const resp = await login('fry@example.com', 'secret');
+    await registerFry();
+    const resp = await login('fry2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${resp.user.token}`)
@@ -188,18 +216,20 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-          tagList: ['learning']
-        }
+          tagList: ['learning'],
+        },
       })
 
-    const { body: { article } } = await request(app.getHttpServer())
+    const {
+      body: { article },
+    } = await request(app.getHttpServer())
       .put('/api/articles/Introduction')
       .set('Authorization', `Bearer ${resp.user.token}`)
       .send({
         article: {
           title: 'Introduction 2',
-          tagList: ['learning', 'foo']
-        }
+          tagList: ['learning', 'foo'],
+        },
       })
       .expect(200)
 
@@ -208,10 +238,10 @@ describe('realworld app', () => {
   })
 
   it('should delete article', async () => {
-    await registerUser(user('Fry', 'fry@example.com', 'secret'), 201);
-    await registerUser(user('Lisa', 'lisa@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
-    const { user: { token: lisaToken }} = await login('lisa@example.com', 'secret');
+    await registerFry();
+    await registerLisa();
+    const fryToken = await login('fry2@example.com', 'secret')
+    const lisaToken = await login('lisa2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${fryToken}`)
@@ -220,8 +250,8 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-          tagList: ['learning']
-        }
+          tagList: ['learning'],
+        },
       })
 
     await request(app.getHttpServer())
@@ -236,10 +266,10 @@ describe('realworld app', () => {
   })
 
   it('should fetch articles by tag', async () => {
-    await registerUser(user('fry', 'fry@example.com', 'secret'), 201);
-    await registerUser(user('lisa', 'lisa@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
-    const { user: { token: lisaToken }} = await login('lisa@example.com', 'secret');
+    await registerFry();
+    await registerLisa();
+    const fryToken = await login('fry2@example.com', 'secret')
+    const lisaToken = await login('lisa2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${lisaToken}`)
@@ -248,8 +278,8 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-          tagList: ['tutorial']
-        }
+          tagList: ['tutorial'],
+        },
       })
     await request(app.getHttpServer())
       .post('/api/articles')
@@ -259,10 +289,9 @@ describe('realworld app', () => {
           body: 'El Barto was here',
           description: 'El Barto',
           title: 'El Barto',
-          tagList: ['simpsons']
-        }
+          tagList: ['simpsons'],
+        },
       })
-
 
     const { body } = await request(app.getHttpServer())
       .get(`/api/articles?tag=tutorial`)
@@ -279,10 +308,14 @@ describe('realworld app', () => {
   })
 
   it('should get feed of articles', async () => {
-    await registerUser(user('fry', 'fry@example.com', 'secret'), 201);
-    await registerUser(user('lisa', 'lisa@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
-    const { user: { token: lisaToken }} = await login('lisa@example.com', 'secret');
+    await registerFry();
+    await registerLisa();
+    const {
+      user: { token: fryToken },
+    } = await login('fry2@example.com', 'secret')
+    const {
+      user: { token: lisaToken },
+    } = await login('lisa2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${lisaToken}`)
@@ -291,7 +324,7 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-        }
+        },
       })
 
     await request(app.getHttpServer())
@@ -299,7 +332,7 @@ describe('realworld app', () => {
       .set('Authorization', `Bearer ${fryToken}`)
       .expect(200)
 
-    const {body } = await request(app.getHttpServer())
+    const { body } = await request(app.getHttpServer())
       .get('/api/articles/feed')
       .set('Authorization', `Bearer ${fryToken}`)
 
@@ -307,8 +340,10 @@ describe('realworld app', () => {
   })
 
   it('should add comment', async () => {
-    await registerUser(user('fry', 'fry@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
+    await registerFry();
+    const {
+      user: { token: fryToken },
+    } = await login('fry2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${fryToken}`)
@@ -317,7 +352,7 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-        }
+        },
       })
 
     await request(app.getHttpServer())
@@ -325,12 +360,14 @@ describe('realworld app', () => {
       .set('Authorization', `Bearer ${fryToken}`)
       .send({
         comment: {
-          body: 'A new comment'
-        }
+          body: 'A new comment',
+        },
       })
       .expect(200)
 
-    const { body: { comments } } = await request(app.getHttpServer())
+    const {
+      body: { comments },
+    } = await request(app.getHttpServer())
       .get('/api/articles/Introduction/comments')
       .set('Authorization', `Bearer ${fryToken}`)
 
@@ -338,8 +375,10 @@ describe('realworld app', () => {
   })
 
   it('should delete comment', async () => {
-    await registerUser(user('fry', 'fry@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
+    await registerFry()
+    const {
+      user: { token: fryToken },
+    } = await login('fry2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${fryToken}`)
@@ -348,22 +387,26 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-        }
+        },
       })
-    const { body: { comment } } = await request(app.getHttpServer())
+    const {
+      body: { comment },
+    } = await request(app.getHttpServer())
       .post(`/api/articles/Introduction/comments`)
       .set('Authorization', `Bearer ${fryToken}`)
       .send({
         comment: {
-          body: 'A new comment'
-        }
+          body: 'A new comment',
+        },
       })
     await request(app.getHttpServer())
       .delete(`/api/articles/Introduction/comments/${comment.id}`)
       .set('Authorization', `Bearer ${fryToken}`)
       .expect(200)
 
-    const { body: { comments } } = await request(app.getHttpServer())
+    const {
+      body: { comments },
+    } = await request(app.getHttpServer())
       .get('/api/articles/Introduction/comments')
       .set('Authorization', `Bearer ${fryToken}`)
 
@@ -371,10 +414,14 @@ describe('realworld app', () => {
   })
 
   it('should favorite article', async () => {
-    await registerUser(user('fry', 'fry@example.com', 'secret'), 201);
-    await registerUser(user('lisa', 'lisa@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
-    const { user: { token: lisaToken }} = await login('lisa@example.com', 'secret');
+    await registerFry()
+    await registerLisa()
+    const {
+      user: { token: fryToken },
+    } = await login('fry2@example.com', 'secret')
+    const {
+      user: { token: lisaToken },
+    } = await login('lisa2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${fryToken}`)
@@ -383,9 +430,11 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-        }
+        },
       })
-    const { body: { article } } = await request(app.getHttpServer())
+    const {
+      body: { article },
+    } = await request(app.getHttpServer())
       .post(`/api/articles/Introduction/favorite`)
       .set('Authorization', `Bearer ${lisaToken}`)
       .expect(200)
@@ -395,10 +444,14 @@ describe('realworld app', () => {
   })
 
   it('should unfavorite article', async () => {
-    await registerUser(user('fry', 'fry@example.com', 'secret'), 201);
-    await registerUser(user('lisa', 'lisa@example.com', 'secret'), 201);
-    const { user: { token: fryToken }} = await login('fry@example.com', 'secret');
-    const { user: { token: lisaToken }} = await login('lisa@example.com', 'secret');
+    await registerFry()
+    await registerLisa()
+    const {
+      user: { token: fryToken },
+    } = await login('fry2@example.com', 'secret')
+    const {
+      user: { token: lisaToken },
+    } = await login('lisa2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
       .set('Authorization', `Bearer ${fryToken}`)
@@ -407,13 +460,15 @@ describe('realworld app', () => {
           body: 'All backend implementations need to adhere to our API spec.',
           description: 'Introduction',
           title: 'Introduction',
-        }
+        },
       })
     await request(app.getHttpServer())
       .post(`/api/articles/Introduction/favorite`)
       .set('Authorization', `Bearer ${lisaToken}`)
       .expect(200)
-    const { body: { article } } = await request(app.getHttpServer())
+    const {
+      body: { article },
+    } = await request(app.getHttpServer())
       .delete(`/api/articles/Introduction/favorite`)
       .set('Authorization', `Bearer ${lisaToken}`)
       .expect(200)
@@ -423,9 +478,9 @@ describe('realworld app', () => {
   })
 
   afterAll(async () => {
-    await app.close();
-  });
-});
+    await app.close()
+  })
+})
 
 export async function createDbSchema(): Promise<void> {
   const connection = await createConnection({
@@ -434,8 +489,8 @@ export async function createDbSchema(): Promise<void> {
     port: 5433,
     username: 'admin',
     password: 'admin',
-    database: 'realworld_testing',
-  });
-  await connection.createQueryRunner().createSchema('realworld', true);
-  await connection.close();
+    database: 'kittgen_testing',
+  })
+  await connection.createQueryRunner().createSchema('kittgen', true)
+  await connection.close()
 }

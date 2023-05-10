@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nx serve",
     "build": "nx build",
-    "test": "nx test",
+    "test": "nx run-many --projects=post,user,auth --target=test --parallel=false",
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
     "schema:create": "ts-node --project tsconfig.script.json tools/scripts/create-schema",

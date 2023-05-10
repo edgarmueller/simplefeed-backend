@@ -44,7 +44,8 @@
       "outputs": ["coverage/apps/app"],
       "options": {
         "jestConfig": "apps/app-name/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "runInBand": true
       }
     }
   },

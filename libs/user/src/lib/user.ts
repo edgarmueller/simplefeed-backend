@@ -52,6 +52,9 @@ export class User extends AggregateRoot {
       this.friends = [];
     }
     this.friends.push(user);
+    if (!user.friends) {
+      user.friends = [];
+    }
     user.friends?.push(this);
   }
 

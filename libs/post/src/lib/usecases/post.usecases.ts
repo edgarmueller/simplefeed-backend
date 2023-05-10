@@ -42,7 +42,7 @@ export class PostUsecases {
     user: User,
     paginationOpts: IPaginationOptions
   ): Promise<Pagination<Post>> {
-    const { friends } = await this.usersRepository.findOneByIdOrFail(user.id)
+    const { friends: friends } = await this.usersRepository.findOneByIdOrFail(user.id)
     const posts = await this.postsRepository.findPostsByUsers(
       [user.id, ...friends.map(friend => friend.id)],
       paginationOpts
