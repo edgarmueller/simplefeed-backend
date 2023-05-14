@@ -8,6 +8,7 @@ const createLikeId = createId(PREFIX)
 export class Like implements Entity {
   id: string
   user: User
+  userId: string
   post: Post
   createdAt?: Date
 

@@ -17,12 +17,16 @@ export const LikeSchema = new EntitySchema<Like>({
       name: 'created_at',
       createDate: true,
     },
+    userId: {
+      type: String,
+      name: 'user_id',
+    }
   },
   relations: {
     user: {
       type: 'many-to-one',
       target: 'User',
-      inverseSide: 'likes',
+      // inverseSide: 'likes',
       joinColumn: { name: 'user_id' },
     },
     post: {

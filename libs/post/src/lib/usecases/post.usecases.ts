@@ -42,12 +42,19 @@ export class PostUsecases {
     user: User,
     paginationOpts: IPaginationOptions
   ): Promise<Pagination<Post>> {
-    const { friends: friends } = await this.usersRepository.findOneByIdOrFail(user.id)
+    const { friends: friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(user.id)
     const posts = await this.postsRepository.findPostsByUsers(
+      user.id,
       [user.id, ...friends.map(friend => friend.id)],
       paginationOpts
     )
     return posts
+  }
+
+  async findLikedPostsByUser(
+    user: User,
+  ) {
+    return this.postsRepository.findLikedPostsByUser(user.id)
   }
 
   async postComment(
@@ -56,11 +63,12 @@ export class PostUsecases {
     dto: CommentPostDto
   ): Promise<Comment> {
     const post = await this.postsRepository.findOneByIdOrFail(postId)
+    const path = dto.path || postId
     const comment = Comment.create({
       content: dto.content,
       author: user,
       post,
-      path: dto.path || postId,
+      path: path.endsWith('/') ? path.substring(0, path.length - 1) : path
     })
     return await this.postsRepository.saveComment(comment)
   }

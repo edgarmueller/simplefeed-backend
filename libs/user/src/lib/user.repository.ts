@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@kittgen/shared-ddd'
 import { Transactional } from 'typeorm-transactional'
-import { In, QueryFailedError, Repository } from 'typeorm'
+import { QueryFailedError, Repository } from 'typeorm'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EventPublisher } from '@nestjs/cqrs'
@@ -45,11 +45,6 @@ export class UsersRepository {
     )
   }
 
-  async findAll(): Promise<User[]> {
-    const users = await this.userRepository.find()
-    return users
-  }
-
   async findOneByIdOrFail(id: UserId): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
@@ -66,6 +61,25 @@ export class UsersRepository {
       throw error
     }
   }
+
+  async findOneByIdWithFriendsOrFail(id: UserId): Promise<User> {
+    try {
+      const foundUser = await this.userRepository.findOneOrFail({
+        where: { id },
+        relations: {
+          profile: true,
+          friends: true,
+        },
+      })
+      return foundUser
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new UserNotFoundError()
+      }
+      throw error
+    }
+  }
+
 
   async findOneByUsernameOrFail(username: string): Promise<User> {
     try {
@@ -101,22 +115,5 @@ export class UsersRepository {
       from: { id: user.id },
     })
     await this.userRepository.delete(user.id)
-  }
-
-  findFriendRequestById(friendRequestId: string) {
-    return this.friendRequestsRepository.findOneOrFail({
-      where: { id: friendRequestId },
-    });
-  }
-
-  findByFriendRequest(friendRequest: FriendRequest) {
-    return this.userRepository.find({
-      where: { id: In([friendRequest.from.id, friendRequest.to.id]) },
-      relations:{
-        incomingFriendRequests: true,
-        outgoingFriendRequests: true,
-        friends: true,
-      }
-    })
   }
 }

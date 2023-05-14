@@ -42,7 +42,7 @@ export class Post extends AggregateRoot {
   like(likedBy: User) {[]
     // this.nrOfLikes = this.nrOfLikes + 1;
     likedBy.profile.nrOfLikes = likedBy.profile.nrOfLikes + 1;
-    const like = Like.create({ post: this, user: likedBy })
+    const like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
     if (!this.likes) {
       this.likes = [];
     }

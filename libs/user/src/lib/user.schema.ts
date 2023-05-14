@@ -56,7 +56,6 @@ export const UserSchema = new EntitySchema<User>({
       type: 'one-to-many',
       target: 'FriendRequest',
       inverseSide: 'to',
-      // eager: true,
     },
     outgoingFriendRequests: {
       type: 'one-to-many',
@@ -72,6 +71,6 @@ export const UserSchema = new EntitySchema<User>({
       inverseSide: 'user',
       eager: true,
       cascade: true,
-    },
+    }
   },
 })

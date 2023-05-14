@@ -26,7 +26,7 @@ export class UserController {
       const user = await this.usecases.getUserByUserName(username)
       return {
         profile: user.profile, //GetProfileDto.forUser(requestingUser).fromDomain(user)
-        friends: user.friends as any,
+        friends: user.friends 
       }
     } catch (error) {
       if (error instanceof UserNotFoundError) {

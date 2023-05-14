@@ -48,8 +48,9 @@ export class PostController {
     @Req() req: RequestWithUser,
     @Param('postId') postId: string,
     @Body() dto: CommentPostDto
-  ): Promise<Comment> {
-    return this.usecases.postComment(req.user, postId, dto)
+  ): Promise<GetCommentDto> {
+    const comment = await this.usecases.postComment(req.user, postId, dto)
+    return GetCommentDto.fromDomain(comment)
   }
 
   @Get(':postId/comments/:commentId')
@@ -81,5 +82,13 @@ export class PostController {
     @Param('postId') postId: string
   ): Promise<void> {
     return this.usecases.likePost(postId, req.user)
+  }
+
+  @Post('likes')
+  @UseGuards(JwtAuthGuard)
+  async fetchLikes(
+    @Req() req: RequestWithUser,
+  ): Promise<any> {
+    return this.usecases.findLikedPostsByUser(req.user);
   }
 }

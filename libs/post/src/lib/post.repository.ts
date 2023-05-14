@@ -1,22 +1,22 @@
-import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@kittgen/shared-ddd'
-import { Transactional } from 'typeorm-transactional'
-import { In, Repository } from 'typeorm'
-import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
-import { InjectRepository } from '@nestjs/typeorm'
+import { Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
-import { PostNotFoundError } from './errors/post-not-found.error'
-import { Post, PostId } from './post'
-import { Comment } from './comment'
+import { InjectRepository } from '@nestjs/typeorm'
 import {
   IPaginationOptions,
-  paginate,
   Pagination,
+  paginate,
 } from 'nestjs-typeorm-paginate'
+import { Repository } from 'typeorm'
+import { Transactional } from 'typeorm-transactional'
+import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
+import { Comment } from './comment'
 import { CommentNotFoundError } from './errors/comment-not-found.error'
+import { PostNotFoundError } from './errors/post-not-found.error'
 import { Like } from './like'
+import { Post, PostId } from './post'
 
-export const DEFAULT_COMMENTS_LIMIT = 10;
+export const DEFAULT_COMMENTS_LIMIT = 10
 
 @Injectable()
 export class PostsRepository {
@@ -82,7 +82,10 @@ export class PostsRepository {
   async findComments(
     postId: string,
     commentId?: string,
-    paginationOpts: IPaginationOptions = { page: 1, limit: DEFAULT_COMMENTS_LIMIT }
+    paginationOpts: IPaginationOptions = {
+      page: 1,
+      limit: DEFAULT_COMMENTS_LIMIT,
+    }
   ): Promise<Pagination<Comment>> {
     try {
       const query = this.commentRepository
@@ -118,20 +121,40 @@ export class PostsRepository {
   }
 
   async findPostsByUsers(
-    userIds: string[],
+    userId: string,
+    friendIds: string[],
     paginationOpts: IPaginationOptions
   ): Promise<Pagination<Post>> {
-    const posts = await paginate(this.postRepository, paginationOpts, {
-      where: { author: { id: In(userIds) } },
-      relations: {
-        author: true,
-        postedTo: true,
-        likes: {
-          user: true,
-        }
-      },
-    })
+    const qb = this.postRepository.createQueryBuilder('post')
+    qb.innerJoinAndSelect(
+      'post.author',
+      'author',
+      'author.id IN (:...friendIds)',
+      { friendIds: [userId, ...friendIds] }
+    )
+      .leftJoinAndSelect(
+        'author.profile',
+        'profile',
+        'profile.user_id = author.id'
+      )
+      .innerJoinAndSelect('post.postedTo', 'postedTo')
+      .leftJoinAndSelect(
+        'postedTo.profile',
+        'postedToProfile',
+        'postedToProfile.user_id = postedTo.id'
+      )
+      .leftJoinAndSelect('post.likes', 'likes', 'likes.user_id = :userId', {
+        userId,
+      })
+      .orderBy('post.createdAt', 'DESC')
+    const posts = await paginate(qb, paginationOpts)
     return posts
+  }
+
+  findLikedPostsByUser(id: string) {
+    return this.likeRepository.find({
+      where: { user: { id } },
+    })
   }
 
   findCommentsByPost(postId: string): Promise<Comment[]> {
