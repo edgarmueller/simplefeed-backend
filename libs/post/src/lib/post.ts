@@ -40,7 +40,6 @@ export class Post extends AggregateRoot {
 
   // TODO: add domain logic
   like(likedBy: User) {[]
-    // this.nrOfLikes = this.nrOfLikes + 1;
     likedBy.profile.nrOfLikes = likedBy.profile.nrOfLikes + 1;
     const like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
     if (!this.likes) {
@@ -48,5 +47,10 @@ export class Post extends AggregateRoot {
     }
     this.likes.push(like);
     return like;
+  }
+
+  unlike(likedBy: User): void {
+    likedBy.profile.nrOfLikes = likedBy.profile.nrOfLikes - 1;
+    this.likes = this.likes.filter(({ userId }) => userId !== likedBy.id)
   }
 }

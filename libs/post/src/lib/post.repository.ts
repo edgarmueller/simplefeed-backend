@@ -65,6 +65,23 @@ export class PostsRepository {
     }
   }
 
+  async findOneByIdOrFailWithLikes(id: PostId): Promise<Post> {
+    try {
+      const foundPost = await this.postRepository.findOneOrFail({
+        where: { id },
+        relations: {
+          likes: true
+        }
+      })
+      return foundPost
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new PostNotFoundError()
+      }
+      throw error
+    }
+  }
+
   async findOneCommentByIdOrFail(commentId: string): Promise<Comment> {
     try {
       const foundComment = await this.commentRepository.findOneOrFail({

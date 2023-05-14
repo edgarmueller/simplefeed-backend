@@ -26,7 +26,6 @@ export const LikeSchema = new EntitySchema<Like>({
     user: {
       type: 'many-to-one',
       target: 'User',
-      // inverseSide: 'likes',
       joinColumn: { name: 'user_id' },
     },
     post: {

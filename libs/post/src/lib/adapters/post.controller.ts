@@ -1,3 +1,4 @@
+import { Delete } from '@nestjs/common';
 import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
 import {
   Body,
@@ -82,6 +83,15 @@ export class PostController {
     @Param('postId') postId: string
   ): Promise<void> {
     return this.usecases.likePost(postId, req.user)
+  }
+
+  @Delete(':postId/like')
+  @UseGuards(JwtAuthGuard)
+  async unlikePost(
+    @Req() req: RequestWithUser,
+    @Param('postId') postId: string
+  ): Promise<void> {
+    return this.usecases.unlikePost(postId, req.user)
   }
 
   @Post('likes')
