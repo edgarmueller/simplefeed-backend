@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@kittgen/shared-ddd'
 import { Transactional } from 'typeorm-transactional'
+import { In } from 'typeorm'
 import { QueryFailedError, Repository } from 'typeorm'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -107,6 +108,13 @@ export class UsersRepository {
       return user
     }
     throw new UserNotFoundError()
+  }
+
+  findMany(userIds: string[]) {
+    return this.userRepository.find({
+      where: { id: In(userIds) },
+      relations: { profile: true },
+    })
   }
 
   async deleteByEmail(email: string) {

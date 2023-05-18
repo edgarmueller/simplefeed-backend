@@ -1,5 +1,7 @@
 import { User, UsersRepository } from '@kittgen/user'
 import { Injectable, Logger } from '@nestjs/common'
+import { GetUserDto } from '../auth/dto/get-user.dto';
+import { RequestWithUser } from '../../../../../libs/auth/src';
 
 @Injectable()
 export class UserUsecases {
@@ -24,8 +26,19 @@ export class UserUsecases {
   //   return this.userRepository.findOneById(userId)
   // }
 
-  async getUserByUserName(username: string): Promise<User> {
-    return this.userRepository.findOneByUsernameOrFail(username)
+  async getUserByUserName(username: string): Promise<GetUserDto> {
+    const user = await this.userRepository.findOneByUsernameOrFail(username)
+    return GetUserDto.fromDomain(user)
+  }
+
+  async getFriendsOfUser(username: string): Promise<GetUserDto[]> {
+    const user = await this.userRepository.findOneByUsernameOrFail(username);
+    const friends = await this.userRepository.findMany(user.friends.map(friend => friend.id));
+    return friends.map(friend => GetUserDto.fromDomain(friend));
+  }
+
+  getUserFromRequest(request: RequestWithUser): Promise<User> {
+    return this.userRepository.findOneByIdWithFriendsOrFail(request.user.id)
   }
 
   // async updateUserInfo(user: User, updateUserDto: UpdateUserDto): Promise<User> {
