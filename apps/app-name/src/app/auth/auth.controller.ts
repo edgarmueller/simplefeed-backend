@@ -18,6 +18,7 @@ import { Profile, User, UserAlreadyExistsError } from '@kittgen/user'
 import { GetUserDto } from './dto/get-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { AuthUsecases } from './auth.usecases'
+import { GetTokenDto } from './dto/get-token.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -44,7 +45,7 @@ export class AuthController {
           }),
         })
       )
-      return { user: GetUserDto.fromDomain(registeredUser).withToken(null) }
+      return { user: GetUserDto.fromDomain(registeredUser) }
     } catch (error) {
       if (error instanceof UserAlreadyExistsError) {
         throw new ConflictException(error.message)
@@ -56,14 +57,9 @@ export class AuthController {
   @HttpCode(200)
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async logIn(@Req() request: RequestWithUser): Promise<{ user: GetUserDto }> {
+  async logIn(@Req() request: RequestWithUser): Promise<GetTokenDto> {
     const { user } = request
-    const { accessToken, refreshToken } = await this.usecases.login(user)
-    return {
-      user: GetUserDto.fromDomain(user)
-        .withToken(accessToken)
-        .withRefreshToken(refreshToken),
-    }
+    return await this.usecases.login(user)
   }
 
   @UseGuards(JwtRefreshGuard)
