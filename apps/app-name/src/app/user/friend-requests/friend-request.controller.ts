@@ -15,20 +15,15 @@ export class FriendRequestsController {
     @Param('username') toUserName: string
   ): Promise<GetFriendRequestDto> {
     const fromUser = req.user
-    const friendRequest = await this.usecases.sendFriendRequest(fromUser, toUserName)
-    return {
-      id: friendRequest.id,
-      from: friendRequest.from.id,
-      to: friendRequest.to.id,
-    };
+    return this.usecases.sendFriendRequest(fromUser, toUserName)
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('friend-requests/pending')
   async getPendingFriendRequests(
     @Req() req: RequestWithUser
-  ): Promise<FriendRequest[]> {
-    const pendingRequets = await this.usecases.getPendingFriendRequests(req.user)
+  ): Promise<GetFriendRequestDto[]> {
+    const pendingRequets = await this.usecases.getReceivedFriendRequests(req.user)
     return pendingRequets;
   }
 
