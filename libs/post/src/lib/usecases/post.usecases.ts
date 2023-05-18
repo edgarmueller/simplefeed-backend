@@ -1,12 +1,12 @@
+import { User, UsersRepository } from '@kittgen/user';
+import { Injectable } from '@nestjs/common';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { Comment } from '../comment';
+import { Post } from '../post';
+import { PostsRepository } from '../post.repository';
 import { DEFAULT_COMMENTS_LIMIT } from './../post.repository';
-import { PostsRepository } from '../post.repository'
-import { User, UsersRepository } from '@kittgen/user'
-import { Post } from '../post'
-import { Injectable } from '@nestjs/common'
-import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate'
-import { CommentPostDto } from './dto/comment-post.dto'
-import { Comment } from '../comment'
-import { GetCommentDto } from './dto/get-comment.dto'
+import { CommentPostDto } from './dto/comment-post.dto';
+import { GetCommentDto } from './dto/get-comment.dto';
 
 @Injectable()
 export class PostUsecases {
@@ -38,14 +38,24 @@ export class PostUsecases {
     return await this.postsRepository.savePost(post)
   }
 
-  async findPosts(
-    user: User,
+  async findPosts(userId: string, paginationOpts: IPaginationOptions): Promise<Pagination<Post>> {
+    const posts = await this.postsRepository.findPostsByUsers(
+      userId,
+      [],
+      paginationOpts
+    )
+    console.log('findPosts', posts)
+    return posts
+  }
+
+  async getFeed(
+    userId: string,
     paginationOpts: IPaginationOptions
   ): Promise<Pagination<Post>> {
-    const { friends: friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(user.id)
+    const { friends: friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(userId)
     const posts = await this.postsRepository.findPostsByUsers(
-      user.id,
-      [user.id, ...friends.map(friend => friend.id)],
+      userId,
+      [userId, ...friends.map(friend => friend.id)],
       paginationOpts
     )
     return posts

@@ -1,27 +1,23 @@
-import { Delete } from '@nestjs/common';
-import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
+import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth';
 import {
   Body,
   Controller,
-  DefaultValuePipe,
-  Get,
+  DefaultValuePipe, Delete, Get,
   Param,
   ParseIntPipe,
   Post,
   Query,
   Req,
-  UseGuards,
-  UsePipes
-} from '@nestjs/common'
-import { Pagination } from 'nestjs-typeorm-paginate'
-import { Comment } from '../comment'
-import { Post as PostEntity } from '../post'
-import { CommentPostDto } from '../usecases/dto/comment-post.dto'
-import { GetCommentDto } from '../usecases/dto/get-comment.dto'
-import { SubmitPostDto } from '../usecases/dto/submit-post.dto'
-import { PostUsecases } from '../usecases/post.usecases'
-import { PaginatedQueryPipe } from './paginated-query.pipe'
-import { PaginatedQueryDto } from './paginated-query.dto'
+  UseGuards
+} from '@nestjs/common';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Post as PostEntity } from '../post';
+import { CommentPostDto } from '../usecases/dto/comment-post.dto';
+import { GetCommentDto } from '../usecases/dto/get-comment.dto';
+import { SubmitPostDto } from '../usecases/dto/submit-post.dto';
+import { PostUsecases } from '../usecases/post.usecases';
+import { PaginatedQueryDto } from './paginated-query.dto';
+import { PaginatedQueryPipe } from './paginated-query.pipe';
 
 @Controller('posts')
 export class PostController {
@@ -35,12 +31,17 @@ export class PostController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  findPosts(
+  getFeed(
     @Req() req: RequestWithUser,
+    @Query('userId') userId?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10
   ): Promise<Pagination<PostEntity>> {
-    return this.usecases.findPosts(req.user, { page, limit })
+    console.log('getFeed', userId)
+    if (userId) {
+      return this.usecases.findPosts(userId, { page, limit })
+    }
+    return this.usecases.getFeed(req.user.id, { page, limit })
   }
 
   @Post(':postId/comments')
