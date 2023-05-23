@@ -7,14 +7,14 @@ export class GetFriendRequestDto {
 		username: string;
 		firstName: string;
 		lastName: string;
-		pictureUrl: string;
+		imageUrl: string;
 	}
 	to: {
 		id: string;
 		username: string;
 		firstName: string;
 		lastName: string;
-		pictureUrl: string;
+		imageUrl: string;
 	}
 
 	static fromDomain(friendRequest: FriendRequest) { 
@@ -25,14 +25,14 @@ export class GetFriendRequestDto {
 				username: friendRequest.from.profile.username,
 				firstName: friendRequest.from.profile.firstName,
 				lastName: friendRequest.from.profile.lastName,
-				pictureUrl: friendRequest.from.profile.imageUrl
+				imageUrl: friendRequest.from.profile.imageUrl
 			},
 			to: {
 				id: friendRequest.to.id,
 				username: friendRequest.to.profile.username,
 				firstName: friendRequest.to.profile.firstName,
 				lastName: friendRequest.to.profile.lastName,
-				pictureUrl: friendRequest.to.profile.imageUrl,
+				imageUrl: friendRequest.to.profile.imageUrl,
 			}
 		}
 	}

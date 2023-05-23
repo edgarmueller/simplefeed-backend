@@ -30,9 +30,9 @@ export class FriendRequestUsecases {
 
   async cancelFriendRequest(actor: User, friendRequestId: string): Promise<void> {
     const friendRequest = await this.friendRequestRepository.findOneByIdWithFriends(friendRequestId);
-    if (actor === friendRequest.from) {
+    if (actor.id === friendRequest.from.id) {
       friendRequest.cancel();
-    } else if (actor === friendRequest.to) {
+    } else if (actor.id === friendRequest.to.id) {
       friendRequest.decline();
     } else {
       throw new ForbiddenException();

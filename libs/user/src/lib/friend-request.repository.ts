@@ -57,12 +57,20 @@ export class FriendRequestRepository {
   findFriendRequestsForUserId(userId: string) {
     return this.friendRequestsRepository.find({
       where: { to: { id: userId } },
+      relations: {
+        from: true,
+        to: true,
+      }
     })
   }
 
   findFriendRequestsFromUserId(userId: string) {
     return this.friendRequestsRepository.find({
       where: { from: { id: userId } },
+      relations: {
+        from: true,
+        to: true,
+      }
     })
   }
 

@@ -44,7 +44,6 @@ export class PostUsecases {
       [],
       paginationOpts
     )
-    console.log('findPosts', posts)
     return posts
   }
 
