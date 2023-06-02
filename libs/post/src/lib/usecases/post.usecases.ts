@@ -98,23 +98,6 @@ export class PostUsecases {
     }
   }
 
-
-  async fetchRootComments(
-    postId: string,
-    commentId?: string,
-    paginationOpts: IPaginationOptions = { page: 1, limit: DEFAULT_COMMENTS_LIMIT }
-  ): Promise<Pagination<GetCommentDto>> {
-    const res = await this.postsRepository.findComments(
-      postId,
-      commentId,
-      paginationOpts
-    )
-    return {
-      ...res,
-      items: res.items.map(GetCommentDto.fromDomain),
-    }
-  }
-
   async likePost(postId: string, likedBy: User) {
     const post = await this.postsRepository.findOneByIdOrFail(postId)
     post.like(likedBy)

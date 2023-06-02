@@ -37,7 +37,6 @@ export class PostController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10
   ): Promise<Pagination<PostEntity>> {
-    console.log('getFeed', userId)
     if (userId) {
       return this.usecases.findPosts(userId, { page, limit })
     }
@@ -60,21 +59,10 @@ export class PostController {
   async fetchComments(
     @Req() req: RequestWithUser,
     @Param('postId') postId: string,
-    @Param('commentId') commentId: string,
-    @Query(new PaginatedQueryPipe()) paginationOpts: PaginatedQueryDto
+    @Param('commentId') commentId?: string,
+    @Query(new PaginatedQueryPipe()) paginationOpts?: PaginatedQueryDto
   ): Promise<Pagination<GetCommentDto>> {
     return this.usecases.fetchComments(postId, commentId, paginationOpts)
-  }
-
-  @Get(':postId/comments')
-  @UseGuards(JwtAuthGuard)
-  async fetchRootComments(
-    @Req() req: RequestWithUser,
-    @Param('postId') postId: string,
-    @Param('commentId') commentId: string,
-    @Query(new PaginatedQueryPipe()) paginationOpts: PaginatedQueryDto
-  ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchRootComments(postId, commentId, paginationOpts)
   }
 
   @Post(':postId/like')
