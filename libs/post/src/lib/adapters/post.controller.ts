@@ -90,4 +90,10 @@ export class PostController {
   ): Promise<any> {
     return this.usecases.findLikedPostsByUser(req.user);
   }
+
+  @Delete(':postId')
+  @UseGuards(JwtAuthGuard)
+  async deletePost(@Req() req: RequestWithUser, @Param('postId') postId: string): Promise<void> {
+    return this.usecases.deletePost(postId, req.user);
+  }
 }

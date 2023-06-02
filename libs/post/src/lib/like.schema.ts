@@ -33,6 +33,7 @@ export const LikeSchema = new EntitySchema<Like>({
       target: 'Post',
       inverseSide: 'likes',
       joinColumn: { name: 'post_id' },
+      onDelete: 'CASCADE',
     },
   },
 })

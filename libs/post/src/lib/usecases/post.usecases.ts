@@ -109,4 +109,8 @@ export class PostUsecases {
     post.unlike(likedBy)
     await this.postsRepository.savePost(post)
   }
+
+  async deletePost(postId: string, user: User) {
+    await this.postsRepository.delete(postId, user)
+  }
 }

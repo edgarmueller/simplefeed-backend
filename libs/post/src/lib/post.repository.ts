@@ -1,5 +1,6 @@
 import { DomainEvents } from '@kittgen/shared-ddd'
-import { Injectable } from '@nestjs/common'
+import { User } from '@kittgen/user'
+import { ForbiddenException, Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
@@ -178,6 +179,25 @@ export class PostsRepository {
     return this.commentRepository.find({
       where: { post: { id: postId } },
     })
+  }
+
+  @Transactional()
+  async delete(postId: string, user: User) {
+    const post = await this.postRepository.findOneOrFail({ 
+      where: { id: postId },
+      relations: {
+        author: true,
+      }
+    })
+    if (post.author.id !== user.id) {
+      throw new ForbiddenException('User is not allowed to delete this post')
+    }
+    const comments = await this.commentRepository.find({
+      where: { post: { id: postId } },
+    })
+    await this.commentRepository.remove(comments);
+    // we don't decrease total number of likes for users
+    await this.postRepository.remove(post);
   }
 
   @Transactional()

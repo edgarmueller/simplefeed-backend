@@ -42,6 +42,7 @@ export const PostSchema = new EntitySchema<Post>({
       target: 'Like',
       inverseSide: 'post',
       cascade: true,
+      onDelete: 'CASCADE',
       joinTable: {
         joinColumn: {
           name: 'post_id',
