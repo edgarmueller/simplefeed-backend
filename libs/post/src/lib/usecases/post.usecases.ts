@@ -7,6 +7,7 @@ import { PostsRepository } from '../post.repository';
 import { DEFAULT_COMMENTS_LIMIT } from './../post.repository';
 import { CommentPostDto } from './dto/comment-post.dto';
 import { GetCommentDto } from './dto/get-comment.dto';
+import { GetPostDto } from './dto/get-post.dto';
 
 @Injectable()
 export class PostUsecases {
@@ -50,14 +51,17 @@ export class PostUsecases {
   async getFeed(
     userId: string,
     paginationOpts: IPaginationOptions
-  ): Promise<Pagination<Post>> {
+  ): Promise<Pagination<GetPostDto>> {
     const { friends: friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(userId)
     const posts = await this.postsRepository.findPostsByUsers(
       userId,
       [userId, ...friends.map(friend => friend.id)],
       paginationOpts
     )
-    return posts
+    return {
+      ...posts,
+      items: posts.items.map(GetPostDto.fromDomain),
+    }
   }
 
   async findLikedPostsByUser(
