@@ -38,9 +38,9 @@ export class PostController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10
   ): Promise<Pagination<GetPostDto>> {
     if (userId) {
-      return this.usecases.findPosts(userId, { page, limit })
+      return this.usecases.getUserActivityFeed(userId, { page, limit })
     }
-    return this.usecases.getFeed(req.user.id, { page, limit })
+    return this.usecases.getPersonalFeed(req.user.id, { page, limit })
   }
 
   @Post(':postId/comments')

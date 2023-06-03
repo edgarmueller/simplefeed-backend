@@ -71,8 +71,8 @@ export class PostsRepository {
       const foundPost = await this.postRepository.findOneOrFail({
         where: { id },
         relations: {
-          likes: true
-        }
+          likes: true,
+        },
       })
       return foundPost
     } catch (error) {
@@ -137,6 +137,32 @@ export class PostsRepository {
       throw error
     }
   }
+  async findUserActivityFeed(
+    userId: string,
+    paginationOpts: IPaginationOptions
+  ): Promise<Pagination<Post>> {
+    const qb = this.postRepository.createQueryBuilder('post')
+    qb.leftJoinAndSelect('post.author', 'author', 'post.author_id = author.id')
+      .leftJoinAndSelect(
+        'author.profile',
+        'profile',
+        'profile.user_id = author.id'
+      )
+      .innerJoinAndSelect('post.postedTo', 'postedTo')
+      .leftJoinAndSelect(
+        'postedTo.profile',
+        'postedToProfile',
+        'postedToProfile.user_id = postedTo.id'
+      )
+      .leftJoinAndSelect('post.likes', 'likes', 'likes.user_id = :userId', {
+        userId,
+      })
+      .where('postedTo.id = :userId', { userId })
+      .orWhere('author.id = :userId', { userId })
+      .orderBy('post.createdAt', 'DESC')
+    const posts = await paginate(qb, paginationOpts)
+    return posts
+  }
 
   async findPostsByUsers(
     userId: string,
@@ -183,11 +209,11 @@ export class PostsRepository {
 
   @Transactional()
   async delete(postId: string, user: User) {
-    const post = await this.postRepository.findOneOrFail({ 
+    const post = await this.postRepository.findOneOrFail({
       where: { id: postId },
       relations: {
         author: true,
-      }
+      },
     })
     if (post.author.id !== user.id) {
       throw new ForbiddenException('User is not allowed to delete this post')
@@ -195,9 +221,9 @@ export class PostsRepository {
     const comments = await this.commentRepository.find({
       where: { post: { id: postId } },
     })
-    await this.commentRepository.remove(comments);
+    await this.commentRepository.remove(comments)
     // we don't decrease total number of likes for users
-    await this.postRepository.remove(post);
+    await this.postRepository.remove(post)
   }
 
   @Transactional()

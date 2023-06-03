@@ -39,16 +39,18 @@ export class PostUsecases {
     return await this.postsRepository.savePost(post)
   }
 
-  async findPosts(userId: string, paginationOpts: IPaginationOptions): Promise<Pagination<Post>> {
-    const posts = await this.postsRepository.findPostsByUsers(
+  async getUserActivityFeed(userId: string, paginationOpts: IPaginationOptions): Promise<Pagination<GetPostDto>> {
+    const posts = await this.postsRepository.findUserActivityFeed(
       userId,
-      [],
       paginationOpts
     )
-    return posts
+    return {
+      ...posts,
+      items: posts.items.map(GetPostDto.fromDomain),
+    }
   }
 
-  async getFeed(
+  async getPersonalFeed(
     userId: string,
     paginationOpts: IPaginationOptions
   ): Promise<Pagination<GetPostDto>> {

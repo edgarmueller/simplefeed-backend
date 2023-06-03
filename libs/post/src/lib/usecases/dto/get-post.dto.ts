@@ -5,7 +5,12 @@ export class GetPostDto {
 		return {
 			...post,
 			author: {
-				...post.author.profile
+				...post.author.profile,
+				id: post.author.id,
+			},
+			postedTo: {
+				...post.postedTo.profile,
+				id: post.postedTo.id,
 			}
 		}
 	}
