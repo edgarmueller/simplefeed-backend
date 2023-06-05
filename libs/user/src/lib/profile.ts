@@ -30,7 +30,10 @@ export class Profile implements Entity {
   }
 
   incrementPostCount() {
-    this.nrOfLikes++;
+    this.nrOfPosts++;
   }
 
+  incrementLikesCount() {
+    this.nrOfLikes++;
+  }
 }

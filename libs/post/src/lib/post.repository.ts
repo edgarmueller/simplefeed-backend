@@ -221,9 +221,9 @@ export class PostsRepository {
     const comments = await this.commentRepository.find({
       where: { post: { id: postId } },
     })
-    await this.commentRepository.remove(comments)
+    await this.commentRepository.softRemove(comments)
     // we don't decrease total number of likes for users
-    await this.postRepository.remove(post)
+    await this.postRepository.softRemove(post)
   }
 
   @Transactional()

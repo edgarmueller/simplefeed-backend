@@ -13,6 +13,7 @@ export class Post extends AggregateRoot {
   author: User 
   postedTo?: User
   createdAt?: Date 
+  deletedAt?: Date 
   likes?: Like[]
 
   public static create(props: Props<Post>, id?: string): Post {
@@ -40,7 +41,7 @@ export class Post extends AggregateRoot {
 
   // TODO: add domain logic
   like(likedBy: User) {[]
-    likedBy.profile.nrOfLikes = likedBy.profile.nrOfLikes + 1;
+    likedBy.profile.incrementLikesCount();
     const like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
     if (!this.likes) {
       this.likes = [];

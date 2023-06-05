@@ -20,6 +20,12 @@ export const PostSchema = new EntitySchema<Post>({
       name: 'created_at',
       createDate: true,
     },
+    deletedAt: {
+      type: Date,
+      name: 'deleted_at',
+      nullable: true,
+      deleteDate: true,
+    }
   },
   relations: {
     author: {
