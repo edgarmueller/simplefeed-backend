@@ -2,6 +2,7 @@ import { User, UsersRepository } from '@kittgen/user'
 import { Injectable, Logger } from '@nestjs/common'
 import { GetUserDto } from '../auth/dto/get-user.dto';
 import { RequestWithUser } from '../../../../../libs/auth/src';
+import { GetMeDto } from '../auth/dto/get-me.dto';
 
 @Injectable()
 export class UserUsecases {
@@ -26,9 +27,13 @@ export class UserUsecases {
   //   return this.userRepository.findOneById(userId)
   // }
 
-  async getUserByUserName(username: string): Promise<GetUserDto> {
-    const user = await this.userRepository.findOneByUsernameOrFail(username)
-    return GetUserDto.fromDomain(user)
+  async getUserByUserName(requestingUser: User, username: string): Promise<GetMeDto | GetUserDto> {
+    if (requestingUser.profile.username === username) {
+      return this.getMe(requestingUser);
+    }
+    const user = await this.userRepository.findOneByIdWithFriendsOrFail(username)
+    const mutualFriends = await this.getMutualFriends(requestingUser, user);
+    return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length);
   }
 
   async getFriendsOfUser(username: string): Promise<GetUserDto[]> {
@@ -37,22 +42,22 @@ export class UserUsecases {
     return friends.map(friend => GetUserDto.fromDomain(friend));
   }
 
-  getUserFromRequest(request: RequestWithUser): Promise<User> {
-    return this.userRepository.findOneByIdWithFriendsOrFail(request.user.id)
+  async getMe(requestingUser: User): Promise<GetMeDto> {
+    const user = await this.userRepository.findOneByIdWithFriendsOrFail(requestingUser.id);
+    return GetMeDto.fromDomain(user);
   }
 
-  async getMutualFriends(user: User, friendId: string): Promise<string[]> {
+  async getMutualFriends(user: User, otherUser: User): Promise<string[]> {
     const userWithFriends =
       await this.userRepository.findOneByIdWithFriendsOrFail(user.id)
-    const otherUserWithFriends =
-      await this.userRepository.findOneByIdWithFriendsOrFail(friendId)
     const mutualFriends = userWithFriends.friends.filter((friend) =>
-      otherUserWithFriends.friends.some(
+      otherUser.friends.some(
         (otherFriend) => otherFriend.id === friend.id
       )
     )
     return mutualFriends.map((friend) => friend.id)
   }
+
   // async updateUserInfo(user: User, updateUserDto: UpdateUserDto): Promise<User> {
   //   if (updateUserDto.user.email) {
   //     const hashedPassword = await this.authService.hashPassword(updateUserDto.user.password)

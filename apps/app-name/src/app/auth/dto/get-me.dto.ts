@@ -1,6 +1,7 @@
 import { User } from '@kittgen/user'
+import { GetUserDto } from './get-user.dto'
 
-export class GetUserDto {
+export class GetMeDto {
   id: string
   email: string
   username: string
@@ -11,9 +12,6 @@ export class GetUserDto {
   nrOfLikes?: number
   nrOfPosts?: number
   friends: GetUserDto[]
-
-
-  mutualFriendsCount?: number
 
   static fromDomain(user: User): GetUserDto {
     return new GetUserDto({
@@ -32,10 +30,5 @@ export class GetUserDto {
 
   constructor(props: Partial<GetUserDto>) {
     Object.assign(this, props)
-  }
-
-  withMutualFriends(mutualFriendsCount: number) {
-    this.mutualFriendsCount = mutualFriendsCount;
-    return this;
   }
 }

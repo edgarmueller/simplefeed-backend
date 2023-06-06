@@ -14,10 +14,4 @@ export class FriendsController {
   ): Promise<void> {
     return this.usecases.removeFriend(req.user.id, friendId);
   }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete(':friendId/mutual-friends')
-  async getMutualFriends(@Req() req: RequestWithUser, friendId: string): Promise<string[]> {
-    // return this.usecases.getMutualFriends(req.user, friendId);
-  }
 }

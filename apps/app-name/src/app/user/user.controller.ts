@@ -1,5 +1,5 @@
 import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
-import { User, UserNotFoundError } from '@kittgen/user'
+import { UserNotFoundError } from '@kittgen/user'
 import {
   Controller,
   Get,
@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common'
 import { UserUsecases } from './user.usecases'
 import { GetUserDto } from '../auth/dto/get-user.dto'
+import { GetMeDto } from '../auth/dto/get-me.dto'
 
 @Controller('users')
 export class UserController {
@@ -19,9 +20,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async me(@Req() request: RequestWithUser): Promise<GetUserDto> {
-    const user = await this.usecases.getUserFromRequest(request)
-    return GetUserDto.fromDomain(user)
+  async me(@Req() request: RequestWithUser): Promise<GetMeDto> {
+    return this.usecases.getMe(request.user)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -29,18 +29,12 @@ export class UserController {
   async getUser(
     @Param('username') username: string,
     @Req() req: RequestWithUser
-  ): Promise<GetUserDto> {
-    const requestingUser = req.user
+  ): Promise<GetMeDto | GetUserDto> {
     try {
-      if (requestingUser) {
-        const user = await this.usecases.getUserByUserName(username)
-        const mutualFriends = await this.usecases.getMutualFriends(requestingUser, user.id);
-        return {
-          ...user,
-          mutualFriendsCount: mutualFriends.length
-        }
+      if (req.user.profile.username === username) {
+        return this.me(req)
       }
-      return await this.usecases.getUserByUserName(username)
+      return await this.usecases.getUserByUserName(req.user, username)
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         throw new NotFoundException()
