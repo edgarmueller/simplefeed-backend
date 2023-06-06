@@ -86,4 +86,9 @@ export class User extends AggregateRoot {
     }
     return this.incomingFriendRequests
   }
+
+  unfriend(friend: User) {
+    this.friends = this.friends?.filter((friend) => friend.id !== friend.id)
+    friend.friends = friend.friends?.filter((f) => f.id !== this.id)
+  }
 }
