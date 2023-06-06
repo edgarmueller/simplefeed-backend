@@ -41,6 +41,18 @@ export class UserUsecases {
     return this.userRepository.findOneByIdWithFriendsOrFail(request.user.id)
   }
 
+  async getMutualFriends(user: User, friendId: string): Promise<string[]> {
+    const userWithFriends =
+      await this.userRepository.findOneByIdWithFriendsOrFail(user.id)
+    const otherUserWithFriends =
+      await this.userRepository.findOneByIdWithFriendsOrFail(friendId)
+    const mutualFriends = userWithFriends.friends.filter((friend) =>
+      otherUserWithFriends.friends.some(
+        (otherFriend) => otherFriend.id === friend.id
+      )
+    )
+    return mutualFriends.map((friend) => friend.id)
+  }
   // async updateUserInfo(user: User, updateUserDto: UpdateUserDto): Promise<User> {
   //   if (updateUserDto.user.email) {
   //     const hashedPassword = await this.authService.hashPassword(updateUserDto.user.password)

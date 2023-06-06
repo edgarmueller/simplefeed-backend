@@ -13,7 +13,9 @@ import { GetUserDto } from '../auth/dto/get-user.dto'
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly usecases: UserUsecases) {}
+  constructor(
+    private readonly usecases: UserUsecases,
+    ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -22,15 +24,22 @@ export class UserController {
     return GetUserDto.fromDomain(user)
   }
 
-  //@UseGuards(PublicGuard)
   @UseGuards(JwtAuthGuard)
   @Get(':username')
   async getUser(
     @Param('username') username: string,
     @Req() req: RequestWithUser
   ): Promise<GetUserDto> {
-    // const requestingUser = req.user
+    const requestingUser = req.user
     try {
+      if (requestingUser) {
+        const user = await this.usecases.getUserByUserName(username)
+        const mutualFriends = await this.usecases.getMutualFriends(requestingUser, user.id);
+        return {
+          ...user,
+          mutualFriendsCount: mutualFriends.length
+        }
+      }
       return await this.usecases.getUserByUserName(username)
     } catch (error) {
       if (error instanceof UserNotFoundError) {

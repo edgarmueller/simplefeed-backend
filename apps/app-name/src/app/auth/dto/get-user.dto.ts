@@ -11,6 +11,7 @@ export class GetUserDto {
   nrOfLikes?: number
   nrOfPosts?: number
   friends: GetUserDto[]
+  mutualFriendsCount?: number
 
   static fromDomain(user: User): GetUserDto {
     return new GetUserDto({
