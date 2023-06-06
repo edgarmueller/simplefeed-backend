@@ -118,5 +118,7 @@ export class PostUsecases {
 
   async deletePost(postId: string, user: User) {
     await this.postsRepository.delete(postId, user)
+    user.profile.decrementPostCount()
+    await this.usersRepository.save(user)
   }
 }
