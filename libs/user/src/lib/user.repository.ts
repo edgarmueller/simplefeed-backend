@@ -83,8 +83,21 @@ export class UsersRepository {
     }
   }
 
+    async findOneByUsernameOrFail(username: string): Promise<User> {
+    try {
+      const foundUser = await this.userRepository.findOneOrFail({
+        where: { profile: { username } },
+      })
+      return foundUser
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new UserNotFoundError(username)
+      }
+      throw error
+    }
+  }
 
-  async findOneByUsernameOrFail(username: string): Promise<User> {
+  async findOneByUsernameWithFriendsOrFail(username: string): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
         where: { profile: { username } },

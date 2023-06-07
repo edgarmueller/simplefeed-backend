@@ -29,15 +29,15 @@ export class UserUsecases {
 
   async getUserByUserName(requestingUser: User, username: string): Promise<GetMeDto | GetUserDto> {
     if (requestingUser.profile.username === username) {
-      return this.getMe(requestingUser);
+      return await this.getMe(requestingUser);
     }
-    const user = await this.userRepository.findOneByIdWithFriendsOrFail(username)
+    const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(username)
     const mutualFriends = await this.getMutualFriends(requestingUser, user);
     return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length);
   }
 
   async getFriendsOfUser(username: string): Promise<GetUserDto[]> {
-    const user = await this.userRepository.findOneByUsernameOrFail(username);
+    const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(username);
     const friends = await this.userRepository.findMany(user.friends.map(friend => friend.id));
     return friends.map(friend => GetUserDto.fromDomain(friend));
   }

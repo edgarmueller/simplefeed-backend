@@ -31,9 +31,6 @@ export class UserController {
     @Req() req: RequestWithUser
   ): Promise<GetMeDto | GetUserDto> {
     try {
-      if (req.user.profile.username === username) {
-        return this.me(req)
-      }
       return await this.usecases.getUserByUserName(req.user, username)
     } catch (error) {
       if (error instanceof UserNotFoundError) {
