@@ -1,7 +1,9 @@
 import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd';
-import { PostCreatedEvent } from './events/post-created.event';
 import { User } from "@kittgen/user";
+import { PostCreatedEvent } from './events/post-created.event';
+import { PostLikedEvent } from './events/post-liked.event';
 import { Like } from './like';
+import { PostUnlikedEvent } from './events/post-unliked.event';
 
 const PREFIX = 'pos'
 export type PostId = string
@@ -41,17 +43,21 @@ export class Post extends AggregateRoot {
 
   // TODO: add domain logic
   like(likedBy: User) {[]
-    likedBy.profile.incrementLikesCount();
+    likedBy.profile.incrementLikeCount();
     const like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
     if (!this.likes) {
       this.likes = [];
     }
     this.likes.push(like);
+    this.emitDomainEvent(new PostLikedEvent(this, likedBy));
     return like;
   }
 
-  unlike(likedBy: User): void {
-    likedBy.profile.nrOfLikes = likedBy.profile.nrOfLikes - 1;
-    this.likes = this.likes.filter(({ userId }) => userId !== likedBy.id)
+  unlike(unlikedBy: User): Like {
+    unlikedBy.profile.decrementLikeCount();
+    const like = this.likes.find(({ userId }) => userId === unlikedBy.id)
+    this.likes = this.likes.filter(({ userId }) => userId !== unlikedBy.id)
+    this.emitDomainEvent(new PostUnlikedEvent(this, unlikedBy));
+    return like
   }
 }

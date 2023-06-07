@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@kittgen/shared-ddd'
-import { Transactional } from 'typeorm-transactional'
+import { IsolationLevel, Propagation, Transactional } from 'typeorm-transactional'
 import { In } from 'typeorm'
 import { QueryFailedError, Repository } from 'typeorm'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
@@ -20,7 +20,9 @@ export class UsersRepository {
     private readonly publisher: EventPublisher
   ) {}
 
-  @Transactional()
+  @Transactional({
+    propagation: Propagation.NESTED
+  })
   async save(user: User): Promise<User> {
     try {
       const savedUser = await this.userRepository.save(user)

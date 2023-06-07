@@ -32,9 +32,17 @@ export class PostsRepository {
 
   @Transactional()
   async savePost(post: Post): Promise<Post> {
+    console.log('likes', post.likes)
+    await this.likeRepository.save(post.likes)
     const savedPost = await this.postRepository.save(post)
     DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
     return savedPost
+  }
+  @Transactional()
+  async removeLike(like: Like): Promise<void> {
+    await this.likeRepository.remove(like)
+    //DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
+    //return savedPost
   }
 
   @Transactional()
@@ -70,9 +78,9 @@ export class PostsRepository {
     try {
       const foundPost = await this.postRepository.findOneOrFail({
         where: { id },
-        relations: {
-          likes: true,
-        },
+        // relations: {
+        //   likes: true,
+        // },
       })
       return foundPost
     } catch (error) {
@@ -154,7 +162,7 @@ export class PostsRepository {
         'postedToProfile',
         'postedToProfile.user_id = postedTo.id'
       )
-      .leftJoinAndSelect('post.likes', 'likes', 'likes.user_id = :userId', {
+      .leftJoinAndMapOne('likes', 'likes', 'likes', 'likes.user_id = :userId', {
         userId,
       })
       .where('postedTo.id = :userId', { userId })
@@ -187,11 +195,12 @@ export class PostsRepository {
         'postedToProfile',
         'postedToProfile.user_id = postedTo.id'
       )
-      .leftJoinAndSelect('post.likes', 'likes', 'likes.user_id = :userId', {
+      .leftJoinAndMapOne('post.likes', Like, 'likes', 'likes.user_id = :userId AND likes.post_id = post.id', {
         userId,
       })
       .orderBy('post.createdAt', 'DESC')
     const posts = await paginate(qb, paginationOpts)
+    console.log(JSON.stringify(posts, null, 2))
     return posts
   }
 
