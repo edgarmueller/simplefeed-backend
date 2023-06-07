@@ -111,10 +111,9 @@ export class PostUsecases {
   }
 
   async unlikePost(postId: string, likedBy: User) {
-    const post = await this.postsRepository.findOneByIdOrFailWithLikes(postId)
-    const l = post.unlike(likedBy)
-    // await this.postsRepository.savePost(post)
-    await this.postsRepository.removeLike(l)
+    const post = await this.postsRepository.findOneByIdAndUserIdOrFailWithLikes(postId, likedBy.id)
+    post.unlike(likedBy)
+    await this.postsRepository.savePost(post)
   }
 
   async deletePost(postId: string, user: User) {

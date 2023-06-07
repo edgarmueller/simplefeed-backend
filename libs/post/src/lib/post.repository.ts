@@ -32,17 +32,10 @@ export class PostsRepository {
 
   @Transactional()
   async savePost(post: Post): Promise<Post> {
-    console.log('likes', post.likes)
-    await this.likeRepository.save(post.likes)
     const savedPost = await this.postRepository.save(post)
+    await this.likeRepository.save(post.likes)
     DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
     return savedPost
-  }
-  @Transactional()
-  async removeLike(like: Like): Promise<void> {
-    await this.likeRepository.remove(like)
-    //DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
-    //return savedPost
   }
 
   @Transactional()
@@ -74,14 +67,15 @@ export class PostsRepository {
     }
   }
 
-  async findOneByIdOrFailWithLikes(id: PostId): Promise<Post> {
+  async findOneByIdAndUserIdOrFailWithLikes(postId: PostId, userId: string): Promise<Post> {
     try {
-      const foundPost = await this.postRepository.findOneOrFail({
-        where: { id },
-        // relations: {
-        //   likes: true,
-        // },
-      })
+      const foundPost = await this.postRepository
+        .createQueryBuilder('post')
+        .where('post.id = :id', { id: postId })
+        .leftJoinAndMapMany('post.likes', Like, 'likes', 'likes.user_id = :userId AND likes.post_id = post.id', {
+          userId,
+        })
+        .getOneOrFail();
       return foundPost
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
@@ -162,7 +156,7 @@ export class PostsRepository {
         'postedToProfile',
         'postedToProfile.user_id = postedTo.id'
       )
-      .leftJoinAndMapOne('likes', 'likes', 'likes', 'likes.user_id = :userId', {
+      .leftJoinAndMapMany('post.likes', Like, 'likes', 'likes.user_id = :userId AND likes.post_id = post.id', {
         userId,
       })
       .where('postedTo.id = :userId', { userId })
@@ -195,12 +189,11 @@ export class PostsRepository {
         'postedToProfile',
         'postedToProfile.user_id = postedTo.id'
       )
-      .leftJoinAndMapOne('post.likes', Like, 'likes', 'likes.user_id = :userId AND likes.post_id = post.id', {
+      .leftJoinAndMapMany('post.likes', Like, 'likes', 'likes.user_id = :userId AND likes.post_id = post.id', {
         userId,
       })
       .orderBy('post.createdAt', 'DESC')
     const posts = await paginate(qb, paginationOpts)
-    console.log(JSON.stringify(posts, null, 2))
     return posts
   }
 

@@ -43,22 +43,5 @@ export const PostSchema = new EntitySchema<Post>({
         name: 'posted_to',
       }
     },
-    // likes: {
-    //   type: 'many-to-many',
-    //   target: 'Like',
-    //   inverseSide: 'post',
-    //   // cascade: true,
-    //   onDelete: 'CASCADE',
-    //   joinTable: {
-    //     joinColumn: {
-    //       name: 'post_id',
-    //       referencedColumnName: 'id',
-    //     },
-    //     inverseJoinColumn: {
-    //       name: 'like_id',
-    //       referencedColumnName: 'id',
-    //     },
-    //   },
-    // },
   },
 })

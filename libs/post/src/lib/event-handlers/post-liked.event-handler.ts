@@ -10,7 +10,6 @@ export class PostLikedEventHandler {
 	) {}
 
 	async handle(event: PostLikedEvent) {
-		console.log('xxx')
     await this.usersRepository.save(event.likedBy);
 	}
 }

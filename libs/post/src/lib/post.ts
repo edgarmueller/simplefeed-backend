@@ -57,7 +57,7 @@ export class Post extends AggregateRoot {
     unlikedBy.profile.decrementLikeCount();
     const like = this.likes.find(({ userId }) => userId === unlikedBy.id)
     this.likes = this.likes.filter(({ userId }) => userId !== unlikedBy.id)
-    this.emitDomainEvent(new PostUnlikedEvent(this, unlikedBy));
+    this.emitDomainEvent(new PostUnlikedEvent(this, unlikedBy, like));
     return like
   }
 }

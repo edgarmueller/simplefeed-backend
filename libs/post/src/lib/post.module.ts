@@ -9,6 +9,8 @@ import { LikeSchema } from './like.schema';
 import { PostsRepository } from './post.repository';
 import { PostSchema } from './post.schema';
 import { PostUsecases } from './usecases/post.usecases';
+import { LikeRepository } from './like.repository';
+import { PostUnlikedEventHandler } from './event-handlers/post-unliked.event-handler';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { PostUsecases } from './usecases/post.usecases';
 		CqrsModule
 	],
 	controllers: [PostController],
-	providers: [PostsRepository, PostUsecases, PostLikedEventHandler],
+	providers: [PostsRepository, LikeRepository, PostUsecases, PostLikedEventHandler, PostUnlikedEventHandler],
 	exports: [PostsRepository],
 })
 export class PostModule {}
