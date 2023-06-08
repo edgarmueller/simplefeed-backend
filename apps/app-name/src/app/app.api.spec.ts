@@ -81,7 +81,7 @@ describe('realworld app', () => {
         },
       })
       .expect(expectedStatus)
-    return body.user.token;
+    return body.accessToken;
   }
 
   async function createPost(token: string, content: string, expectedStatus = 201) {
@@ -162,42 +162,22 @@ describe('realworld app', () => {
     expect(body.accessToken).not.toBe(updatedBody.accessToken)
   })
 
-  // it.only('should return the current user', async () => {
-  //   await registerUser(
-  //     {
-  //       user: {
-  //         username: 'Fry',
-  //         firstName: 'Philip J.',
-  //         lastName: 'Fry',
-  //         email: 'fry2@example.com',
-  //         password: 'secret',
-  //       },
-  //     },
-  //     201
-  //   );
-  //   const resp = await login('fry2@example.com', 'secret');
-  //   const { body } = await request(app.getHttpServer())
-  //     .get('/api/user')
-  //     .set('Authorization', `Bearer ${resp.user.token}`)
-  //     .expect(200);
-  //   expect(body).toHaveProperty('user.email');
-  // });
-
   describe('post usecases ', () => {
     it('should allow submitting a new post', async () => {
       await registerFry();
       const resp = await login('fry2@example.com', 'secret')
-      await createPost(resp.user.token, 'All backend implementations need to adhere to our API spec.')
+      await createPost(resp.accessToken, 'All backend implementations need to adhere to our API spec.')
     });
 
     it('should allow fetching own post', async () => {
       await registerFry();
       const resp = await login('fry2@example.com', 'secret')
-      await createPost(resp.user.token, 'Hi everyone!');
-      await createPost(resp.user.token, `I'm here, too!`);
+      const accessToken = resp.accessToken;
+      await createPost(accessToken, 'Hi everyone!');
+      await createPost(accessToken, `I'm here, too!`);
       const { body } = await request(app.getHttpServer())
         .get('/api/posts')
-        .set('Authorization', `Bearer ${resp.user.token}`)
+        .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
       // TODO: no need to expose entire profile for author prop
       // update dto
@@ -210,7 +190,7 @@ describe('realworld app', () => {
     const resp = await login('fry2@example.com', 'secret')
     await request(app.getHttpServer())
       .post('/api/articles')
-      .set('Authorization', `Bearer ${resp.user.token}`)
+      .set('Authorization', `Bearer ${resp.accessToken}`)
       .send({
         article: {
           body: 'All backend implementations need to adhere to our API spec.',
@@ -224,7 +204,7 @@ describe('realworld app', () => {
       body: { article },
     } = await request(app.getHttpServer())
       .put('/api/articles/Introduction')
-      .set('Authorization', `Bearer ${resp.user.token}`)
+      .set('Authorization', `Bearer ${resp.accessToken}`)
       .send({
         article: {
           title: 'Introduction 2',

@@ -54,7 +54,7 @@ export class PostController {
     return GetCommentDto.fromDomain(comment)
   }
 
-  @Get(':postId/comments/:commentId')
+  @Get(':postId/comments/:commentId?')
   @UseGuards(JwtAuthGuard)
   async fetchComments(
     @Req() req: RequestWithUser,
@@ -62,7 +62,7 @@ export class PostController {
     @Param('commentId') commentId?: string,
     @Query(new PaginatedQueryPipe()) paginationOpts?: PaginatedQueryDto
   ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(postId, commentId, paginationOpts)
+    return this.usecases.fetchComments(postId, commentId || postId, paginationOpts)
   }
 
   @Post(':postId/like')

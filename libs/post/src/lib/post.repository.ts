@@ -33,7 +33,9 @@ export class PostsRepository {
   @Transactional()
   async savePost(post: Post): Promise<Post> {
     const savedPost = await this.postRepository.save(post)
-    await this.likeRepository.save(post.likes)
+    if (post.likes) {
+      await this.likeRepository.save(post.likes)
+    }
     DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
     return savedPost
   }

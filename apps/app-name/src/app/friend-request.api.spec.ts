@@ -67,6 +67,7 @@ describe('friend request api', () => {
     await request(app.getHttpServer())
       .patch(`/api/friend-requests/${friendRequestId}`)
       .set('Authorization', `Bearer ${userToken}`)
+      .expect(200)
   }
 
   async function declineFriendRequest(userToken: string, friendRequestId: string) {
@@ -84,7 +85,7 @@ describe('friend request api', () => {
 
   async function getFriendsOf(username: string, userToken: string) {
     const { body } = await request(app.getHttpServer())
-      .get(`/api/profiles/${username}`)
+      .get(`/api/users/${username}`)
       .set('Authorization', `Bearer ${userToken}`)
     return body.friends;
   }
@@ -117,7 +118,7 @@ describe('friend request api', () => {
         },
       })
       .expect(expectedStatus)
-    return body.user.token;
+    return body.accessToken;
   }
 
   beforeEach(async () => {
@@ -135,7 +136,7 @@ describe('friend request api', () => {
   })
 
   describe("friends usecases", () => {
-    it.only("should send friend request to another user", async () => {
+    it("should send friend request to another user", async () => {
       await registerFry()
       await registerLisa()
       const fryToken = await login('fry@example.com', 'secret')
@@ -147,26 +148,26 @@ describe('friend request api', () => {
       expect(pendingRequests).toHaveLength(1)
     });
 
-    it.only("should accept friend request", async () => {
+    it("should accept friend request", async () => {
       await registerFry()
       await registerLisa()
-      const fryToken = await login('fry@example.com', 'secret')
-      const lisaToken = await login('lisa@example.com', 'secret')
+      const frysToken = await login('fry@example.com', 'secret')
+      const lisasToken = await login('lisa@example.com', 'secret')
       // send request
-      const friendRequest = await sendFriendRequest(fryToken, 'lisa')
+      const friendRequest = await sendFriendRequest(frysToken, 'lisa')
       // confirm
-      await confirmFriendRequest(lisaToken, friendRequest.id)
+      await confirmFriendRequest(lisasToken, friendRequest.id)
       // get friends of try
-      const pendingFriendRequests = await getPendingFriendRequests(lisaToken) 
-      const frysFriends = await getFriendsOf('fry', fryToken)
-      const lisasFriends = await getFriendsOf('lisa', fryToken)
+      const pendingFriendRequests = await getPendingFriendRequests(lisasToken) 
+      const frysFriends = await getFriendsOf('fry', frysToken)
+      const lisasFriends = await getFriendsOf('lisa', frysToken)
 
       expect(pendingFriendRequests).toHaveLength(0)
       expect(frysFriends).toHaveLength(1)
       expect(lisasFriends).toHaveLength(1)
     });
 
-    it.only("should cancel friend request to another user", async () => {
+    it("should cancel friend request to another user", async () => {
       await registerFry();
       await registerLisa();
       const fryToken = await login('fry@example.com', 'secret')
