@@ -8,7 +8,7 @@
     "test": "nx run-many --projects=post,user,auth --target=test --parallel=false",
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
-    "schema:create": "ts-node --project tsconfig.script.json tools/scripts/create-schema",
+    "schema:create": "ts-node --project tsconfig.script.json apps/app-name/scripts/create-schema",
     "lint": "eslint '**/*.ts'",
     "lint:fix": "npm run lint -- --fix"
   },

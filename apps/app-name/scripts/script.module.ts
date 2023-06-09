@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config";
 import Joi from "joi";
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DatabaseConfigSchema } from "../src/app/infra/database/database.config";
 
 export const databaseConfig = registerAs('database', () => ({
 	host: process.env.POSTGRES_HOST,
@@ -18,7 +19,7 @@ export const databaseConfig = registerAs('database', () => ({
   imports:[
     ConfigModule.forRoot({
       envFilePath: [`.env.local`],
-      load: [authConfig, databaseConfig],
+      load: [databaseConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
       )
