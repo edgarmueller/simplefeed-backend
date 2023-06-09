@@ -20,7 +20,7 @@ export class PostUsecases {
     body: string,
     author: User,
     toUserId?: string
-  ): Promise<Post> {
+  ): Promise<GetPostDto> {
     let postedTo: User | undefined
     if (toUserId) {
       try {
@@ -36,7 +36,8 @@ export class PostUsecases {
     })
     author.profile.incrementPostCount()
     await this.usersRepository.save(author)
-    return await this.postsRepository.savePost(post)
+    const savedPost = await this.postsRepository.savePost(post)
+    return GetPostDto.fromDomain(savedPost);
   }
 
   async getUserActivityFeed(userId: string, paginationOpts: IPaginationOptions): Promise<Pagination<GetPostDto>> {
