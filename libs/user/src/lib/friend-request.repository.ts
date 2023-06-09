@@ -43,12 +43,12 @@ export class FriendRequestRepository {
       relations: {
         from: {
           friends: true,
-          outgoingFriendRequests: true,
+          friendRequests: true,
 
         },
         to: {
           friends: true,
-          incomingFriendRequests : true,
+          friendRequests: true
         },
       }
     });
@@ -76,5 +76,6 @@ export class FriendRequestRepository {
 
   async delete(friendRequest: FriendRequest) {
     await this.friendRequestsRepository.remove(friendRequest);
+    DomainEvents.dispatchEventsForAggregate(friendRequest.id, this.publisher)
   }
 }

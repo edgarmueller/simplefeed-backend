@@ -15,8 +15,7 @@ export class User extends AggregateRoot {
 
   profile: Profile
   friends?: User[]
-  incomingFriendRequests?: FriendRequest[]
-  outgoingFriendRequests?: FriendRequest[]
+  friendRequests?: FriendRequest[]
 
   public static create(
     props: Omit<
@@ -46,15 +45,11 @@ export class User extends AggregateRoot {
   }
 
   sendFriendRequestTo(otherUser: User): FriendRequest {
-    //if (this.isFriend(otherUser) || this.hasSentFriendRequestTo(otherUser)) {
-    //  throw new Error("already friends or request has been sent");
-    //}
     const friendRequest = FriendRequest.create({ from: this, to: otherUser })
-    this.outgoingFriendRequests = [...this.sentFriendRequests, friendRequest]
-    otherUser.incomingFriendRequests = [
-      ...otherUser.receivedFriendRequests,
-      friendRequest,
-    ]
+    if (!this.friendRequests) {
+      this.friendRequests = []
+    }
+    this.friendRequests.push(friendRequest);
     return friendRequest
   }
 
@@ -73,22 +68,8 @@ export class User extends AggregateRoot {
     user.friends?.push(this)
   }
 
-  get sentFriendRequests() {
-    if (!this.outgoingFriendRequests) {
-      this.outgoingFriendRequests = []
-    }
-    return this.outgoingFriendRequests
-  }
-
-  get receivedFriendRequests() {
-    if (!this.incomingFriendRequests) {
-      this.incomingFriendRequests = []
-    }
-    return this.incomingFriendRequests
-  }
-
   unfriend(friend: User) {
-    this.friends = this.friends?.filter((friend) => friend.id !== friend.id)
+    this.friends = this.friends?.filter((f) => f.id !== friend.id)
     friend.friends = friend.friends?.filter((f) => f.id !== this.id)
   }
 }

@@ -1,5 +1,6 @@
 import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd'
-import { User, UserId } from './user'
+import { FriendRequestAccepted } from './events/friend-request-accepted.event'
+import { User } from './user'
 
 const PREFIX = 'frq'
 const createFriendRequestId = createId(PREFIX)
@@ -21,13 +22,14 @@ export class FriendRequest extends AggregateRoot {
 
   accept() {
     this.from.addFriend(this.to);
-    this.from.outgoingFriendRequests = this.from.outgoingFriendRequests?.filter(req => req.id !== this.id);
-    this.to.incomingFriendRequests = this.to.incomingFriendRequests?.filter(req => req.id !== this.id);
+    this.from.friendRequests = this.from.friendRequests?.filter(req => req.id !== this.id);
+    this.to.friendRequests = this.to.friendRequests?.filter(req => req.id !== this.id);
+    this.emitDomainEvent(new FriendRequestAccepted(this))
   }
 
   decline() {
-    this.from.outgoingFriendRequests = this.from.outgoingFriendRequests?.filter(req => req.id !== this.id);
-    this.to.incomingFriendRequests = this.to.incomingFriendRequests?.filter(req => req.id !== this.id);
+    this.from.friendRequests = this.from.friendRequests?.filter(req => req.id !== this.id);
+    this.to.friendRequests = this.to.friendRequests?.filter(req => req.id !== this.id);
   }
 
   cancel() {

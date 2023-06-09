@@ -22,13 +22,14 @@ export const FriendRequestSchema = new EntitySchema<FriendRequest>({
     from: {
       type: 'many-to-one',
       target: 'User',
-      inverseSide: 'outgoingFriendRequests',
+      inverseSide: 'friendRequests',
       joinColumn: { name: 'from_user_id' },
     },
     to: {
       type: 'many-to-one',
+      onDelete: 'CASCADE',
       target: 'User',
-      inverseSide: 'incomingFriendRequests',
+      inverseSide: 'friendRequests',
       joinColumn: { name: 'to_user_id' },
     },
   },

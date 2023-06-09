@@ -99,7 +99,7 @@ describe('comment api', () => {
   })
 
   describe("comment usecases", () => {
-    it.only("should allow commenting a post ", async () => {
+    it("should allow commenting a post ", async () => {
       await registerBart();
       await registerHomer();
       const bartToken = await login('bart@example.com', 'secret')

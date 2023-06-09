@@ -52,18 +52,22 @@ export const UserSchema = new EntitySchema<User>({
         },
       },
     },
-    incomingFriendRequests: {
-      type: 'one-to-many',
+    friendRequests: {
+      type: 'many-to-many',
       target: 'FriendRequest',
       inverseSide: 'to',
-    },
-    outgoingFriendRequests: {
-      type: 'one-to-many',
-      target: 'FriendRequest',
-      inverseSide: 'from',
-      // eager: true,
       cascade: true,
       onDelete: 'CASCADE',
+      joinTable: {
+        joinColumn: {
+          name: 'from_user_id',
+          referencedColumnName: 'id',
+        },
+        inverseJoinColumn: {
+          name: 'to_user_id',
+          referencedColumnName: 'id',
+        },
+      },
     },
     profile: {
       type: 'one-to-one',

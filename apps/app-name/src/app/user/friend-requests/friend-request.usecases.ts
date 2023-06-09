@@ -37,7 +37,7 @@ export class FriendRequestUsecases {
     } else {
       throw new ForbiddenException();
     }
-    await this.userRepository.saveMany([friendRequest.from, friendRequest.to]);
+    await this.friendRequestRepository.delete(friendRequest);
   }
 
   async confirmRequest(friendRequestId: string): Promise<void> {
@@ -46,6 +46,6 @@ export class FriendRequestUsecases {
       throw new Error('Friend request has not been sent');
     }
     foundRequest.accept();
-    await this.userRepository.saveMany([foundRequest.from, foundRequest.to]);
+    await this.friendRequestRepository.delete(foundRequest);
   }
 }

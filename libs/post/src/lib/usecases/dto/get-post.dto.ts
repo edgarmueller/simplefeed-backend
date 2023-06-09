@@ -9,8 +9,8 @@ export class GetPostDto {
 				id: post.author.id,
 			},
 			postedTo: {
-				...post.postedTo.profile,
-				id: post.postedTo.id,
+				...post.postedTo?.profile,
+				id: post.postedTo?.id,
 			}
 		}
 	}
