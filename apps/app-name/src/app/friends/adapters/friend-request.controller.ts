@@ -1,7 +1,7 @@
 import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth';
 import { Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
-import { FriendRequestUsecases } from "./friend-request.usecases";
-import { GetFriendRequestDto } from './get-friend-request.dto';
+import { FriendRequestUsecases } from "../usecases/friend-request.usecases";
+import { GetFriendRequestDto } from '../usecases/get-friend-request.dto';
 
 @Controller('friend-requests')
 export class FriendRequestsController {

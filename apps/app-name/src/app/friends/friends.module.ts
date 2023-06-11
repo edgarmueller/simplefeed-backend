@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from '../user/user.module';
-import { FriendsController } from './friends.controller';
-import { FriendUsecases } from './friends.usecases';
-import { FriendRequestAcceptedHandler } from './friend-request-accepted.event-handler';
+import { FriendRequestAcceptedHandler } from './event-handlers/friend-request-accepted.event-handler';
+import { FriendsController } from './adapters/friends.controller';
+import { FriendRequestsController } from './adapters/friend-request.controller';
+import { FriendUsecases } from './usecases/friends.usecases';
+import { FriendRequestUsecases } from './usecases/friend-request.usecases';
 
 @Module({
-	controllers: [FriendsController],
-	providers: [FriendUsecases, FriendRequestAcceptedHandler],
+	controllers: [FriendsController, FriendRequestsController],
+	providers: [FriendUsecases, FriendRequestUsecases, FriendRequestAcceptedHandler],
 	imports: [UserModule]
 })
 export class FriendsModule {

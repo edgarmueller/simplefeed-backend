@@ -8,7 +8,7 @@
   },
   "include": [
     "**/*.ts"
-  ],
+, "../../apps/app-name/src/app/infra/paginated-query.dto.ts", "../../apps/app-name/src/app/posts/post.controller.ts"  ],
   "exclude": [
     "jest.config.ts",
     "**/*.spec.ts",

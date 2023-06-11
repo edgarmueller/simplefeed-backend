@@ -11,13 +11,13 @@ import {
   UseGuards
 } from '@nestjs/common';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { CommentPostDto } from '../usecases/dto/comment-post.dto';
-import { GetCommentDto } from '../usecases/dto/get-comment.dto';
-import { SubmitPostDto } from '../usecases/dto/submit-post.dto';
-import { PostUsecases } from '../usecases/post.usecases';
-import { PaginatedQueryDto } from './paginated-query.dto';
-import { PaginatedQueryPipe } from './paginated-query.pipe';
-import { GetPostDto } from '../usecases/dto/get-post.dto';
+import { CommentPostDto } from '../../../../../libs/post/src/lib/usecases/dto/comment-post.dto';
+import { GetCommentDto } from '../../../../../libs/post/src/lib/usecases/dto/get-comment.dto';
+import { SubmitPostDto } from '../../../../../libs/post/src/lib/usecases/dto/submit-post.dto';
+import { PostUsecases } from '../../../../../libs/post/src/lib/usecases/post.usecases';
+import { PaginatedQueryDto } from '../infra/paginated-query.dto';
+import { GetPostDto } from '../../../../../libs/post/src/lib/usecases/dto/get-post.dto';
+import { PaginatedQueryPipe } from '../infra/paginated-query.pipe';
 
 @Controller('posts')
 export class PostController {
