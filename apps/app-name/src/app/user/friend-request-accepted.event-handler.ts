@@ -1,6 +1,6 @@
 import { UsersRepository } from "@kittgen/user";
 import { EventsHandler } from "@nestjs/cqrs";
-import { FriendRequestAccepted } from "../../../../../../libs/user/src/lib/events/friend-request-accepted.event";
+import { FriendRequestAccepted } from "../../../../../libs/user/src/lib/events/friend-request-accepted.event";
 
 @EventsHandler(FriendRequestAccepted)
 export class FriendRequestAcceptedHandler {

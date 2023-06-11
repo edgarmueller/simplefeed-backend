@@ -6,12 +6,13 @@ import { FriendRequestsController } from './friend-requests/friend-request.contr
 import { FriendRequestUsecases } from './friend-requests/friend-request.usecases';
 import { FriendsController } from './friends/friends.controller';
 import { FriendUsecases } from './friends/friends.usecases';
-import { FriendRequestAcceptedHandler } from './event-handler/friend-request-accepted.event-handler';
+import { FriendRequestAcceptedHandler } from './friend-request-accepted.event-handler';
+import { S3Module } from '../infra/s3/s3.module';
 
 @Module({
 	controllers: [UserController, FriendRequestsController, FriendsController],
 	providers: [UserUsecases, FriendRequestUsecases, FriendUsecases, FriendRequestAcceptedHandler],
-	imports: [UserCoreModule]
+	imports: [UserCoreModule, S3Module]
 })
 export class UserModule {
 

@@ -10,6 +10,7 @@ import {
   Controller,
   HttpCode,
   Logger,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -19,6 +20,7 @@ import { GetUserDto } from './dto/get-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { AuthUsecases } from './auth.usecases'
 import { GetTokenDto } from './dto/get-token.dto'
+import { UpdatePasswordDto } from './dto/update-password.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -80,5 +82,11 @@ export class AuthController {
     return {
       accessToken,
     }
+  }
+
+  @UseGuards(JwtRefreshGuard)
+  @Patch('update-password')
+  async updatePassword(@Req() request: RequestWithUser, @Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.authService.updatePassword(request.user, updatePasswordDto.password);
   }
 }

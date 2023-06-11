@@ -128,10 +128,15 @@ export class AuthService {
     return isRefreshTokenMatching
   }
 
-  async removeRefreshToken(userId: number) {
+  async removeRefreshToken(userId: string) {
     return this.refreshTokenRepository.update(userId, {
       token: null,
     })
+  }
+
+  async updatePassword(user: User, password: string) {
+    await user.updatePassword(password);
+    await this.userRepo.save(user)
   }
 
   private async verifyPassword(

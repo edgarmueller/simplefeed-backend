@@ -80,3 +80,19 @@ Some parts of realworld specs are slightly weird, but I've followed
   - `PUT` user has `PATCH` semantics actually
   - why is token part of the user entity?
  
+ ## Local infra (WIP)
+
+ To provide a s3 instance locally one can make use of [localstack](https://localstack.cloud/).
+
+ A short breakdown to get it working:
+
+- After installing and starting `localstack` create a new IAM user
+   `awslocal iam create-user --user-name test`
+- Create an access key: `awslocal iam create-access-key --user-name test`
+- Set env vars to update current user:
+  `setx AWS_ACCESS_KEY_ID <ACCESS_KEY>`
+  `setx AWS_SECRET_ACCESS_KEY <SECRET_KEY>`
+- You can verify the current user via `awslocal sts get-caller-identity`
+- Create a s3 bucket:
+  `awslocal s3api create-bucket --bucket simplefeed-avatar`
+

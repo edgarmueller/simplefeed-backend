@@ -45,4 +45,16 @@ export class Profile implements Entity {
     this.nrOfLikes--;
   }
 
+  updateAvatar(location: string) {
+    this.imageUrl = location;
+  }
+
+  updateProfile(updatedProps: Pick<Profile, 'firstName' | 'lastName'>) {
+    if (updatedProps.firstName) {
+      this.firstName = updatedProps.firstName;
+    }
+    if (updatedProps.lastName) {
+      this.lastName = updatedProps.lastName;
+    }
+  }
 }

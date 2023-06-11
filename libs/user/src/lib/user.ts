@@ -1,4 +1,5 @@
 import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd'
+import bcrypt from 'bcrypt'
 import { UserCreatedEvent } from './events/user-created.event'
 import { FriendRequest } from './friend-request'
 import { Profile } from './profile'
@@ -71,5 +72,18 @@ export class User extends AggregateRoot {
   unfriend(friend: User) {
     this.friends = this.friends?.filter((f) => f.id !== friend.id)
     friend.friends = friend.friends?.filter((f) => f.id !== this.id)
+  }
+
+  updateEmail(email: string) {
+    if (email) {
+      this.email = email;
+    }
+  }
+
+  async updatePassword(password: string) {
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10)
+      this.password = hashedPassword;
+    }
   }
 }

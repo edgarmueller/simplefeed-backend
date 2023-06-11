@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module';
 import { PostModule } from '@kittgen/post';
 import { authConfig } from '@kittgen/auth';
+import { S3Schema } from './infra/s3/s3.config';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { authConfig } from '@kittgen/auth';
       load: [authConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
-      )
+      ).keys(S3Schema)
     }),
     DatabaseModule,
     ScheduleModule.forRoot(),
