@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { PostModule } from '@kittgen/post';
 import { authConfig } from '@kittgen/auth';
 import { S3Schema } from './infra/s3/s3.config';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { S3Schema } from './infra/s3/s3.config';
     ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
+    FriendsModule,
     PostModule
   ],
   controllers: [AppController],
