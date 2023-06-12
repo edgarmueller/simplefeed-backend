@@ -6,7 +6,7 @@ import request from 'supertest'
 import { createConnection } from 'typeorm'
 import { AppModule } from './app.module'
 import { PostsRepository } from '@kittgen/post'
-import { GetFriendRequestDto } from './friend-requests/get-friend-request.dto'
+import { GetFriendRequestDto } from './friends/usecases/get-friend-request.dto'
 
 describe('friend request api', () => {
   let app: INestApplication
