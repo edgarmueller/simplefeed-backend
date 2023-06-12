@@ -46,7 +46,9 @@ export class Profile implements Entity {
   }
 
   updateAvatar(location: string) {
-    this.imageUrl = location;
+    if (location) {
+      this.imageUrl = location;
+    }
   }
 
   updateProfile(updatedProps: Pick<Profile, 'firstName' | 'lastName'>) {

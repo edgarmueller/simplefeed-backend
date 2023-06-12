@@ -7,16 +7,16 @@ import {
   NotFoundException,
   Param,
   Patch,
-  Post,
   Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import 'multer'
 import { GetMeDto } from '../auth/dto/get-me.dto'
 import { GetUserDto } from '../auth/dto/get-user.dto'
+import { FileSizeValidationPipe } from '../infra/file-size-validation.pipe'
 import { UpdateUserDto } from './update-user.dto'
 import { UserUsecases } from './user.usecases'
 
@@ -64,29 +64,15 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':userId')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image'))
   async updateUser(
     @Req() req: RequestWithUser,
     @Body() body: UpdateUserDto,
-    @UploadedFile(/*new FileSizeValidationPipe()*/) file: Express.Multer.File,
+    @UploadedFile(new FileSizeValidationPipe()) file: Express.Multer.File,
   ): Promise<GetMeDto> {
-    this.usecases.updateUserInfo(req.user, body.email, body.password, {
+    return await this.usecases.updateUserInfo(req.user, body.email, body.password, file?.buffer, file?.originalname, {
       firstName: body.firstName,
       lastName: body.lastName
     }) 
-    const user = await this.usecases.updateAvatar(file.buffer, req.user)
-    return GetMeDto.fromDomain(user)
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(
-    @UploadedFile(/*new FileSizeValidationPipe()*/) file: Express.Multer.File,
-    @Req() req: RequestWithUser
-  ): Promise<GetMeDto> {
-    console.log({ file })
-    const user = await this.usecases.updateAvatar(file.buffer, req.user)
-    return GetMeDto.fromDomain(user)
   }
 }

@@ -70,10 +70,13 @@ export class UserUsecases {
     return mutualFriends.map((friend) => friend.id)
   }
 
-  async updateAvatar(imageBuffer: Buffer, user: User) {
+  async updateAvatar(imageBuffer: Buffer, filename: string, user: User) {
+    if (!imageBuffer) {
+      return user;
+    }
     const uploadResult = await this.s3Service.uploadPublicFile(
       imageBuffer,
-      user.id
+      filename 
     )
     user.profile.updateAvatar(uploadResult.Location)
     return await this.userRepository.save(user)
@@ -83,11 +86,15 @@ export class UserUsecases {
     user: User,
     email?: string,
     password?: string,
+    imageBuffer?: Buffer,
+    filename?: string,
     updatedProfile?: Pick<Profile, 'firstName' | 'lastName'>
-  ) {
+  ): Promise<GetMeDto> {
     user.updateEmail(email)
     await user.updatePassword(password)
     user.profile.updateProfile(updatedProfile)
+    const me = await this.updateAvatar(imageBuffer, filename, user)
+    return GetMeDto.fromDomain(me);
   }
 
   // async updateUserInfo(user: User, updateUserDto: UpdateUserDto): Promise<User> {

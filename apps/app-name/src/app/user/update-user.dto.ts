@@ -17,4 +17,8 @@ export class UpdateUserDto {
 	@MinLength(8)
 	@IsOptional()
 	password?: string
+
+	@IsString()
+	@IsOptional()
+	image: string
 }
