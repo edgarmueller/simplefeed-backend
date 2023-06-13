@@ -2,7 +2,6 @@ import { UserModule } from '@kittgen/user';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostController } from '../../../../apps/app-name/src/app/posts/post.controller';
 import { CommentSchema } from './comment.schema';
 import { PostLikedEventHandler } from './event-handlers/post-liked.event-handler';
 import { LikeSchema } from './like.schema';
@@ -18,7 +17,7 @@ import { PostUnlikedEventHandler } from './event-handlers/post-unliked.event-han
 		TypeOrmModule.forFeature([PostSchema, CommentSchema, LikeSchema]),
 		CqrsModule
 	],
-	controllers: [PostController],
+	controllers: [],
 	providers: [PostsRepository, LikeRepository, PostUsecases, PostLikedEventHandler, PostUnlikedEventHandler],
 	exports: [PostsRepository, PostUsecases],
 })
