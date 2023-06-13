@@ -139,6 +139,13 @@ export class AuthService {
     await this.userRepo.save(user)
   }
 
+  async findOneUserByToken(token: string): Promise<User> {
+    const payload: TokenPayload = this.jwtService.verify(token);
+    if (payload.userId) {
+      return this.userRepo.findOneByIdOrFail(payload.userId);
+    }
+  }
+
   private async verifyPassword(
     plainTextPassword: string,
     hashedPassword: string

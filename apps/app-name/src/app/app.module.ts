@@ -12,6 +12,7 @@ import { authConfig } from '@kittgen/auth';
 import { S3Schema } from './infra/s3/s3.config';
 import { FriendsModule } from './friends/friends.module';
 import { PostModule } from './posts/post.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { PostModule } from './posts/post.module';
     AuthModule,
     UserModule,
     FriendsModule,
-    PostModule
+    PostModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [AppService],

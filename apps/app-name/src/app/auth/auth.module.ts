@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common'
-import { AuthConfigKeys, AuthModule as AuthCoreModule } from '@kittgen/auth'
+import { AuthModule as AuthCoreModule } from '@kittgen/auth'
 import { UserModule as UserCoreModule } from '@kittgen/user'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { AuthConfigFactory } from './auth.config.factory'
 import { AuthController } from './auth.controller'
 import { AuthUsecases } from './auth.usecases'
 
@@ -10,24 +11,7 @@ import { AuthUsecases } from './auth.usecases'
     UserCoreModule,
     AuthCoreModule.registerAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return {
-          useCookies: configService.get(AuthConfigKeys.UseCookies),
-          accessTokenSecret: configService.get(
-            AuthConfigKeys.AccessTokenSecret
-          ),
-          accessTokenExpirationInSeconds: configService.get(
-            AuthConfigKeys.AccessTokenExpirationInSeconds
-          ),
-          refreshTokenSecret: configService.get(
-            AuthConfigKeys.RefreshTokenSecret
-          ),
-          refreshTokenExpirationInSeconds: configService.get(
-            AuthConfigKeys.RefreshTokenExpirationInSeconds
-          ),
-        }
-      },
+      useClass: AuthConfigFactory
     }),
     ConfigModule,
   ],

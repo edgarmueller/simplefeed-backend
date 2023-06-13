@@ -14,6 +14,8 @@ import { JwtRefreshTokenStrategy as JwtRefreshStrategy } from './strategies/jwt-
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { LocalStrategy } from './strategies/local.strategy'
 import { PublicStrategy } from './strategies/public.strategy'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { AuthConfigKeys } from './auth.config'
 
 @Module({})
 export class AuthModule {
@@ -22,12 +24,16 @@ export class AuthModule {
     return {
       module: JwtModule,
       imports: [
-        ...options.imports,
+        ...(options?.imports || []),
         UserModule,
         PassportModule,
         TypeOrmModule.forFeature([RefreshToken]),
-        JwtModule.register({
-          secret: 'does-not-matter',
+        JwtModule.registerAsync({
+          imports: [ConfigModule],
+          inject: [ConfigService],
+          useFactory: (configService: ConfigService) => ({
+            secret: configService.get(AuthConfigKeys.AccessTokenSecret)
+          })
         }),
       ],
       providers: [
