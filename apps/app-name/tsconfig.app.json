@@ -8,5 +8,5 @@
     "target": "es2015"
   },
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"],
-  "include": ["**/*.ts", "../../libs/user/src/lib/friend-request.usecases.ts"]
+  "include": ["**/*.ts", "../../libs/user/src/lib/friend-request.usecases.ts", "../../libs/auth/src/lib/auth.usecases.ts", "../../libs/chat/src/lib/chat.usecases.ts", "../../libs/user/src/lib/user.usecases.ts", "../../libs/user/src/lib/friends.usecases.ts", "../../libs/s3/src/lib/s3.config.ts"]
 }

@@ -7,3 +7,8 @@ export { Profile } from "./lib/profile"
 export { FriendRequest } from "./lib/friend-request"
 export { FriendRequestRepository } from './lib/friend-request.repository'
 export { FriendRequestAccepted } from './lib/events/friend-request-accepted.event';
+export { UserUsecases } from './lib/user.usecases';
+export { FriendUsecases } from './lib/friends.usecases';
+export { GetMeDto } from './lib/dto/get-me.dto';
+export { GetUserDto } from './lib/dto/get-user.dto';
+export { GetFriendRequestDto } from './lib/dto/get-friend-request.dto';

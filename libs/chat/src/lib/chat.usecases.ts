@@ -1,6 +1,9 @@
-import { Conversation, ConversationRepository, Message } from '@kittgen/chat';
 import { UsersRepository } from '@kittgen/user';
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { ConversationRepository } from './conversation.repository';
+import { Conversation } from './conversation';
+import { Message } from './message';
+import { GetConversationDto } from '../../../../apps/app-name/src/app/chat/dto/get-conversation.dto';
 
 @Injectable()
 export class ChatUsecases {
@@ -38,5 +41,10 @@ export class ChatUsecases {
       throw new ForbiddenException()
     }
     return converation
+  }
+
+  async findConversationsByUserId(userId: string): Promise<GetConversationDto[]> {
+    const conversations = await this.conversationsRepo.findByUserId(userId);
+    return conversations.map(GetConversationDto.fromDomain);
   }
 }

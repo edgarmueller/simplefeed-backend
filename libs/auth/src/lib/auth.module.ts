@@ -16,6 +16,7 @@ import { LocalStrategy } from './strategies/local.strategy'
 import { PublicStrategy } from './strategies/public.strategy'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthConfigKeys } from './auth.config'
+import { AuthUsecases } from './auth.usecases'
 
 @Module({})
 export class AuthModule {
@@ -43,8 +44,9 @@ export class AuthModule {
         JwtStrategy,
         JwtRefreshStrategy,
         PublicStrategy,
+        AuthUsecases
       ],
-      exports: [AuthService],
+      exports: [AuthService, AuthUsecases],
     }
   }
 

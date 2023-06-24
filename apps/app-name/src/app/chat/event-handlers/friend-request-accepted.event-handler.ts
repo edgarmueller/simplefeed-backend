@@ -1,6 +1,6 @@
 import { EventsHandler } from "@nestjs/cqrs";
 import { FriendRequestAccepted } from "@kittgen/user";
-import { ChatUsecases } from "../chat.usecases";
+import { ChatUsecases } from "@kittgen/chat";
 
 @EventsHandler(FriendRequestAccepted)
 export class FriendRequestAcceptedEventHandler {

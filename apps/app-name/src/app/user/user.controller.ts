@@ -1,5 +1,5 @@
 import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
-import { UserNotFoundError } from '@kittgen/user'
+import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@kittgen/user'
 import {
   Body,
   Controller,
@@ -16,9 +16,6 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import 'multer'
 import { FileSizeValidationPipe } from '../infra/file-size-validation.pipe'
 import { UpdateUserDto } from './update-user.dto'
-import { UserUsecases } from './user.usecases'
-import { GetMeDto } from './dto/get-me.dto'
-import { GetUserDto } from './dto/get-user.dto'
 
 @Controller('users')
 export class UserController {

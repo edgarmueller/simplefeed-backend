@@ -1,5 +1,6 @@
 import {
   AuthService,
+  AuthUsecases,
   JwtRefreshGuard,
   LocalAuthGuard,
   RequestWithUser,
@@ -18,7 +19,6 @@ import {
 import { Profile, User, UserAlreadyExistsError } from '@kittgen/user'
 import { GetUserDto } from './dto/get-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
-import { AuthUsecases } from './auth.usecases'
 import { GetTokenDto } from './dto/get-token.dto'
 import { UpdatePasswordDto } from './dto/update-password.dto'
 

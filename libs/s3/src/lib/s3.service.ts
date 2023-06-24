@@ -11,6 +11,7 @@ export class S3Service {
  
   async uploadPublicFile(dataBuffer: Buffer, filename: string) {
     const s3 = new S3({
+      // TODO
       endpoint: {
         host: 'localhost:4566',
         href: 'http://localhost:4566',

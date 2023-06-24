@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { S3Module, S3Schema } from '@kittgen/s3';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import Joi from 'joi';
@@ -9,7 +10,6 @@ import { DatabaseConfigSchema } from './infra/database/database.config';
 import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module';
 import { authConfig } from '@kittgen/auth';
-import { S3Schema } from './infra/s3/s3.config';
 import { FriendsModule } from './friends/friends.module';
 import { PostModule } from './posts/post.module';
 import { ChatModule } from './chat/chat.module';
@@ -29,7 +29,8 @@ import { ChatModule } from './chat/chat.module';
     UserModule,
     FriendsModule,
     PostModule,
-    ChatModule
+    ChatModule,
+    // S3Module
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,10 +1,12 @@
-import { FriendRequestRepository, FriendRequest, User, UsersRepository } from '@kittgen/user';
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common'
-import { GetFriendRequestDto } from './get-friend-request.dto';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { UsersRepository } from './user.repository';
+import { FriendRequestRepository } from './friend-request.repository';
+import { User } from './user';
+import { GetFriendRequestDto } from './dto/get-friend-request.dto';
 
 @Injectable()
-export class FriendRequestUsecases {
-  private logger = new Logger(FriendRequestUsecases.name)
+export class FriendUsecases {
+  private logger = new Logger(FriendUsecases.name)
 
   constructor(
 		private readonly userRepository: UsersRepository,
@@ -48,5 +50,14 @@ export class FriendRequestUsecases {
     foundRequest.accept();
     await this.friendRequestRepository.delete(foundRequest);
     await this.userRepository.saveMany([foundRequest.from, foundRequest.to]);
+  }
+
+  async removeFriend(userId: string, friendId: string): Promise<void> {
+    const user = await this.userRepository.findOneByIdWithFriendsOrFail(userId)
+    const friend = await this.userRepository.findOneByIdWithFriendsOrFail(
+      friendId
+    )
+    user.unfriend(friend)
+    await this.userRepository.saveMany([user, friend])
   }
 }

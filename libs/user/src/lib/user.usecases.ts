@@ -1,7 +1,9 @@
-import { Profile, User, UsersRepository } from '@kittgen/user'
-import { ConversationRepository } from '@kittgen/chat'
+// import { ConversationRepository } from '@kittgen/chat'
 import { Injectable, Logger } from '@nestjs/common'
-import { S3Service } from '../infra/s3/s3.service'
+import { S3Service } from '@kittgen/s3'
+import { UsersRepository } from './user.repository'
+import { User } from './user'
+import { Profile } from './profile'
 import { GetMeDto } from './dto/get-me.dto'
 import { GetUserDto } from './dto/get-user.dto'
 
@@ -11,7 +13,7 @@ export class UserUsecases {
 
   constructor(
     private readonly userRepository: UsersRepository,
-    private readonly conversationRepository: ConversationRepository,
+    // private readonly conversationRepository: ConversationRepository,
     private s3Service: S3Service
   ) {}
 
@@ -60,8 +62,8 @@ export class UserUsecases {
     const user = await this.userRepository.findOneByIdWithFriendsOrFail(
       requestingUser.id
     )
-    const conversations = await this.conversationRepository.findByUserId(user.id)
-    return GetMeDto.fromDomain(user).withConversations(conversations)
+    // const conversations = await this.conversationRepository.findByUserId(user.id)
+    return GetMeDto.fromDomain(user)//.withConversations(conversations)
   }
 
   async getMutualFriends(user: User, otherUser: User): Promise<string[]> {

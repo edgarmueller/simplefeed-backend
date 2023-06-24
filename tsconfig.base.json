@@ -20,6 +20,7 @@
       "@kittgen/auth": ["libs/auth/src/index.ts"],
       "@kittgen/chat": ["libs/chat/src/index.ts"],
       "@kittgen/post": ["libs/post/src/index.ts"],
+      "@kittgen/s3": ["libs/s3/src/index.ts"],
       "@kittgen/shared-ddd": ["libs/shared-ddd/src/index.ts"],
       "@kittgen/user": ["libs/user/src/index.ts"]
     }

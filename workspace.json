@@ -129,6 +129,7 @@
       "tags": [],
       "configFilePath": "libs/post/project.json"
     },
+    "s3": "libs/s3",
     "schematics": {
       "root": "libs/schematics",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",

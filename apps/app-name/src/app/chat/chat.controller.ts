@@ -1,18 +1,18 @@
-import { RequestWithUser } from './../../../../../libs/schematics/src/auth/templates/lib/interfaces/request-with-user.interface';
+import { JwtAuthGuard, RequestWithUser   } from '@kittgen/auth';
+import { ChatUsecases } from '@kittgen/chat';
 import { Controller, Get, Req, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "../../../../../libs/auth/src";
-import { ConversationRepository } from "../../../../../libs/chat/src/lib/conversation.repository";
+import { GetConversationDto } from './dto/get-conversation.dto';
 
 @Controller('chat')
 export class ChatController {
 
-	constructor(readonly conversationRepository: ConversationRepository) {
+	constructor(readonly usecases: ChatUsecases) {
 
 	}
 
 	@Get()
 	@UseGuards(JwtAuthGuard)
-	async getConversatios(@Req() req: RequestWithUser) {
-		return this.conversationRepository.findByUserId(req.user.id);
+	async getConversations(@Req() req: RequestWithUser): Promise<GetConversationDto[]> {
+		return this.usecases.findConversationsByUserId(req.user.id);
 	}
 }
