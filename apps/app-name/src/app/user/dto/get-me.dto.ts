@@ -1,6 +1,9 @@
 import { User } from '@kittgen/user'
+import { GetUserDto } from './get-user.dto'
+import { GetConversationDto } from '../../chat/dto/get-conversation.dto'
+import { Conversation } from '@kittgen/chat'
 
-export class GetUserDto {
+export class GetMeDto {
   id: string
   email: string
   username: string
@@ -11,9 +14,10 @@ export class GetUserDto {
   nrOfLikes?: number
   nrOfPosts?: number
   friends: GetUserDto[]
+  conversations: GetConversationDto[]
 
-  static fromDomain(user: User): GetUserDto {
-    return new GetUserDto({
+  static fromDomain(user: User): GetMeDto {
+    return new GetMeDto({
       id: user.id,
       email: user.email,
       username: user.profile.username,
@@ -29,5 +33,10 @@ export class GetUserDto {
 
   constructor(props: Partial<GetUserDto>) {
     Object.assign(this, props)
+  }
+
+  withConversations(conversations: Conversation[]): GetMeDto {
+    this.conversations = conversations.map(GetConversationDto.fromDomain)
+    return this;
   }
 }

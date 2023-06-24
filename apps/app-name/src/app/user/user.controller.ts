@@ -14,11 +14,11 @@ import {
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import 'multer'
-import { GetMeDto } from '../auth/dto/get-me.dto'
-import { GetUserDto } from '../auth/dto/get-user.dto'
 import { FileSizeValidationPipe } from '../infra/file-size-validation.pipe'
 import { UpdateUserDto } from './update-user.dto'
 import { UserUsecases } from './user.usecases'
+import { GetMeDto } from './dto/get-me.dto'
+import { GetUserDto } from './dto/get-user.dto'
 
 @Controller('users')
 export class UserController {
@@ -53,7 +53,8 @@ export class UserController {
     @Req() req: RequestWithUser
   ): Promise<GetUserDto[]> {
     try {
-      return await this.usecases.getFriendsOfUser(username)
+      const friends = await this.usecases.getFriendsOfUser(username)
+      return friends
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         throw new NotFoundException()
