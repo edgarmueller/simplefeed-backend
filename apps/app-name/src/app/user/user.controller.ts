@@ -44,23 +44,6 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':username/friends')
-  async getFriends(
-    @Param('username') username: string,
-    @Req() req: RequestWithUser
-  ): Promise<GetUserDto[]> {
-    try {
-      const friends = await this.usecases.getFriendsOfUser(username)
-      return friends
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        throw new NotFoundException()
-      }
-      throw error
-    }
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Patch(':userId')
   @UseInterceptors(FileInterceptor('image'))
   async updateUser(
