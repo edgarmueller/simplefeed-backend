@@ -47,5 +47,6 @@ export class FriendRequestUsecases {
     }
     foundRequest.accept();
     await this.friendRequestRepository.delete(foundRequest);
+    await this.userRepository.saveMany([foundRequest.from, foundRequest.to]);
   }
 }
