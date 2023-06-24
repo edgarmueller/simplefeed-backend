@@ -5,18 +5,14 @@ export const MessageSchema = new EntitySchema<Message>({
   name: 'Message',
   columns: {
     id: {
-      type: Number,
+      type: String,
       primary: true,
-      generated: true,
     },
     content: {
       type: String,
       nullable: false,
     },
-    sender: {
-      type: String,
-    },
-    recipient: {
+    authorId: {
       type: String,
     },
     createdAt: {

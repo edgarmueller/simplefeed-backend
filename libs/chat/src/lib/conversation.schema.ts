@@ -1,6 +1,5 @@
 import { EntitySchema } from 'typeorm'
 import { Conversation } from './conversation'
-import { Message } from './message'
 
 export const ConversationSchema = new EntitySchema<Conversation>({
   target: Conversation,
@@ -24,17 +23,16 @@ export const ConversationSchema = new EntitySchema<Conversation>({
       nullable: true,
       deleteDate: true,
     },
+    userIds: {
+      name: 'user_ids',
+      type: 'jsonb',
+    }
   },
   relations: {
     messages: {
       type: 'one-to-many',
       target: 'Message',
       inverseSide: 'conversation',
-    },
-    participants: {
-      type: 'many-to-many',
-      target: 'User',
-      joinTable: true,
     },
   },
 })

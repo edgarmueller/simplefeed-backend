@@ -6,3 +6,4 @@ export { UserModule } from './lib/user.module'
 export { Profile } from "./lib/profile" 
 export { FriendRequest } from "./lib/friend-request"
 export { FriendRequestRepository } from './lib/friend-request.repository'
+export { FriendRequestAccepted } from './lib/events/friend-request-accepted.event';
