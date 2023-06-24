@@ -140,7 +140,7 @@ export class AuthService {
   }
 
   async findOneUserByToken(token: string): Promise<User> {
-    const payload: TokenPayload = this.jwtService.verify(token);
+    const payload: TokenPayload = this.jwtService.verify(token.replace('Bearer', '').trim(), { secret: this.options.accessTokenSecret });
     if (payload.userId) {
       return this.userRepo.findOneByIdOrFail(payload.userId);
     }
