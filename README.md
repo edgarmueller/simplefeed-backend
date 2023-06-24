@@ -90,7 +90,7 @@ Some parts of realworld specs are slightly weird, but I've followed
    `awslocal iam create-user --user-name test`
 - Create an access key: `awslocal iam create-access-key --user-name test`
 - Set env vars to update current user:
-  `setx AWS_ACCESS_KEY_ID <ACCESS_KEY>`
+  `setx AWS_ACCESS_KEY_ID <ACCESS_KEY>` or `export AWS_ACCESS_KEY_ID=<ACCESS_KEY>`
   `setx AWS_SECRET_ACCESS_KEY <SECRET_KEY>`
 - You can verify the current user via `awslocal sts get-caller-identity`
 - Create a s3 bucket:
