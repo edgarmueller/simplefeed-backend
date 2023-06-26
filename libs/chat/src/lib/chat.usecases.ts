@@ -29,7 +29,6 @@ export class ChatUsecases {
   }
 
   async addMessageToConversation(conversation: Conversation, message: Message) {
-    console.log('saving message', message);
     conversation.addMessage(message)
     return await this.conversationsRepo.saveMessage(message)
   }
@@ -45,6 +44,11 @@ export class ChatUsecases {
 
   async findConversationsByUserId(userId: string): Promise<GetConversationDto[]> {
     const conversations = await this.conversationsRepo.findByUserId(userId);
+    return conversations.map(GetConversationDto.fromDomain);
+  }
+
+  async findConversationsByUserIdWithmessage(userId: string): Promise<GetConversationDto[]> {
+    const conversations = await this.conversationsRepo.findByUserIdWithMessages(userId);
     return conversations.map(GetConversationDto.fromDomain);
   }
 }

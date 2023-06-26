@@ -1,4 +1,4 @@
-import { Conversation } from '../../../../../../libs/chat/src/lib/conversation';
+import { Conversation } from '@kittgen/chat';
 import { GetMessageDto } from './get-message.dto';
 export class GetConversationDto {
 
@@ -11,7 +11,6 @@ export class GetConversationDto {
 	}
 
 	static fromDomain(conversation: Conversation): GetConversationDto {
-		console.log('conversation', conversation)
 		return new GetConversationDto({
 			id: conversation.id,
 			participantIds: conversation.userIds.map((participantId) => participantId),

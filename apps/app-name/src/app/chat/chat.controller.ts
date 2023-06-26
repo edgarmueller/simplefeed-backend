@@ -13,6 +13,6 @@ export class ChatController {
 	@Get()
 	@UseGuards(JwtAuthGuard)
 	async getConversations(@Req() req: RequestWithUser): Promise<GetConversationDto[]> {
-		return this.usecases.findConversationsByUserId(req.user.id);
+		return this.usecases.findConversationsByUserIdWithmessage(req.user.id);
 	}
 }

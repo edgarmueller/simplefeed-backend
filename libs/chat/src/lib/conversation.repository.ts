@@ -20,6 +20,7 @@ export class ConversationRepository {
 
   @Transactional()
   async saveConversation(conversation: Conversation): Promise<Conversation> {
+    conversation.userIds.sort();
     const savedPost = await this.conversationRepository.save(conversation)
     DomainEvents.dispatchEventsForAggregate(conversation.id, this.publisher)
     return savedPost
@@ -42,6 +43,14 @@ export class ConversationRepository {
 
 	findByUserId(userId: string) {
     return this.conversationRepository.createQueryBuilder('conversation')
+      .where('user_ids::jsonb @> :userId', {
+        userId: `["${userId}"]`
+    }).getMany();
+	}
+
+	findByUserIdWithMessages(userId: string) {
+    return this.conversationRepository.createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.messages', 'message', 'message.deleted_at IS NULL AND message.conversationId = conversation.id')
       .where('user_ids::jsonb @> :userId', {
         userId: `["${userId}"]`
     }).getMany();

@@ -66,7 +66,6 @@ export class ChatGateway implements OnGatewayConnection {
           conversationId: body.conversationId,
         })
       )
-      console.log('saved message', msg)
       // push into usecase, or use events?
       this.server.sockets.emit('receive_message', GetMessageDto.fromDomain(msg))
     } catch (error) {
