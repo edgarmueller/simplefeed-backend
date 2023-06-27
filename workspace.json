@@ -93,7 +93,7 @@
       "configFilePath": "libs/auth/project.json"
     },
     "chat": "libs/chat",
-    "elastic": "libs/elastic",
+    "search": "libs/search",
     "post": {
       "root": "libs/post",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",

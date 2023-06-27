@@ -1,4 +1,4 @@
-import { ElasticModule, elasticConfig } from '@kittgen/elastic';
+import { SearchModule, searchConfig } from '@simplefeed/search';
 import { S3Module, S3Schema, s3Config } from '@kittgen/s3';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -19,7 +19,7 @@ import { UserModule } from './user/user.module';
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env.development.local', '.env.local'],
-      load: [authConfig, s3Config, elasticConfig],
+      load: [authConfig, s3Config, searchConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
       ).keys(S3Schema)
@@ -45,13 +45,13 @@ import { UserModule } from './user/user.module';
         protocol: configService.get('s3.protocol'),
       }),
     }),
-    ElasticModule.registerAsync({
+    SearchModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        node: configService.get('elastic.node'),
-        username: configService.get('elastic.username'),
-      	password: configService.get('elastic.password'),
+        node: configService.get('search.node'),
+        username: configService.get('search.username'),
+      	password: configService.get('search.password'),
       })
     })
   ],
