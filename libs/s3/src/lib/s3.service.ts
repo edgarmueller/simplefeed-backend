@@ -13,11 +13,11 @@ export class S3Service {
     const s3 = new S3({
       // TODO
       endpoint: {
-        host: 'localhost:4566',
-        href: 'http://localhost:4566',
-        port: 4566,
-        hostname: 'localhost',
-        protocol: 'http:'
+        host:  this.configService.get('s3.host'),
+        href: this.configService.get('s3.href'),
+        port: this.configService.get('s3.port'),
+        hostname: this.configService.get('s3.hostname'),
+        protocol: this.configService.get('s3.protocol'),
       },
       s3ForcePathStyle: true
     });

@@ -1,8 +1,4 @@
-import { Module } from '@nestjs/common'
-
-@Module({
-  controllers: [],
-  providers: [],
-  exports: [],
-})
-export class ElasticModule {}
+import { Module } from '@nestjs/common';
+import { ConfigurableModuleClass } from './elastic.module-definition'
+@Module({})
+export class ElasticModule extends ConfigurableModuleClass {}
