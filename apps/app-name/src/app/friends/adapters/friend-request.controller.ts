@@ -1,6 +1,6 @@
-import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth';
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
 import { Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
-import { FriendUsecases, GetFriendRequestDto } from '@kittgen/user';
+import { FriendUsecases, GetFriendRequestDto } from '@simplefeed/user';
 
 @Controller('friend-requests')
 export class FriendRequestsController {

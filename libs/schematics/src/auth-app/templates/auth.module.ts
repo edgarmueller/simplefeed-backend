@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-import { AuthConfigKeys, AuthModule as AuthCoreModule } from '@kittgen/auth'
-import { UserModule as UserCoreModule } from '@kittgen/user'
+import { AuthConfigKeys, AuthModule as AuthCoreModule } from '@simplefeed/auth'
+import { UserModule as UserCoreModule } from '@simplefeed/user'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthController } from './auth.controller'
 import { AuthUsecases } from './auth.usecases'

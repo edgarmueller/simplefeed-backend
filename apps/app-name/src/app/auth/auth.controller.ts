@@ -4,7 +4,7 @@ import {
   JwtRefreshGuard,
   LocalAuthGuard,
   RequestWithUser,
-} from '@kittgen/auth'
+} from '@simplefeed/auth'
 import {
   Body,
   ConflictException,
@@ -16,7 +16,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
-import { Profile, User, UserAlreadyExistsError } from '@kittgen/user'
+import { Profile, User, UserAlreadyExistsError } from '@simplefeed/user'
 import { GetUserDto } from './dto/get-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { GetTokenDto } from './dto/get-token.dto'

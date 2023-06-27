@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { PostModule as PostCoreModule } from '@kittgen/post'
+import { PostModule as PostCoreModule } from '@simplefeed/post'
 import { PostController } from './post.controller'
 
 @Module({

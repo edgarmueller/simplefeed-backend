@@ -1,4 +1,4 @@
-import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth';
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
 import {
   Body,
   Controller,

@@ -1,5 +1,5 @@
-import { JwtAuthGuard, RequestWithUser   } from '@kittgen/auth';
-import { ChatUsecases } from '@kittgen/chat';
+import { JwtAuthGuard, RequestWithUser   } from '@simplefeed/auth';
+import { ChatUsecases } from '@simplefeed/chat';
 import { Controller, Get, Req, UseGuards } from "@nestjs/common";
 import { GetConversationDto } from './dto/get-conversation.dto';
 

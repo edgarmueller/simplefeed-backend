@@ -1,5 +1,5 @@
-import { AuthModule as AuthCoreModule } from "@kittgen/auth";
-import { ChatModule as ChatCoreModule } from "@kittgen/chat";
+import { AuthModule as AuthCoreModule } from "@simplefeed/auth";
+import { ChatModule as ChatCoreModule } from "@simplefeed/chat";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthConfigFactory } from "../auth/auth.config.factory";

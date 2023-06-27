@@ -1,4 +1,4 @@
-import { User, UsersRepository } from '@kittgen/user';
+import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { Comment } from '../comment';

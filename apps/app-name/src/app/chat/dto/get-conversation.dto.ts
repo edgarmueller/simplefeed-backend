@@ -1,4 +1,4 @@
-import { Conversation } from '@kittgen/chat';
+import { Conversation } from '@simplefeed/chat';
 import { GetMessageDto } from './get-message.dto';
 export class GetConversationDto {
 

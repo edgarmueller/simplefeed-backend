@@ -1,6 +1,4 @@
-import { User } from '@kittgen/user'
-import { Conversation } from '@kittgen/chat'
-import { GetMeDto } from './get-me.dto'
+import { User } from '@simplefeed/user'
 
 export class GetUserDto {
   id: string

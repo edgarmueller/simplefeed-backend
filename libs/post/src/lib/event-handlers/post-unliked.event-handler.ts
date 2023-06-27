@@ -1,5 +1,5 @@
 import { EventsHandler } from "@nestjs/cqrs";
-import { UsersRepository } from "@kittgen/user";
+import { UsersRepository } from "@simplefeed/user";
 import { PostUnlikedEvent } from "../events/post-unliked.event";
 import { LikeRepository } from "../like.repository";
 

@@ -1,4 +1,4 @@
-import { User } from '@kittgen/user'
+import { User } from '@simplefeed/user'
 import { GetUserDto } from './get-user.dto'
 
 export class GetMeDto {

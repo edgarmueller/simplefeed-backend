@@ -1,4 +1,4 @@
-import { Message} from "@kittgen/chat"
+import { Message} from "@simplefeed/chat"
 
 export class GetMessageDto {
 		constructor(props) {

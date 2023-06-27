@@ -1,5 +1,5 @@
 import { IDomainEvent } from '@kittgen/shared-ddd';
-import { User } from '@kittgen/user';
+import { User } from '@simplefeed/user';
 import { Post } from '../post';
 import { Like } from '../like';
 

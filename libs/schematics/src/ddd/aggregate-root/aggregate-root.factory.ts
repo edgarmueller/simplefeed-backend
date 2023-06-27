@@ -79,7 +79,7 @@ export function main(options: AggregateRootOptions): Rule {
             `${options.path}/lib/${options.name.toLowerCase()}.module.ts`
           ),
           name: `${classify(options.name)}Module`,
-          path: `@kittgen/${options.name.toLowerCase()}`,
+          path: `@simplefeed/${options.name.toLowerCase()}`,
           metadata: 'imports',
         }),
       ])

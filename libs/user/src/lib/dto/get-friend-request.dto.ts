@@ -1,4 +1,4 @@
-import { FriendRequest } from "@kittgen/user";
+import { FriendRequest } from "@simplefeed/user";
 
 export class GetFriendRequestDto {
 	id: string;

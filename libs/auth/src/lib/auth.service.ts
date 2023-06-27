@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { User, UsersRepository } from '@kittgen/user'
+import { User, UsersRepository } from '@simplefeed/user'
 import { JwtService } from '@nestjs/jwt'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'

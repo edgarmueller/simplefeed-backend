@@ -2,7 +2,7 @@ import { DynamicModule, Module, Provider } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { UserModule } from '@kittgen/user'
+import { UserModule } from '@simplefeed/user'
 import { AUTH_MODULE_OPTIONS } from './auth.constants'
 import { AuthService } from './auth.service'
 import {

@@ -9,7 +9,7 @@ import { DatabaseModule } from './infra/database/database.module';
 import { DatabaseConfigSchema } from './infra/database/database.config';
 import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module';
-import { authConfig } from '@kittgen/auth';
+import { authConfig } from '@simplefeed/auth';
 import { FriendsModule } from './friends/friends.module';
 import { PostModule } from './posts/post.module';
 import { ChatModule } from './chat/chat.module';

@@ -1,4 +1,4 @@
-import { User } from '@kittgen/user'
+import { User } from '@simplefeed/user'
 
 export class GetUserDto {
   email: string

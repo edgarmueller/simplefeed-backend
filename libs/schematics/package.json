@@ -1,5 +1,5 @@
 {
-  "name": "@kittgen/schematics",
+  "name": "@simplefeed/schematics",
   "version": "0.0.1",
   "schematics": "./collection.json",
   "scripts": {

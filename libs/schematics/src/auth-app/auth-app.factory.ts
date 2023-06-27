@@ -59,7 +59,7 @@ function collectRules(tree: Tree, _options: AuthAppOptions): Rule[] {
   // 	addDeclarationToAggregateRootModule(
   // 		`${ws.projects.app.sourceRoot!}/app/auth`,
   // 		{
-  // 			path: '@kittgen/auth' as Path,
+  // 			path: '@simplefeed/auth' as Path,
   // 			metadata: 'imports',
   // 			name: 'AuthModule',
   // 			alias: 'AuthCoreModule'

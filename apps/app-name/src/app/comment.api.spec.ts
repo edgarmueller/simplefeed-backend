@@ -1,11 +1,11 @@
 import { initializeTransactionalContext } from 'typeorm-transactional'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { UserNotFoundError, UsersRepository } from '@kittgen/user'
+import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
 import request from 'supertest'
 import { createConnection } from 'typeorm'
 import { AppModule } from './app.module'
-import { PostsRepository } from '@kittgen/post'
+import { PostsRepository } from '@simplefeed/post'
 
 describe('comment api', () => {
   let app: INestApplication

@@ -1,4 +1,4 @@
-import { UserModule } from '@kittgen/user';
+import { UserModule } from '@simplefeed/user';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';

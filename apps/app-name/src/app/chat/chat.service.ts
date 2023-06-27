@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { AuthService } from '@kittgen/auth'
+import { AuthService } from '@simplefeed/auth'
 import { Socket } from 'socket.io'
 import { WsException } from '@nestjs/websockets'
 

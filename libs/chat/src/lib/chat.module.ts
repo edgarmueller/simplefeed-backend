@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { UserModule } from '@kittgen/user'
+import { UserModule } from '@simplefeed/user'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConversationSchema } from './conversation.schema'
 import { CqrsModule } from '@nestjs/cqrs'

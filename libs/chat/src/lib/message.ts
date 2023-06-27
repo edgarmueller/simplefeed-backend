@@ -1,5 +1,5 @@
 import { Entity, Props, createId } from "@kittgen/shared-ddd";
-import { User } from "@kittgen/user";
+import { User } from "@simplefeed/user";
 import { Conversation } from "./conversation";
 import { MessageAddedEvent } from "./events/message-added.event";
 

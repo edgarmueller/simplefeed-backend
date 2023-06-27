@@ -1,12 +1,11 @@
-import { UserModule as UserCoreModule, UserUsecases } from '@kittgen/user';
+import { UserModule as UserCoreModule, UserUsecases } from '@simplefeed/user';
 import { Module } from '@nestjs/common';
-import { ChatModule } from '@kittgen/chat';
 import { UserController } from './user.controller';
 
 @Module({
 	controllers: [UserController],
 	providers: [UserUsecases],
-	imports: [UserCoreModule, ChatModule],
+	imports: [UserCoreModule],
 	exports: [UserCoreModule]
 })
 export class UserModule {

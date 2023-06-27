@@ -1,4 +1,4 @@
-import { UsersRepository, UserNotFoundError } from '@kittgen/user'
+import { UsersRepository, UserNotFoundError } from '@simplefeed/user'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { PassportStrategy } from '@nestjs/passport'
 import {

@@ -1,4 +1,4 @@
-import { User } from '@kittgen/user';
+import { User } from '@simplefeed/user';
 import { Entity, Props, createId } from '@kittgen/shared-ddd';
 
 import { Post } from "./post" 

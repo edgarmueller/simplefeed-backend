@@ -1,5 +1,5 @@
-import { JwtAuthGuard, RequestWithUser } from '@kittgen/auth'
-import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@kittgen/user'
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
+import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user'
 import {
   Body,
   Controller,

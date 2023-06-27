@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { AuthConfigKeys, AuthOptionsFactory } from '@kittgen/auth'
-import { AuthModuleOptions } from '@kittgen/auth'
+import { AuthConfigKeys, AuthOptionsFactory } from '@simplefeed/auth'
+import { AuthModuleOptions } from '@simplefeed/auth'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()

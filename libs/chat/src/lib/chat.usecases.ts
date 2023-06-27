@@ -1,4 +1,4 @@
-import { UsersRepository } from '@kittgen/user';
+import { UsersRepository } from '@simplefeed/user';
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ConversationRepository } from './conversation.repository';
 import { Conversation } from './conversation';
