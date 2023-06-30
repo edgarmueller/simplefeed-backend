@@ -1,7 +1,5 @@
 import { Entity, Props, createId } from "@kittgen/shared-ddd";
-import { User } from "@simplefeed/user";
 import { Conversation } from "./conversation";
-import { MessageAddedEvent } from "./events/message-added.event";
 
 const PREFIX = 'msg'
 export type MessageId = string
@@ -11,7 +9,9 @@ export class Message implements Entity {
   conversation?: Conversation
   conversationId: string
   authorId: string 
-  content: string;
+  recipientId: string
+  isRead: boolean
+  content: string
   createdAt?: Date 
   // sentAt?: Date 
   deletedAt?: Date 

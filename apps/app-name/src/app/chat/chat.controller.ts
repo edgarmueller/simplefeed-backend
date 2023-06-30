@@ -1,7 +1,6 @@
 import { JwtAuthGuard, RequestWithUser   } from '@simplefeed/auth';
-import { ChatUsecases } from '@simplefeed/chat';
+import { ChatUsecases, GetConversationDto, GetMessageDto } from '@simplefeed/chat';
 import { Controller, Get, Req, UseGuards } from "@nestjs/common";
-import { GetConversationDto } from './dto/get-conversation.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -14,5 +13,11 @@ export class ChatController {
 	@UseGuards(JwtAuthGuard)
 	async getConversations(@Req() req: RequestWithUser): Promise<GetConversationDto[]> {
 		return this.usecases.findConversationsByUserIdWithmessage(req.user.id);
+	}
+
+	@Get('unread')
+	@UseGuards(JwtAuthGuard)
+	async getUnreadMessages(@Req() req: RequestWithUser): Promise<GetMessageDto[]> {
+		return this.usecases.findUnreadMessageByUserId(req.user.id);
 	}
 }

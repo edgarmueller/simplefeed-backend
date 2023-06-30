@@ -3,11 +3,11 @@ import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ConversationRepository } from './conversation.repository';
 import { Conversation } from './conversation';
 import { Message } from './message';
-import { GetConversationDto } from '../../../../apps/app-name/src/app/chat/dto/get-conversation.dto';
+import { GetConversationDto } from './dto/get-conversation.dto';
+import { GetMessageDto } from './dto/get-message.dto';
 
 @Injectable()
 export class ChatUsecases {
-
   readonly logger = new Logger(ChatUsecases.name)
 
   constructor(
@@ -50,5 +50,19 @@ export class ChatUsecases {
   async findConversationsByUserIdWithmessage(userId: string): Promise<GetConversationDto[]> {
     const conversations = await this.conversationsRepo.findByUserIdWithMessages(userId);
     return conversations.map(GetConversationDto.fromDomain);
+  
   }
+
+	async findUnreadMessageByUserId(userId: string): Promise<GetMessageDto[]> {
+    const msgs = await this.conversationsRepo.findUnreadMessageByUserId(userId);
+    return msgs.map(GetMessageDto.fromDomain);
+	}
+
+	async markMessagesAsRead(userId: string, conversationId: string): Promise<void> {
+    const msgs = await this.conversationsRepo.findUnreadMessageByUserAndConversationId(userId, conversationId);
+    msgs.forEach(msg => {
+      msg.isRead = true;
+    })
+    await this.conversationsRepo.saveMessages(msgs);
+	}
 }

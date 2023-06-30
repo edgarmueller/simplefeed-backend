@@ -15,6 +15,12 @@ export const MessageSchema = new EntitySchema<Message>({
     authorId: {
       type: String,
     },
+    recipientId: {
+      type: String,
+    },
+    isRead: {
+      type: Boolean,
+    },
     createdAt: {
       type: Date,
       unique: false,
