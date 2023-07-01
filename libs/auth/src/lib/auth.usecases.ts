@@ -15,7 +15,7 @@ export class AuthUsecases {
       User.create({
         ...user,
         password: hashedPassword,
-      })
+      }, user.id)
     )
     return registeredUser
   }
