@@ -15,9 +15,4 @@ export class ChatController {
 		return this.usecases.findConversationsByUserIdWithmessage(req.user.id);
 	}
 
-	@Get('unread')
-	@UseGuards(JwtAuthGuard)
-	async getUnreadMessages(@Req() req: RequestWithUser): Promise<GetMessageDto[]> {
-		return this.usecases.findUnreadMessageByUserId(req.user.id);
-	}
 }

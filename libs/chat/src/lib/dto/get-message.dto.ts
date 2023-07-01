@@ -7,9 +7,11 @@ export class GetMessageDto {
 		static fromDomain(message: Message) {
 				return new GetMessageDto({
 						id: message.id,
+						conversationId: message.conversationId,
 						authorId: message.authorId,
 						content: message.content,
 						createdAt: message.createdAt,
+						isRead: message.isRead,
 				});
 		}
 }

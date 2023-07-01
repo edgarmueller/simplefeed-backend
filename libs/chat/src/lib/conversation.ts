@@ -1,6 +1,8 @@
 import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd'
 import { ConversationAddedEvent } from './events/conversation-added.event'
 import { Message } from './message'
+import { MessagesReadEvent } from './events/messages-read.event'
+import { MessageAddedEvent } from './events/message-added.event'
 
 const PREFIX = 'conv'
 const createConversationId = createId(PREFIX)
@@ -12,7 +14,10 @@ export class Conversation extends AggregateRoot {
   deletedAt?: Date
 
   public static create(props: Props<Conversation>, id?: string): Conversation {
-    const conversation = new Conversation({ ...props }, id || createConversationId())
+    const conversation = new Conversation(
+      { ...props },
+      id || createConversationId()
+    )
     const isNewConversation = !!id === false
     if (isNewConversation) {
       conversation.emitDomainEvent(new ConversationAddedEvent(conversation))
@@ -21,15 +26,29 @@ export class Conversation extends AggregateRoot {
   }
 
   private constructor(props: Props<Conversation>, readonly id: string) {
-     super(props, id)
+    super(props, id)
   }
 
-  addMessage(messsage: Message) {
+  addMessage(message: Message) {
     if (!this.messages) {
       this.messages = []
     }
-    this.messages.push(messsage)
-    messsage.conversation = this
-    this.emitDomainEvent(new ConversationAddedEvent(this))
+    this.messages.push(message)
+    message.conversation = this
+    this.emitDomainEvent(new MessageAddedEvent(this, message))
+  }
+
+  markMessagesAsRead(userId: string) {
+    const unreadMsgs = this.messages
+      .filter((msg) => msg.recipientId === userId && !msg.isRead)
+    unreadMsgs.forEach((msg) => {
+      msg.isRead = true
+      msg.conversationId = this.id
+    })
+    if (unreadMsgs.length > 0) {
+      console.log('markMessagesAsRead', unreadMsgs, this.id)
+      this.emitDomainEvent(new MessagesReadEvent(unreadMsgs, this.id, userId))
+    }
+    return unreadMsgs
   }
 }
