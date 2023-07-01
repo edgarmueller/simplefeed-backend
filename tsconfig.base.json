@@ -17,13 +17,14 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@simplefeed/notification": ["libs/notification/src/index.ts"],
       "@kittgen/s3": ["libs/s3/src/index.ts"],
       "@kittgen/shared-ddd": ["libs/shared-ddd/src/index.ts"],
       "@simplefeed/auth": ["libs/auth/src/index.ts"],
       "@simplefeed/chat": ["libs/chat/src/index.ts"],
       "@simplefeed/post": ["libs/post/src/index.ts"],
-      "@simplefeed/user": ["libs/user/src/index.ts"],
-      "@simplefeed/search": ["libs/search/src/index.ts"]
+      "@simplefeed/search": ["libs/search/src/index.ts"],
+      "@simplefeed/user": ["libs/user/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

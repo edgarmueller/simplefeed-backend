@@ -93,7 +93,7 @@
       "configFilePath": "libs/auth/project.json"
     },
     "chat": "libs/chat",
-    "search": "libs/search",
+    "notification": "libs/notification",
     "post": {
       "root": "libs/post",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",
@@ -139,6 +139,7 @@
       "tags": [],
       "configFilePath": "libs/schematics/project.json"
     },
+    "search": "libs/search",
     "shared-ddd": {
       "root": "libs/shared-ddd",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",
