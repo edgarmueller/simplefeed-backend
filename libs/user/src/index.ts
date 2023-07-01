@@ -12,3 +12,4 @@ export { FriendUsecases } from './lib/friends.usecases';
 export { GetMeDto } from './lib/dto/get-me.dto';
 export { GetUserDto } from './lib/dto/get-user.dto';
 export { GetFriendRequestDto } from './lib/dto/get-friend-request.dto';
+export { UserCreatedEvent } from './lib/events/user-created.event';

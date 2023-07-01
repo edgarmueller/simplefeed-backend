@@ -1,4 +1,4 @@
-import { SearchModule, searchConfig } from '@simplefeed/search';
+import { searchConfig } from '@simplefeed/search';
 import { S3Module, S3Schema, s3Config } from '@kittgen/s3';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,6 +14,8 @@ import { DatabaseConfigSchema } from './infra/database/database.config';
 import { DatabaseModule } from './infra/database/database.module';
 import { PostModule } from './posts/post.module';
 import { UserModule } from './user/user.module';
+import { SearchModule } from './search/search.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -45,15 +47,8 @@ import { UserModule } from './user/user.module';
         protocol: configService.get('s3.protocol'),
       }),
     }),
-    SearchModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        node: configService.get('search.node'),
-        username: configService.get('search.username'),
-      	password: configService.get('search.password'),
-      })
-    })
+    SearchModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

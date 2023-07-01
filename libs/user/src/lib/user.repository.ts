@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@kittgen/shared-ddd'
-import { IsolationLevel, Propagation, Transactional } from 'typeorm-transactional'
+import { Propagation, Transactional } from 'typeorm-transactional'
 import { In } from 'typeorm'
 import { QueryFailedError, Repository } from 'typeorm'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'

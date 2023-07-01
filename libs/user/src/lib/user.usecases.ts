@@ -12,7 +12,6 @@ export class UserUsecases {
 
   constructor(
     private readonly userRepository: UsersRepository,
-    // private readonly conversationRepository: ConversationRepository,
     private s3Service: S3Service
   ) {}
 

@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
