@@ -40,13 +40,12 @@ export class Conversation extends AggregateRoot {
 
   markMessagesAsRead(userId: string) {
     const unreadMsgs = this.messages
-      .filter((msg) => msg.recipientId === userId && !msg.isRead)
+      .filter((msg) => msg.recipientId === userId).filter(msg => !msg.isRead)
     unreadMsgs.forEach((msg) => {
       msg.isRead = true
       msg.conversationId = this.id
     })
     if (unreadMsgs.length > 0) {
-      console.log('markMessagesAsRead', unreadMsgs, this.id)
       this.emitDomainEvent(new MessagesReadEvent(unreadMsgs, this.id, userId))
     }
     return unreadMsgs
