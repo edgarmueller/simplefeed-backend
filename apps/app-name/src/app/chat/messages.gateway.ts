@@ -3,14 +3,14 @@ import {
   WebSocketServer
 } from '@nestjs/websockets'
 import { Server } from 'socket.io'
-import { ChatService } from './chat.service'
+import { AuthService } from '@simplefeed/auth'
 
 @WebSocketGateway()
 export class MessagesGateway {
   @WebSocketServer()
   server: Server
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly authService: AuthService) {}
 
   async sendMessage(converationId: string, content: string, author: string) {
     this.server.to(converationId).emit('message', { content, author })

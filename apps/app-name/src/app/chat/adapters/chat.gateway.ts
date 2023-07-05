@@ -1,3 +1,4 @@
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -6,16 +7,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
   WsException,
-} from '@nestjs/websockets'
-import { Server, Socket } from 'socket.io'
-import { ChatService } from '../chat.service'
-import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common'
-import { WebsocketExceptionsFilter } from '../websocket.exception-filter'
-import { ChatUsecases } from '@simplefeed/chat'
-import { Message } from '@simplefeed/chat'
-import { GetConversationDto } from '../../../../../../libs/chat/src/lib/dto/get-conversation.dto'
-import { GetMessageDto } from '../../../../../../libs/chat/src/lib/dto/get-message.dto'
-import { NotificationUsecases } from '../../../../../../libs/notification/src/lib/notifications.usecases'
+} from '@nestjs/websockets';
+import { AuthService } from '@simplefeed/auth';
+import { ChatUsecases, Message } from '@simplefeed/chat';
+import { Server, Socket } from 'socket.io';
+import { GetConversationDto, GetMessageDto } from '@simplefeed/chat';
+import { WebsocketExceptionsFilter } from '../websocket.exception-filter';
 
 @WebSocketGateway({
   cors: {
@@ -30,13 +27,13 @@ export class ChatGateway implements OnGatewayConnection {
   server: Server
 
   constructor(
-    private readonly chatService: ChatService,
+    readonly authService: AuthService,
     readonly usecases: ChatUsecases,
   ) {}
 
   async handleConnection(socket: Socket) {
     try {
-      await this.chatService.getUserFromSocket(socket)
+      await this.authService.getUserFromSocket(socket)
       console.log('client connected')
     } catch (error) {
       console.log(error)
@@ -53,7 +50,7 @@ export class ChatGateway implements OnGatewayConnection {
   ) {
     try {
       const body = JSON.parse(rawBody)
-      const author = await this.chatService.getUserFromSocket(socket)
+      const author = await this.authService.getUserFromSocket(socket)
       // dont load all messages
       const conv = await this.usecases.findConversationById(
         body.conversationId,
@@ -83,12 +80,13 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) body: any
   ) {
     try {
-      const user = await this.chatService.getUserFromSocket(socket)
+      const user = await this.authService.getUserFromSocket(socket)
       const conversation = await this.usecases.findConversationById(
         body.conversationId,
         user.id
       )
       this.usecases.markMessagesAsRead(user.id, conversation.id)
+      socket.emit('mark_as_read', { conversationId: conversation.id, userId: user.id })
     } catch (error) {
       console.log(error)
       throw new WsException('Invalid credentials.')
@@ -104,14 +102,13 @@ export class ChatGateway implements OnGatewayConnection {
     try {
       console.log('request_all_messages', body, typeof body)
       const parsedBody = body; // JSON.parse(body)
-      const user = await this.chatService.getUserFromSocket(socket)
+      const user = await this.authService.getUserFromSocket(socket)
       const conversation = await this.usecases.findConversationById(
         parsedBody.conversationId,
         user.id
       );
 
       socket.emit('send_all_messages', GetConversationDto.fromDomain(conversation))
-      this.usecases.markMessagesAsRead(user.id, conversation.id)
     } catch (error) {
       socket.emit('error', { message: 'Invalid credentials.' })
       socket.disconnect()

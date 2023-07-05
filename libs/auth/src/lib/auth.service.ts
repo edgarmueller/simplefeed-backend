@@ -10,6 +10,8 @@ import { Repository } from 'typeorm'
 import { AUTH_MODULE_OPTIONS } from './auth.constants'
 import { AuthModuleOptions } from './interfaces/auth-options.interface'
 import { AuthCookie } from './auth-cookie'
+import { Socket } from 'socket.io'
+import { WsException } from '@nestjs/websockets'
 
 @Injectable()
 export class AuthService {
@@ -157,5 +159,14 @@ export class AuthService {
     if (!isPasswordMatching) {
       throw new InvalidCredentialsError()
     }
+  }
+
+  async getUserFromSocket(socket: Socket) {
+    const authHeader = socket.handshake.headers.authorization
+    const user = await this.findOneUserByToken(authHeader)
+    if (!user) {
+      throw new WsException('Invalid credentials.')
+    }
+    return user
   }
 }

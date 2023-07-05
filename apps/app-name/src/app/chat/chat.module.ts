@@ -8,7 +8,6 @@ import { ChatController } from "./chat.controller";
 import { ChatGateway } from "./adapters/chat.gateway";
 import { FriendRequestAcceptedEventHandler } from "./event-handlers/friend-request-accepted.event-handler";
 import { MessagesGateway } from "./messages.gateway";
-import { ChatService } from "./chat.service";
 
 @Module({
 	imports: [
@@ -20,7 +19,7 @@ import { ChatService } from "./chat.service";
     }),
 	], 
 	controllers: [ChatController],
-	providers: [ChatGateway, ChatService, MessagesGateway, FriendRequestAcceptedEventHandler],
+	providers: [ChatGateway, MessagesGateway, FriendRequestAcceptedEventHandler],
 	exports: []
 })
 export class ChatModule {
