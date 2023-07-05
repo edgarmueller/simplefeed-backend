@@ -1,12 +1,11 @@
 import { initializeTransactionalContext } from 'typeorm-transactional'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
+import { GetFriendRequestDto, UserNotFoundError, UsersRepository } from '@simplefeed/user'
 import request from 'supertest'
 import { createConnection } from 'typeorm'
 import { AppModule } from './app.module'
 import { PostsRepository } from '@simplefeed/post'
-import { GetFriendRequestDto } from './friends/usecases/get-friend-request.dto'
 
 describe('friend request api', () => {
   let app: INestApplication
