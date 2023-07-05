@@ -8,6 +8,7 @@ export const SearchSchema = {
 }
 
 export const searchConfig = registerAs('search', () => ({
+	enabled: process.env.ELASTICSEARCH_ENABLED === 'true',
 	node: process.env.ELASTICSEARCH_NODE,
 	username: process.env.ELASTICSEARCH_USERNAME,
 	password: process.env.ELASTICSEARCH_PASSWORD

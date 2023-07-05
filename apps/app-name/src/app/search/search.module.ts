@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
+        enabled: configService.get('search.enabled'),
         node: configService.get('search.node'),
         username: configService.get('search.username'),
         password: configService.get('search.password'),

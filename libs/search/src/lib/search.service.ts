@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@simplefeed/user';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { UserSearchDto } from './user-search.dto';
-import { UserSearchResultDto } from './user-search-result.dto';
+import { UserSearchDto } from './dto/user-search.dto';
+import { UserSearchResultDto } from './dto/user-search-result.dto';
  
 @Injectable()
 export class SearchService {
