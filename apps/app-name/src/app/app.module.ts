@@ -1,9 +1,9 @@
-import { searchConfig } from '@simplefeed/search';
 import { S3Module, S3Schema, s3Config } from '@kittgen/s3';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { authConfig } from '@simplefeed/auth';
+import { SearchSchema, searchConfig } from '@simplefeed/search';
 import Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,10 +12,10 @@ import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
 import { DatabaseConfigSchema } from './infra/database/database.config';
 import { DatabaseModule } from './infra/database/database.module';
-import { PostModule } from './posts/post.module';
-import { UserModule } from './user/user.module';
-import { SearchModule } from './search/search.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PostModule } from './posts/post.module';
+import { SearchModule } from './search/search.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       load: [authConfig, s3Config, searchConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
-      ).keys(S3Schema)
+      ).keys(S3Schema).keys(SearchSchema)
     }),
     DatabaseModule,
     ScheduleModule.forRoot(),

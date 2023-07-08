@@ -10,7 +10,6 @@ function guardedModuleMetadata(): ModuleMetadata {
   const imports = []
   let providers = []
   let exports = []
-  if (process.env.ELASTICSEARCH_ENABLED === 'true') {
     imports.push(
       ElasticsearchModule.registerAsync({
         imports: [ConfigModule],
@@ -28,7 +27,6 @@ function guardedModuleMetadata(): ModuleMetadata {
     )
     providers = [SearchService, SearchUsecases, UserCreatedEventHandler]
     exports = [SearchService, SearchUsecases]
-  }
   return {
     imports,
     providers,

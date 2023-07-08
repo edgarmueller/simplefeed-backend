@@ -34,7 +34,7 @@ export class ChatUsecases {
   }
 
   async findConversationById(id: string, userId: string) {
-    const converation = await this.conversationsRepo.findOneById(id);
+    const converation = await this.conversationsRepo.findOneByIdWithMessages(id);
     if (!converation.userIds.includes(userId)) {
       this.logger.warn('user not in conversation', converation, userId)
       throw new ForbiddenException()
@@ -59,7 +59,7 @@ export class ChatUsecases {
 	}
 
 	async markMessagesAsRead(userId: string, conversationId: string): Promise<void> {
-    const conversation = await this.conversationsRepo.findOneById(conversationId);
+    const conversation = await this.conversationsRepo.findOneByIdWithMessages(conversationId);
     const unreadMessages = conversation.markMessagesAsRead(userId);
     await this.conversationsRepo.saveMessages(unreadMessages);
 	}

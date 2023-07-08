@@ -56,10 +56,15 @@ export class ConversationRepository {
     return savedMessages
   }
 
-  async findOneById(id: string): Promise<Conversation> {
+  async findOneByIdWithMessages(id: string): Promise<Conversation> {
     return this.conversationRepository.findOne({
       where: { id },
       relations: ['messages'],
+      order: {
+        messages: {
+          createdAt: 'ASC',
+        }
+      },
     })
   }
 

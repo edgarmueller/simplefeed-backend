@@ -5,7 +5,7 @@ import { SearchUsecases } from '@simplefeed/search';
 @Controller('search')
 export class SearchController {
 
-	constructor(@Optional() readonly usecases?: SearchUsecases) {}
+	constructor(readonly usecases?: SearchUsecases) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()

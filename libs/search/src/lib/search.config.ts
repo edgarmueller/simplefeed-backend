@@ -2,6 +2,7 @@ import { registerAs } from '@nestjs/config'
 import Joi from 'joi'
 
 export const SearchSchema = {
+	ELASTICSEARCH_ENABLED: Joi.boolean().required(),
 	ELASTICSEARCH_NODE: Joi.string().required(),
 	ELASTICSEARCH_USERNAME: Joi.string().required(),
 	ELASTICSEARCH_PASSWORD: Joi.string().required(),

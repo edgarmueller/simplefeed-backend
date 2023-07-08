@@ -33,10 +33,10 @@ export class ChatGateway implements OnGatewayConnection {
 
   async handleConnection(socket: Socket) {
     try {
-      await this.authService.getUserFromSocket(socket)
-      console.log('client connected')
+      const user = await this.authService.getUserFromSocket(socket)
+      const conversations = await this.usecases.findConversationsByUserId(user.id)
+      await socket.join(conversations.map((c) => c.id))
     } catch (error) {
-      console.log(error)
       socket.emit('error', { message: 'Invalid credentials.' })
       socket.disconnect()
     }
@@ -52,24 +52,23 @@ export class ChatGateway implements OnGatewayConnection {
       const body = JSON.parse(rawBody)
       const author = await this.authService.getUserFromSocket(socket)
       // dont load all messages
-      const conv = await this.usecases.findConversationById(
+      const conversation = await this.usecases.findConversationById(
         body.conversationId,
         author.id
       )
       const msg = await this.usecases.addMessageToConversation(
-        conv,
+        conversation,
         Message.create({
           content: body.content,
           authorId: author.id,
-          recipientId: conv.userIds.find((id) => id !== author.id),
+          recipientId: conversation.userIds.find((id) => id !== author.id),
           isRead: false,
           conversationId: body.conversationId,
         })
       )
       // push into usecase, or use events?
-      this.server.sockets.emit('receive_message', GetMessageDto.fromDomain(msg))
+      this.server.to(conversation.id).emit('receive_message', GetMessageDto.fromDomain(msg))
     } catch (error) {
-      console.log(error)
       throw new WsException('Invalid credentials.')
     }
   }
@@ -86,9 +85,8 @@ export class ChatGateway implements OnGatewayConnection {
         user.id
       )
       this.usecases.markMessagesAsRead(user.id, conversation.id)
-      socket.emit('mark_as_read', { conversationId: conversation.id, userId: user.id })
+      this.server.to(conversation.id).emit('mark_as_read', { conversationId: conversation.id, userId: user.id })
     } catch (error) {
-      console.log(error)
       throw new WsException('Invalid credentials.')
     }
   }
@@ -100,7 +98,6 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) body: any
   ) {
     try {
-      console.log('request_all_messages', body, typeof body)
       const parsedBody = body; // JSON.parse(body)
       const user = await this.authService.getUserFromSocket(socket)
       const conversation = await this.usecases.findConversationById(
