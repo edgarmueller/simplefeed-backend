@@ -20,7 +20,7 @@ import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local', '.env.local'],
+      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}}`],
       load: [authConfig, s3Config, searchConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
