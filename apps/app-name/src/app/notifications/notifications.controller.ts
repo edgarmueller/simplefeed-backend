@@ -12,6 +12,6 @@ export class NotificationsController {
 	@Get('unread')
 	@UseGuards(JwtAuthGuard)
 	async getUnreadMessages(@Req() req: RequestWithUser): Promise<GetMessageDto[]> {
-		return this.usecases.findUnreadNotificationsForUserId(req.user.id);
+		return this.usecases.findUnviewedNotificationsForUserId(req.user.id);
 	}
 }

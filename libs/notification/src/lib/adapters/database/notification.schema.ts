@@ -16,7 +16,13 @@ export const NotificationSchema = new EntitySchema<Notification>({
     recipientId: {
       type: String,
     },
-    isRead: {
+    content: {
+      type: String,
+    },
+    opened: {
+      type: Boolean,
+    },
+    viewed: {
       type: Boolean,
     },
     type: {

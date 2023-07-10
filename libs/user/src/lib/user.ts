@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import { UserCreatedEvent } from './events/user-created.event'
 import { FriendRequest } from './friend-request'
 import { Profile } from './profile'
+import { FriendRequestSent } from './events/friend-request-sent.event'
 
 const PREFIX = 'use'
 export type UserId = string
@@ -51,6 +52,7 @@ export class User extends AggregateRoot {
       this.friendRequests = []
     }
     this.friendRequests.push(friendRequest);
+    this.emitDomainEvent(new FriendRequestSent(friendRequest))
     return friendRequest
   }
 

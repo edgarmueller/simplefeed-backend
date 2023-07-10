@@ -85,7 +85,7 @@ export class ChatGateway implements OnGatewayConnection {
         user.id
       )
       this.usecases.markMessagesAsRead(user.id, conversation.id)
-      this.server.to(conversation.id).emit('mark_as_read', { conversationId: conversation.id, userId: user.id })
+      // this.server.to(conversation.id).emit('message_read', { conversationId: conversation.id, userId: user.id })
     } catch (error) {
       throw new WsException('Invalid credentials.')
     }

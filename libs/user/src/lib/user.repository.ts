@@ -41,6 +41,7 @@ export class UsersRepository {
 
   @Transactional()
   async saveMany(users: User[]): Promise<User[]> {
+    // TODO: use batch insert
     return Promise.all(
       users.map(async (user) => {
         return await this.save(user)

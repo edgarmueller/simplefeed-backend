@@ -14,21 +14,21 @@ export class NotificationsRepository {
     this.notificationsRepository.save(notification)
   }
 
-  findManyUnreadByRecipientAndResourceIds(resourceIds: string[], userId: string): Promise<Notification[]> {
+  findManyUnviewedByRecipientAndResourceIds(resourceIds: string[], userId: string): Promise<Notification[]> {
     return this.notificationsRepository.find({
       where: {
         resourceId: In(resourceIds),
-        isRead: false,
+        viewed: false,
         recipientId: userId,
       },
     })
   
 	}
 
-	findManyUnreadByUserId(userId: string) {
+	findManyUnviewedByUserId(userId: string) {
 		return this.notificationsRepository.find({
       where: {
-        isRead: false,
+        viewed: false,
         recipientId: userId,
       },
     })

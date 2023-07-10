@@ -1,3 +1,4 @@
+import { FriendRequestSent } from './lib/events/friend-request-sent.event';
 export { User } from './lib/user'
 export { UsersRepository } from './lib/user.repository'
 export { UserAlreadyExistsError } from './lib/errors/user-already-exists.error'
@@ -7,6 +8,7 @@ export { Profile } from "./lib/profile"
 export { FriendRequest } from "./lib/friend-request"
 export { FriendRequestRepository } from './lib/friend-request.repository'
 export { FriendRequestAccepted } from './lib/events/friend-request-accepted.event';
+export { FriendRequestSent } from './lib/events/friend-request-sent.event';
 export { UserUsecases } from './lib/user.usecases';
 export { FriendUsecases } from './lib/friends.usecases';
 export { GetMeDto } from './lib/dto/get-me.dto';
