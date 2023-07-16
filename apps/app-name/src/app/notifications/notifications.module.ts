@@ -5,7 +5,13 @@ import { NotificationModule as NotificationCoreModule } from '@simplefeed/notifi
 import { NotificationsController } from './notifications.controller';
 import { NotificationsGateway } from './adapters/notifications.gateway';
 import { AuthConfigFactory } from '../auth/auth.config.factory';
-import { FriendRequestSentEventHandler } from './events/friend-request-sent.event-handler';
+import { FriendRequestSentEventHandler } from './adapters/friend-request-sent.event-handler';
+import { PostLikedEventHandler } from './adapters/post-liked.event-handler';
+
+const EVENT_HANDLERS = [
+	FriendRequestSentEventHandler,
+	PostLikedEventHandler
+]
 
 @Module({
 	imports: [ConfigModule, NotificationCoreModule,
@@ -15,7 +21,7 @@ import { FriendRequestSentEventHandler } from './events/friend-request-sent.even
     }),
 	],
 	controllers: [NotificationsController],
-	providers: [NotificationsGateway, FriendRequestSentEventHandler],
+	providers: [NotificationsGateway, FriendRequestSentEventHandler, ...EVENT_HANDLERS],
 	exports: []
 })
 export class NotificationsModule {}

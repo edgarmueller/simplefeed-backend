@@ -18,9 +18,10 @@ export class NotificationUsecases {
     await this.notificaitonsRepository.save(notification)
   }
 
-  async markNotificationAsRead(notificationId: string) {
+  async markNotificationAsRead(notificationId: string): Promise<Notification> {
     const notification = await this.notificaitonsRepository.findOneById(notificationId)
     notification.markAsRead()
     await this.notificaitonsRepository.save(notification)
+    return notification
   }
 }

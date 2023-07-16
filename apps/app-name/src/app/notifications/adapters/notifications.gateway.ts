@@ -1,4 +1,4 @@
-import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Get, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { EventsHandler } from '@nestjs/cqrs';
 import {
   ConnectedSocket,
@@ -59,8 +59,15 @@ export class NotificationsGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket
   ) {
     try {
+      console.log({ rawBody })
       const body = rawBody;
-      this.usecases.markNotificationAsRead(body.notificationId);
+      console.log({ body })
+      const user = await this.authService.getUserFromSocket(socket)
+      const readNotification = await this.usecases.markNotificationAsRead(body.notificationId);
+      this.logger.log(`User ${user.id} marked notification ${body.notificationId} as read`)
+      this.logger.log(`body: ${JSON.stringify(body)}`)
+      socket.to(`notifications-${user.id}`).emit('notification_read', GetNotificationDto.fromDomain(readNotification))
+      socket.emit('notification_read', GetNotificationDto.fromDomain(readNotification))
     } catch (error) {
       throw new WsException('Invalid credentials.')
     }
