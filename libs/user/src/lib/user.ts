@@ -1,9 +1,9 @@
-import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd'
-import bcrypt from 'bcrypt'
-import { UserCreatedEvent } from './events/user-created.event'
-import { FriendRequest } from './friend-request'
-import { Profile } from './profile'
-import { FriendRequestSent } from './events/friend-request-sent.event'
+import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd';
+import bcrypt from 'bcrypt';
+import { FriendRequestSent } from './events/friend-request-sent.event';
+import { UserCreatedEvent } from './events/user-created.event';
+import { FriendRequest } from './friend-request';
+import { Profile } from './profile';
 
 const PREFIX = 'use'
 export type UserId = string
@@ -50,6 +50,9 @@ export class User extends AggregateRoot {
     const friendRequest = FriendRequest.create({ from: this, to: otherUser })
     if (!this.friendRequests) {
       this.friendRequests = []
+    }
+    if (otherUser.friendRequests.find((fr) => fr.from.id === this.id)) {
+      throw new Error('Friend request already sent')
     }
     this.friendRequests.push(friendRequest);
     this.emitDomainEvent(new FriendRequestSent(friendRequest))

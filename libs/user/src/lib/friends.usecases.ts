@@ -14,7 +14,7 @@ export class FriendUsecases {
 	) {}
 	
   async sendFriendRequest(from: User, toUserName: string): Promise<GetFriendRequestDto> {
-    const toUser = await this.userRepository.findOneByUsernameOrFail(toUserName)
+    const toUser = await this.userRepository.findOneByUsernameWithFriendRequestsOrFail(toUserName)
     const friendRequest = from.sendFriendRequestTo(toUser)
     await this.userRepository.saveMany([from, toUser])
     return GetFriendRequestDto.fromDomain(friendRequest);

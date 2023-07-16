@@ -21,7 +21,7 @@ export class UsersRepository {
   ) {}
 
   @Transactional({
-    propagation: Propagation.NESTED
+    propagation: Propagation.NESTED,
   })
   async save(user: User): Promise<User> {
     try {
@@ -84,10 +84,24 @@ export class UsersRepository {
     }
   }
 
-    async findOneByUsernameOrFail(username: string): Promise<User> {
+  async findOneByUsernameOrFail(username: string): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
         where: { profile: { username } },
+      })
+      return foundUser
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new UserNotFoundError(username)
+      }
+      throw error
+    }
+  }
+  async findOneByUsernameWithFriendRequestsOrFail(username: string): Promise<User> {
+    try {
+      const foundUser = await this.userRepository.findOneOrFail({
+        where: { profile: { username } },
+        relations: { friendRequests: true },
       })
       return foundUser
     } catch (error) {
@@ -104,7 +118,7 @@ export class UsersRepository {
         where: { profile: { username } },
         relations: {
           friends: true,
-        }
+        },
       })
       return foundUser
     } catch (error) {
