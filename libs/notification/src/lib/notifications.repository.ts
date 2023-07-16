@@ -1,17 +1,25 @@
 import { Injectable } from '@nestjs/common'
-import { Notification } from './notification'
+import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
+import { Transactional, runOnTransactionCommit } from 'typeorm-transactional'
+import { DomainEvents } from '@kittgen/shared-ddd'
+import { Notification } from './notification'
 
 @Injectable()
 export class NotificationsRepository {
   constructor(
     @InjectRepository(Notification)
-    private readonly notificationsRepository: Repository<Notification>
+    private readonly notificationsRepository: Repository<Notification>,
+    readonly publisher: EventPublisher
   ) {}
 
+  @Transactional()
   async save(notification: Notification) {
     this.notificationsRepository.save(notification)
+    runOnTransactionCommit(() => {
+      DomainEvents.dispatchEventsForAggregate(notification.id, this.publisher)
+    });
   }
 
   findManyUnviewedByRecipientAndResourceIds(resourceIds: string[], userId: string): Promise<Notification[]> {
@@ -37,4 +45,12 @@ export class NotificationsRepository {
 	async saveMany(notifications: Notification[]) {
 		await this.notificationsRepository.save(notifications)
 	}
+
+  findOneById(notificationId: any) {
+    return this.notificationsRepository.findOne({
+      where: {
+        id: notificationId,
+      },
+    })  
+  }
 }

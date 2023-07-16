@@ -24,7 +24,7 @@ export class Notification extends AggregateRoot {
     super(props, id || createNotificationId())
   }
 
-  markAsViewed() {
+  markAsRead() {
     this.viewed = true
   }
 }

@@ -7,6 +7,7 @@ export class GetNotificationDto {
 		viewed: boolean;
 		opened: boolean;
 		createdAt: Date;
+		message: string;
 
     static fromDomain(notification: Notification): GetNotificationDto {
       return {
@@ -15,7 +16,8 @@ export class GetNotificationDto {
 				resourceId: notification.resourceId,
 				viewed: notification.viewed,
 				opened: notification.opened,
-				createdAt: notification.createdAt
+				createdAt: notification.createdAt,
+				message: notification.content,
 			}
     }
 }
