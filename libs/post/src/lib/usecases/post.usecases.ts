@@ -106,7 +106,7 @@ export class PostUsecases {
   }
 
   async likePost(postId: string, likedBy: User) {
-    const post = await this.postsRepository.findOneByIdOrFail(postId)
+    const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
     post.like(likedBy)
     await this.postsRepository.savePost(post)
   }

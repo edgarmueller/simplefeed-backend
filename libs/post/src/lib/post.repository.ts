@@ -55,6 +55,21 @@ export class PostsRepository {
     return posts
   }
 
+  async findOneByIdWithAuthorOrFail(id: PostId): Promise<Post> {
+    try {
+      const foundPost = await this.postRepository.findOneOrFail({
+        where: { id },
+        relations: { author: true },
+      })
+      return foundPost
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new PostNotFoundError()
+      }
+      throw error
+    }
+  }
+
   async findOneByIdOrFail(id: PostId): Promise<Post> {
     try {
       const foundPost = await this.postRepository.findOneOrFail({
