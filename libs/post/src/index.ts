@@ -1,5 +1,6 @@
 export { PostLikedEvent } from './lib/events/post-liked.event';
 export { CommentAddedEvent } from './lib/events/commet-added.event';
+export { PostCreatedEvent } from './lib/events/post-created.event';
 export { Post } from './lib/post'
 export { PostsRepository } from './lib/post.repository'
 export { PostAlreadyExistsError } from './lib/errors/post-already-exists.error'
