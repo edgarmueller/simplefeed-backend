@@ -21,7 +21,8 @@ export class PostLikedEventHandler {
       opened: false,
       viewed: false,
       type: 'post-liked',
-      resourceId: event.post.id
+      resourceId: event.post.id,
+      link: `/posts/${event.post.id}`,
     }))
   }
 }

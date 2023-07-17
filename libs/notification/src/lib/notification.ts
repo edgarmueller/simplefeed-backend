@@ -13,6 +13,7 @@ export class Notification extends AggregateRoot {
   createdAt?: Date 
   type: string
   resourceId: string
+  link?: string
 
   public static create(props: Props<Notification>, id?: string): Notification {
     const notification = new Notification({ ...props }, id || createNotificationId());

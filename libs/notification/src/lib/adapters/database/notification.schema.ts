@@ -31,6 +31,10 @@ export const NotificationSchema = new EntitySchema<Notification>({
     resourceId: {
       type: String,
     },
+    link: {
+      type: String,
+      nullable: true,
+    },
     createdAt: {
       type: Date,
       unique: false,
