@@ -9,6 +9,7 @@ import { DEFAULT_COMMENTS_LIMIT } from './../post.repository';
 import { CommentPostDto } from './dto/comment-post.dto';
 import { GetCommentDto } from './dto/get-comment.dto';
 import { GetPostDto } from './dto/get-post.dto';
+import { PostNotFoundError } from '../errors/post-not-found.error';
 
 @Injectable()
 export class PostUsecases {
@@ -68,6 +69,17 @@ export class PostUsecases {
     }
   }
 
+  async getPost(postId: string, userId: string): Promise<GetPostDto> {
+    const { friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(userId)
+    const friendIds = friends.map(friend => friend.id)
+    const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
+    if ([userId, ...friendIds].filter(friendId => friendId === userId).length === 0) {
+      throw new PostNotFoundError()
+    }
+    
+    return GetPostDto.fromDomain(post)
+  }
+
   async findLikedPostsByUser(
     user: User,
   ) {
@@ -84,7 +96,7 @@ export class PostUsecases {
     const parentId = last(dto.path.split('/'))
     let parentComment: Comment | undefined
     if (parentId !== postId) {
-      parentComment = await this.postsRepository.findOneCommentByIdWithAuthorOrFail(parentId)
+      parentComment = await this.postsRepository.findOneCommentByIdWithAuthor(parentId)
     }
     const comment = Comment.create({
       content: dto.content,

@@ -13,6 +13,7 @@ export class Comment implements Entity {
   author: User 
   createdAt?: Date 
   updatedAt?: Date 
+  deletedAt?: Date 
   content: string
 
   parentComment?: Comment

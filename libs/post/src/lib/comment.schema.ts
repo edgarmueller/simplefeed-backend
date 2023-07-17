@@ -31,6 +31,12 @@ export const CommentSchema = new EntitySchema<Comment>({
       name: 'updated_at',
       updateDate: true,
     },
+    deletedAt: {
+      type: Date,
+      name: 'deleted_at',
+      nullable: true,
+      deleteDate: true,
+    },
   },
   relations: {
     author: {

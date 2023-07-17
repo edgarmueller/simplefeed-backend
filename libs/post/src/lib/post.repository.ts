@@ -116,9 +116,9 @@ export class PostsRepository {
     }
   }
 
-  async findOneCommentByIdWithAuthorOrFail(commentId: string): Promise<Comment> {
+  async findOneCommentByIdWithAuthor(commentId: string): Promise<Comment | null> {
     try {
-      const foundComment = await this.commentRepository.findOneOrFail({
+      const foundComment = await this.commentRepository.findOne({
         where: { id: commentId },
         relations: { author: true },
       })

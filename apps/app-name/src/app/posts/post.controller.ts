@@ -1,23 +1,25 @@
-import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
 import {
   Body,
   Controller,
-  DefaultValuePipe, Delete, Get,
+  DefaultValuePipe,
+  Delete,
+  Get,
   Param,
   ParseIntPipe,
   Post,
   Query,
   Req,
-  UseGuards
-} from '@nestjs/common';
-import { Pagination } from 'nestjs-typeorm-paginate';
-import { CommentPostDto } from '../../../../../libs/post/src/lib/usecases/dto/comment-post.dto';
-import { GetCommentDto } from '../../../../../libs/post/src/lib/usecases/dto/get-comment.dto';
-import { SubmitPostDto } from '../../../../../libs/post/src/lib/usecases/dto/submit-post.dto';
-import { PostUsecases } from '../../../../../libs/post/src/lib/usecases/post.usecases';
-import { PaginatedQueryDto } from '../infra/paginated-query.dto';
-import { GetPostDto } from '../../../../../libs/post/src/lib/usecases/dto/get-post.dto';
-import { PaginatedQueryPipe } from '../infra/paginated-query.pipe';
+  UseGuards,
+} from '@nestjs/common'
+import { Pagination } from 'nestjs-typeorm-paginate'
+import { CommentPostDto } from '../../../../../libs/post/src/lib/usecases/dto/comment-post.dto'
+import { GetCommentDto } from '../../../../../libs/post/src/lib/usecases/dto/get-comment.dto'
+import { SubmitPostDto } from '../../../../../libs/post/src/lib/usecases/dto/submit-post.dto'
+import { PostUsecases } from '../../../../../libs/post/src/lib/usecases/post.usecases'
+import { PaginatedQueryDto } from '../infra/paginated-query.dto'
+import { GetPostDto } from '../../../../../libs/post/src/lib/usecases/dto/get-post.dto'
+import { PaginatedQueryPipe } from '../infra/paginated-query.pipe'
 
 @Controller('posts')
 export class PostController {
@@ -43,6 +45,15 @@ export class PostController {
     return this.usecases.getPersonalFeed(req.user.id, { page, limit })
   }
 
+  @Get(':postId')
+  @UseGuards(JwtAuthGuard)
+  getPost(
+    @Req() req: RequestWithUser,
+    @Param('postId') postId: string
+  ): Promise<GetPostDto> {
+    return this.usecases.getPost(postId, req.user.id);
+  }
+
   @Post(':postId/comments')
   @UseGuards(JwtAuthGuard)
   async postComment(
@@ -62,7 +73,11 @@ export class PostController {
     @Param('commentId') commentId?: string,
     @Query(new PaginatedQueryPipe()) paginationOpts?: PaginatedQueryDto
   ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(postId, commentId || postId, paginationOpts)
+    return this.usecases.fetchComments(
+      postId,
+      commentId || postId,
+      paginationOpts
+    )
   }
 
   @Post(':postId/like')
@@ -85,15 +100,16 @@ export class PostController {
 
   @Post('likes')
   @UseGuards(JwtAuthGuard)
-  async fetchLikes(
-    @Req() req: RequestWithUser,
-  ): Promise<any> {
-    return this.usecases.findLikedPostsByUser(req.user);
+  async fetchLikes(@Req() req: RequestWithUser): Promise<any> {
+    return this.usecases.findLikedPostsByUser(req.user)
   }
 
   @Delete(':postId')
   @UseGuards(JwtAuthGuard)
-  async deletePost(@Req() req: RequestWithUser, @Param('postId') postId: string): Promise<void> {
-    return this.usecases.deletePost(postId, req.user);
+  async deletePost(
+    @Req() req: RequestWithUser,
+    @Param('postId') postId: string
+  ): Promise<void> {
+    return this.usecases.deletePost(postId, req.user)
   }
 }
