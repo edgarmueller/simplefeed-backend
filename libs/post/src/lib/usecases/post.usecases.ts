@@ -1,3 +1,4 @@
+import { last } from 'lodash';
 import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
@@ -80,11 +81,17 @@ export class PostUsecases {
   ): Promise<Comment> {
     const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
     const path = dto.path || postId
+    const parentId = last(dto.path.split('/'))
+    let parentComment: Comment | undefined
+    if (parentId !== postId) {
+      parentComment = await this.postsRepository.findOneCommentByIdWithAuthorOrFail(parentId)
+    }
     const comment = Comment.create({
       content: dto.content,
       author: user,
       post,
-      path: path.endsWith('/') ? path.substring(0, path.length - 1) : path
+      path: path.endsWith('/') ? path.substring(0, path.length - 1) : path,
+      parentComment
     })
     return await this.postsRepository.saveComment(comment)
   }

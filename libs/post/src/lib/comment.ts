@@ -14,7 +14,8 @@ export class Comment implements Entity {
   createdAt?: Date 
   updatedAt?: Date 
   content: string
- 
+
+  parentComment?: Comment
   post?: Post
   path?: string
 

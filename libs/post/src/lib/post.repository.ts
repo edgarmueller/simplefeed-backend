@@ -116,6 +116,21 @@ export class PostsRepository {
     }
   }
 
+  async findOneCommentByIdWithAuthorOrFail(commentId: string): Promise<Comment> {
+    try {
+      const foundComment = await this.commentRepository.findOneOrFail({
+        where: { id: commentId },
+        relations: { author: true },
+      })
+      return foundComment
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new CommentNotFoundError()
+      }
+      throw error
+    }
+  }
+
   async findComments(
     postId: string,
     commentId?: string,
