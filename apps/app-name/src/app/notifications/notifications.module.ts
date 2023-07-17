@@ -7,10 +7,12 @@ import { NotificationsGateway } from './adapters/notifications.gateway';
 import { AuthConfigFactory } from '../auth/auth.config.factory';
 import { FriendRequestSentEventHandler } from './adapters/friend-request-sent.event-handler';
 import { PostLikedEventHandler } from './adapters/post-liked.event-handler';
+import { CommentAddedEventHandler } from './adapters/comment-added.event-handler';
 
 const EVENT_HANDLERS = [
 	FriendRequestSentEventHandler,
-	PostLikedEventHandler
+	PostLikedEventHandler,
+	CommentAddedEventHandler
 ]
 
 @Module({

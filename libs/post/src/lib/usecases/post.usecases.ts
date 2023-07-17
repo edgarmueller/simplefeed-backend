@@ -78,7 +78,7 @@ export class PostUsecases {
     postId: string,
     dto: CommentPostDto
   ): Promise<Comment> {
-    const post = await this.postsRepository.findOneByIdOrFail(postId)
+    const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
     const path = dto.path || postId
     const comment = Comment.create({
       content: dto.content,
