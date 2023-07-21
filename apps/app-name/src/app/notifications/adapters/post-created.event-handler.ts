@@ -10,7 +10,7 @@ export class PostCreatedEventHandler {
   constructor(readonly usecases: NotificationUsecases) {}
 
   async handle(event: PostCreatedEvent) {
-    if (event.post.postedTo) {
+    if (event.post.postedTo && event.post.author.id !== event.post.postedTo.id) {
       await this.usecases.createNotification(
         Notification.create({
           recipientId: event.post.postedTo.id,
@@ -20,6 +20,7 @@ export class PostCreatedEventHandler {
           viewed: false,
           type: 'post-created',
           resourceId: event.post.id,
+          link: `/posts/${event.post.id}`
         })
       )
     }

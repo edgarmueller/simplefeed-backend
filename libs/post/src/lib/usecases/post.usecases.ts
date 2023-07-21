@@ -93,7 +93,7 @@ export class PostUsecases {
   ): Promise<Comment> {
     const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
     const path = dto.path || postId
-    const parentId = last(dto.path.split('/'))
+    const parentId = last(dto.path?.split('/'))
     let parentComment: Comment | undefined
     if (parentId !== postId) {
       parentComment = await this.postsRepository.findOneCommentByIdWithAuthor(parentId)

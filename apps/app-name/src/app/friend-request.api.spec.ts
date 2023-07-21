@@ -19,7 +19,6 @@ describe('friend request api', () => {
       imports: [AppModule],
     }).compile()
     // TODO unify app config
-    console.log(process.env)
     app = moduleRef.createNestApplication()
     app.setGlobalPrefix('api')
     app.useGlobalPipes(
