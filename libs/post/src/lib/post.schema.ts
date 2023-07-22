@@ -42,6 +42,6 @@ export const PostSchema = new EntitySchema<Post>({
       joinColumn: {
         name: 'posted_to',
       }
-    },
+    }
   },
 })

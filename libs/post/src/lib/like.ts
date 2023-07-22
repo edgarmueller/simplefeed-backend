@@ -9,6 +9,7 @@ export class Like implements Entity {
   id: string
   user: User
   userId: string
+  unliked?: boolean
   post: Post
   createdAt?: Date
 
@@ -29,5 +30,9 @@ export class Like implements Entity {
   constructor(props: Props<Like>, id?: string) {
     Object.assign(this, props)
     this.id = id || createLikeId()
+  }
+
+  unlike() {
+    this.unliked = true
   }
 }

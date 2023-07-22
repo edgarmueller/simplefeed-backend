@@ -84,7 +84,7 @@ export class PostsRepository {
     }
   }
 
-  async findOneByIdAndUserIdOrFailWithLikes(postId: PostId, userId: string): Promise<Post> {
+  async findOneWithAuthorByIdAndLikedById(postId: PostId, userId: string): Promise<Post> {
     try {
       const foundPost = await this.postRepository
         .createQueryBuilder('post')
@@ -92,7 +92,12 @@ export class PostsRepository {
         .leftJoinAndMapMany('post.likes', Like, 'likes', 'likes.user_id = :userId AND likes.post_id = post.id', {
           userId,
         })
-        .getOneOrFail();
+        .innerJoinAndSelect(
+          'post.author',
+          'user',
+          'post.author_id = user.id'
+        )
+        .getOne();
       return foundPost
     } catch (error) {
       if (error instanceof EntityNotFoundError) {

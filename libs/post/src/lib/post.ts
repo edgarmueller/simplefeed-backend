@@ -43,6 +43,9 @@ export class Post extends AggregateRoot {
 
   // TODO: add domain logic
   like(likedBy: User) {[]
+    if (this.hasLikeBy(likedBy)) { 
+      return;
+    }
     likedBy.profile.incrementLikeCount();
     const like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
     if (!this.likes) {
@@ -53,10 +56,14 @@ export class Post extends AggregateRoot {
     return like;
   }
 
+  hasLikeBy(user: User): boolean {
+    return !!this.likes?.find(({ userId }) => userId === user.id);
+  }
+
   unlike(unlikedBy: User): Like {
     unlikedBy.profile.decrementLikeCount();
     const like = this.likes.find(({ userId }) => userId === unlikedBy.id)
-    this.likes = this.likes.filter(({ userId }) => userId !== unlikedBy.id)
+    like.unlike();
     this.emitDomainEvent(new PostUnlikedEvent(this, unlikedBy, like));
     return like
   }

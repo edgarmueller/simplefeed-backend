@@ -10,6 +10,10 @@ export const LikeSchema = new EntitySchema<Like>({
       type: String,
       primary: true,
     },
+    unliked: {
+      type: Boolean,
+      default: false,
+    },
     createdAt: {
       type: Date,
       unique: false,
