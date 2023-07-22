@@ -9,12 +9,14 @@ import { FriendRequestSentEventHandler } from './adapters/friend-request-sent.ev
 import { PostLikedEventHandler } from './adapters/post-liked.event-handler';
 import { CommentAddedEventHandler } from './adapters/comment-added.event-handler';
 import { PostCreatedEventHandler } from './adapters/post-created.event-handler';
+import { FriendRequestAcceptedEventHandler } from './adapters/friend-request-accepted.event-handler';
 
 const EVENT_HANDLERS = [
 	FriendRequestSentEventHandler,
 	PostLikedEventHandler,
 	CommentAddedEventHandler,
-	PostCreatedEventHandler
+	PostCreatedEventHandler,
+	FriendRequestAcceptedEventHandler
 ]
 
 @Module({

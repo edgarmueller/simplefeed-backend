@@ -21,7 +21,8 @@ export class FriendRequestSentEventHandler {
 			opened: false,
   		viewed: false,
   		type: 'friend-request-sent',
-		  resourceId: event.friendRequest.id
+		  resourceId: event.friendRequest.id,
+			link: '/friends'
 		}))
 	}
 }

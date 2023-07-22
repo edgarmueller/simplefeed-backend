@@ -75,7 +75,7 @@ export class FriendRequestRepository {
   }
 
   async delete(friendRequest: FriendRequest) {
-    await this.friendRequestsRepository.remove(friendRequest);
+    await this.friendRequestsRepository.softDelete(friendRequest.id);
     DomainEvents.dispatchEventsForAggregate(friendRequest.id, this.publisher)
   }
 }

@@ -10,6 +10,7 @@ export class FriendRequest extends AggregateRoot {
   from: User
   to: User
   createdAt?: Date
+  deletedAt?: Date 
 
   public static create(props: Props<FriendRequest>, id?: string): FriendRequest {
     const friendRequest = new FriendRequest({ ...props }, id)
