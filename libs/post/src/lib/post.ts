@@ -52,7 +52,10 @@ export class Post extends AggregateRoot {
       this.likes = [];
     }
     this.likes.push(like);
-    this.emitDomainEvent(new PostLikedEvent(this, likedBy));
+    // don't emit event if author liked their own post
+    if (this.author.id !== likedBy.id) {
+      this.emitDomainEvent(new PostLikedEvent(this, likedBy));
+    }
     return like;
   }
 
