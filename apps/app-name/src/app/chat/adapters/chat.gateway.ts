@@ -1,4 +1,4 @@
-import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,9 +9,8 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { AuthService } from '@simplefeed/auth';
-import { ChatUsecases, Message } from '@simplefeed/chat';
+import { ChatUsecases, GetConversationDto, GetMessageDto, Message } from '@simplefeed/chat';
 import { Server, Socket } from 'socket.io';
-import { GetConversationDto, GetMessageDto } from '@simplefeed/chat';
 import { WebsocketExceptionsFilter } from '../websocket.exception-filter';
 
 @WebSocketGateway({
@@ -23,6 +22,9 @@ import { WebsocketExceptionsFilter } from '../websocket.exception-filter';
 @UseFilters(WebsocketExceptionsFilter)
 @UsePipes(new ValidationPipe({ transform: true }))
 export class ChatGateway implements OnGatewayConnection {
+
+  private readonly logger = new Logger(ChatGateway.name)
+
   @WebSocketServer()
   server: Server
 
@@ -42,6 +44,23 @@ export class ChatGateway implements OnGatewayConnection {
     }
   }
 
+  @SubscribeMessage('join_conversation')
+  async joinConversation(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody(new ValidationPipe({ transform: true })) body: any
+  ) {
+    try {
+      const user = await this.authService.getUserFromSocket(socket)
+      const conversation = await this.usecases.findConversationById(
+        body.conversationId,
+        user.id
+      )
+      await socket.join(conversation.id)
+    } catch (error) {
+      throw new WsException('Invalid credentials.')
+    }
+  }
+
   // FIXME: usecase?
   @SubscribeMessage('send_message')
   async listenForMessages(
@@ -49,6 +68,7 @@ export class ChatGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket
   ) {
     try {
+      this.logger.log('message received', rawBody)
       const body = JSON.parse(rawBody)
       const author = await this.authService.getUserFromSocket(socket)
       // dont load all messages

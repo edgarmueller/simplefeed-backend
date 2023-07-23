@@ -9,6 +9,7 @@ export class GetNotificationDto {
 		createdAt: Date;
 		message: string;
 		link: string;
+		type: string;
 
     static fromDomain(notification: Notification): GetNotificationDto {
       return {
@@ -20,6 +21,7 @@ export class GetNotificationDto {
 				createdAt: notification.createdAt,
 				message: notification.content,
 				link: notification.link,
+				type: notification.type
 			}
     }
 }

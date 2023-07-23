@@ -10,6 +10,7 @@ import { PostLikedEventHandler } from './adapters/post-liked.event-handler';
 import { CommentAddedEventHandler } from './adapters/comment-added.event-handler';
 import { PostCreatedEventHandler } from './adapters/post-created.event-handler';
 import { FriendRequestAcceptedEventHandler } from './adapters/friend-request-accepted.event-handler';
+import { ChatModule } from '@simplefeed/chat';
 
 const EVENT_HANDLERS = [
 	FriendRequestSentEventHandler,
@@ -20,7 +21,10 @@ const EVENT_HANDLERS = [
 ]
 
 @Module({
-	imports: [ConfigModule, NotificationCoreModule,
+	imports: [
+		ConfigModule, 
+		NotificationCoreModule,
+		ChatModule,
     AuthCoreModule.registerAsync({
       imports: [ConfigModule],
 			useClass: AuthConfigFactory,

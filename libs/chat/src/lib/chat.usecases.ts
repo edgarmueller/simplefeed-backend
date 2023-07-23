@@ -1,10 +1,10 @@
-import { UsersRepository } from '@simplefeed/user';
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
-import { ConversationRepository } from './conversation.repository';
+import { UsersRepository } from '@simplefeed/user';
 import { Conversation } from './conversation';
-import { Message } from './message';
+import { ConversationRepository } from './conversation.repository';
 import { GetConversationDto } from './dto/get-conversation.dto';
 import { GetMessageDto } from './dto/get-message.dto';
+import { Message } from './message';
 
 @Injectable()
 export class ChatUsecases {
@@ -18,7 +18,6 @@ export class ChatUsecases {
   async createConversation(participantIds: string[]) {
     const existingConversation = await this.conversationsRepo.findConversationByParticipantIds(participantIds);
     if (existingConversation) {
-      console.log('existing conversation', existingConversation);
       return existingConversation;
     }
     const conversation = Conversation.create({
@@ -47,7 +46,11 @@ export class ChatUsecases {
     return conversations.map(GetConversationDto.fromDomain);
   }
 
-  async findConversationsByUserIdWithmessage(userId: string): Promise<GetConversationDto[]> {
+  async findConversationsByUserIds(userIds: string[]): Promise<Conversation> {
+    return this.conversationsRepo.findConversationByParticipantIds(userIds);
+  }
+
+  async findConversationsByUserIdWithMessages(userId: string): Promise<GetConversationDto[]> {
     const conversations = await this.conversationsRepo.findByUserIdWithMessages(userId);
     return conversations.map(GetConversationDto.fromDomain);
   

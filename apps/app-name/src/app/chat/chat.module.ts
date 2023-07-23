@@ -8,10 +8,12 @@ import { ChatController } from "./chat.controller";
 import { ChatGateway } from "./adapters/chat.gateway";
 import { FriendRequestAcceptedEventHandler } from "./event-handlers/friend-request-accepted.event-handler";
 import { MessagesGateway } from "./messages.gateway";
+import { NotificationModule } from "@simplefeed/notification";
 
 @Module({
 	imports: [
 		ChatCoreModule,
+		NotificationModule,
 		UserModule,
     AuthCoreModule.registerAsync({
       imports: [ConfigModule],
