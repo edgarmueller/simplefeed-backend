@@ -35,7 +35,8 @@ export class ChatGateway implements OnGatewayConnection {
 
   async handleConnection(socket: Socket) {
     try {
-      const user = await this.authService.getUserFromSocket(socket)
+      const authHeader = socket.handshake.headers.authorization
+      const user = await this.authService.getUserFromHeader(authHeader)
       const conversations = await this.usecases.findConversationsByUserId(user.id)
       await socket.join(conversations.map((c) => c.id))
     } catch (error) {
@@ -50,7 +51,8 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) body: any
   ) {
     try {
-      const user = await this.authService.getUserFromSocket(socket)
+      const authHeader = socket.handshake.headers.authorization
+      const user = await this.authService.getUserFromHeader(authHeader)
       const conversation = await this.usecases.findConversationById(
         body.conversationId,
         user.id
@@ -68,27 +70,27 @@ export class ChatGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      this.logger.log('message received', rawBody)
       const body = JSON.parse(rawBody)
-      const author = await this.authService.getUserFromSocket(socket)
+      const author = await this.authService.getUserFromHeader(body.auth.Authorization)
       // dont load all messages
       const conversation = await this.usecases.findConversationById(
-        body.conversationId,
+        body.message.conversationId,
         author.id
       )
       const msg = await this.usecases.addMessageToConversation(
         conversation,
         Message.create({
-          content: body.content,
+          content: body.message.content,
           authorId: author.id,
           recipientId: conversation.userIds.find((id) => id !== author.id),
           isRead: false,
-          conversationId: body.conversationId,
+          conversationId: body.message.conversationId,
         })
       )
       // push into usecase, or use events?
       this.server.to(conversation.id).emit('receive_message', GetMessageDto.fromDomain(msg))
     } catch (error) {
+      this.logger.error(error)
       throw new WsException('Invalid credentials.')
     }
   }
@@ -99,13 +101,14 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) body: any
   ) {
     try {
-      const user = await this.authService.getUserFromSocket(socket)
+      const authHeader = socket.handshake.headers.authorization
+      const user = await this.authService.getUserFromHeader(authHeader)
       const conversation = await this.usecases.findConversationById(
         body.conversationId,
         user.id
       )
       this.usecases.markMessagesAsRead(user.id, conversation.id)
-      // this.server.to(conversation.id).emit('message_read', { conversationId: conversation.id, userId: user.id })
+      this.server.to(conversation.id).emit('message_read', { conversationId: conversation.id, userId: user.id })
     } catch (error) {
       throw new WsException('Invalid credentials.')
     }
@@ -119,7 +122,8 @@ export class ChatGateway implements OnGatewayConnection {
   ) {
     try {
       const parsedBody = body; // JSON.parse(body)
-      const user = await this.authService.getUserFromSocket(socket)
+      const authHeader = socket.handshake.headers.authorization
+      const user = await this.authService.getUserFromHeader(authHeader)
       const conversation = await this.usecases.findConversationById(
         parsedBody.conversationId,
         user.id
@@ -128,7 +132,7 @@ export class ChatGateway implements OnGatewayConnection {
       socket.emit('send_all_messages', GetConversationDto.fromDomain(conversation))
     } catch (error) {
       socket.emit('error', { message: 'Invalid credentials.' })
-      socket.disconnect()
+      socket.disconnect(true)
     }
   }
 }

@@ -161,12 +161,16 @@ export class AuthService {
     }
   }
 
-  async getUserFromSocket(socket: Socket) {
-    const authHeader = socket.handshake.headers.authorization
-    const user = await this.findOneUserByToken(authHeader)
-    if (!user) {
-      throw new WsException('Invalid credentials.')
+  async getUserFromHeader(authHeader: string) {
+    try {
+      this.jwtService.verify(authHeader?.replace('Bearer', '').trim(), { secret: this.options.accessTokenSecret })
+      const user = await this.findOneUserByToken(authHeader)
+      if (!user) {
+        throw new WsException('Invalid credentials.')
+      }
+      return user
+    } catch (error) {
+      throw new WsException(error.message)
     }
-    return user
   }
 }
