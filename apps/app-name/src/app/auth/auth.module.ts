@@ -1,8 +1,7 @@
-import { AuthModule as AuthCoreModule } from '@simplefeed/auth'
+import { AuthModule as AuthCoreModule, AuthConfigFactory } from '@simplefeed/auth'
 import { UserModule as UserCoreModule } from '@simplefeed/user'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { AuthConfigFactory } from './auth.config.factory'
 import { AuthController } from './auth.controller'
 import { AuthUsecases } from '../../../../../libs/auth/src/lib/auth.usecases'
 

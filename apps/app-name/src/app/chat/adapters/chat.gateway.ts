@@ -1,17 +1,22 @@
 import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
+  BaseWsExceptionFilter,
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
+  WsException
 } from '@nestjs/websockets';
 import { AuthService } from '@simplefeed/auth';
-import { ChatUsecases, GetConversationDto, GetMessageDto, Message } from '@simplefeed/chat';
+import { ChatUsecases } from '@simplefeed/chat';
 import { Server, Socket } from 'socket.io';
-import { WebsocketExceptionsFilter } from '../websocket.exception-filter';
+import { Incoming, Outgoing } from './chat.constants';
+import { JoinConversationDto } from './dto/join-conversation.dto';
+import { MarkMessageAsReadDto } from './dto/mark-message-as-read.dto';
+import { RequestAllMessagesDto } from './dto/request-all-messages.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @WebSocketGateway({
   cors: {
@@ -19,7 +24,7 @@ import { WebsocketExceptionsFilter } from '../websocket.exception-filter';
     methods: ['GET', 'POST'],
   },
 })
-@UseFilters(WebsocketExceptionsFilter)
+@UseFilters(BaseWsExceptionFilter)
 @UsePipes(new ValidationPipe({ transform: true }))
 export class ChatGateway implements OnGatewayConnection {
 
@@ -36,103 +41,89 @@ export class ChatGateway implements OnGatewayConnection {
   async handleConnection(socket: Socket) {
     try {
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
+      const user = await this.authService.findOneUserByToken(authHeader)
       const conversations = await this.usecases.findConversationsByUserId(user.id)
       await socket.join(conversations.map((c) => c.id))
     } catch (error) {
-      socket.emit('error', { message: 'Invalid credentials.' })
+      // we can't use WsException here, see https://github.com/nestjs/nest/issues/336
+      this.logger.error(error)
       socket.disconnect()
     }
   }
 
-  @SubscribeMessage('join_conversation')
+  @SubscribeMessage(Incoming.JOIN_CONVERSATION)
   async joinConversation(
     @ConnectedSocket() socket: Socket,
-    @MessageBody(new ValidationPipe({ transform: true })) body: any
+    @MessageBody(new ValidationPipe({ transform: true })) dto: JoinConversationDto
   ) {
     try {
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
+      const user = await this.authService.findOneUserByToken(authHeader)
       const conversation = await this.usecases.findConversationById(
-        body.conversationId,
+        dto.conversationId, 
         user.id
       )
       await socket.join(conversation.id)
     } catch (error) {
-      throw new WsException('Invalid credentials.')
+      this.logger.error(error)
+      throw new WsException(error.message)
     }
   }
 
-  // FIXME: usecase?
-  @SubscribeMessage('send_message')
+  @SubscribeMessage(Incoming.SEND_MESSAGE)
   async listenForMessages(
-    @MessageBody(new ValidationPipe({ transform: true })) rawBody: any,
-    @ConnectedSocket() socket: Socket
+    @MessageBody() dto: SendMessageDto,
   ) {
     try {
-      const body = JSON.parse(rawBody)
-      const author = await this.authService.getUserFromHeader(body.auth.Authorization)
-      // dont load all messages
-      const conversation = await this.usecases.findConversationById(
-        body.message.conversationId,
-        author.id
-      )
+      const author = await this.authService.findOneUserByToken(dto.auth.Authorization)
+      const conversationId = dto.message.conversationId
       const msg = await this.usecases.addMessageToConversation(
-        conversation,
-        Message.create({
-          content: body.message.content,
-          authorId: author.id,
-          recipientId: conversation.userIds.find((id) => id !== author.id),
-          isRead: false,
-          conversationId: body.message.conversationId,
-        })
+        conversationId,
+        author.id,
+        dto.message.content
       )
-      // push into usecase, or use events?
-      this.server.to(conversation.id).emit('receive_message', GetMessageDto.fromDomain(msg))
+      this.server.to(conversationId).emit(Outgoing.RECEIVE_MESSAGE, msg)
     } catch (error) {
       this.logger.error(error)
-      throw new WsException('Invalid credentials.')
+      throw new WsException(error.message)
     }
   }
 
-  @SubscribeMessage('mark_as_read')
+  @SubscribeMessage(Incoming.MARK_AS_READ)
   async markAsRead(
     @ConnectedSocket() socket: Socket,
-    @MessageBody(new ValidationPipe({ transform: true })) body: any
+    @MessageBody(new ValidationPipe({ transform: true })) dto: MarkMessageAsReadDto
   ) {
     try {
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
-      const conversation = await this.usecases.findConversationById(
-        body.conversationId,
-        user.id
-      )
-      this.usecases.markMessagesAsRead(user.id, conversation.id)
-      this.server.to(conversation.id).emit('message_read', { conversationId: conversation.id, userId: user.id })
+      const conversationId = dto.conversationId
+      const user = await this.authService.findOneUserByToken(authHeader)
+      await this.usecases.markMessagesAsRead(user, conversationId)
+      this.server.to(conversationId).emit(Outgoing.MESSAGE_READ, { conversationId, userId: user.id })
     } catch (error) {
-      throw new WsException('Invalid credentials.')
+      this.logger.error(error)
+      // TODO: is this the right way to handle WS errors?
+      throw new WsException(error.message)
     }
   }
 
-  // FIXME: usecase?
-  @SubscribeMessage('request_all_messages')
+  @SubscribeMessage(Incoming.REQUEST_ALL_MESSAGES)
   async requestAllMessages(
     @ConnectedSocket() socket: Socket,
-    @MessageBody(new ValidationPipe({ transform: true })) body: any
+    @MessageBody() dto: RequestAllMessagesDto
   ) {
     try {
-      const parsedBody = body; // JSON.parse(body)
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
+      const user = await this.authService.findOneUserByToken(authHeader)
       const conversation = await this.usecases.findConversationById(
-        parsedBody.conversationId,
+        dto.conversationId,
         user.id
       );
-
-      socket.emit('send_all_messages', GetConversationDto.fromDomain(conversation))
+      socket.emit(Outgoing.SEND_ALL_MESSAGES, conversation)
     } catch (error) {
-      socket.emit('error', { message: 'Invalid credentials.' })
+      this.logger.error(error)
       socket.disconnect(true)
+      throw new WsException(error.message)
     }
   }
 }

@@ -28,6 +28,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     whitelist: true
   }))
+
   await createSchemaIfNecessary(app)
   await app.listen(port)
   Logger.log(

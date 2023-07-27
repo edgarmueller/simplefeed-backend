@@ -1,4 +1,4 @@
-import { Get, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { EventsHandler } from '@nestjs/cqrs';
 import {
   ConnectedSocket,
@@ -43,7 +43,7 @@ export class NotificationsGateway implements OnGatewayConnection {
   async handleConnection(socket: Socket) {
     try {
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
+      const user = await this.authService.findOneUserByToken(authHeader)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(user.id)
       socket.join(`notifications-${user.id}`)
       await socket.to(`notifications-${user.id}`).emit('send_all_notifications', notifications)
@@ -60,11 +60,9 @@ export class NotificationsGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      console.log({ rawBody })
       const body = rawBody;
-      console.log({ body })
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
+      const user = await this.authService.findOneUserByToken(authHeader)
       const readNotification = await this.usecases.markNotificationAsRead(body.notificationId);
       this.logger.log(`User ${user.id} marked notification ${body.notificationId} as read`)
       this.logger.log(`body: ${JSON.stringify(body)}`)
@@ -81,7 +79,7 @@ export class NotificationsGateway implements OnGatewayConnection {
   ) {
     try {
       const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.getUserFromHeader(authHeader)
+      const user = await this.authService.findOneUserByToken(authHeader)
       this.logger.log(`User ${user.id} requested all notifications`)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(
         user.id

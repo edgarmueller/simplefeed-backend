@@ -14,5 +14,4 @@ export class ChatController {
 	async getConversations(@Req() req: RequestWithUser): Promise<GetConversationDto[]> {
 		return this.usecases.findConversationsByUserIdWithMessages(req.user.id);
 	}
-
 }

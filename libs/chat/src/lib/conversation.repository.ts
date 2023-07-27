@@ -1,5 +1,5 @@
 import { DomainEvents } from '@kittgen/shared-ddd'
-import { Injectable } from '@nestjs/common'
+import { ForbiddenException, Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -56,7 +56,16 @@ export class ConversationRepository {
     return savedMessages
   }
 
-  async findOneByIdWithMessages(id: string): Promise<Conversation> {
+  async findOneByIdAndUserIdOrFail(conversationId: string, userId: string): Promise<Conversation> {
+    const conversation = await this.findOneByIdWithMessagesOrFail(conversationId)
+    if (!conversation.userIds.includes(userId)) {
+      // TODO: shortcut as no domain error
+      throw new ForbiddenException()
+    }
+    return conversation
+  }
+
+  async findOneByIdWithMessagesOrFail(id: string): Promise<Conversation> {
     return this.conversationRepository.findOne({
       where: { id },
       relations: ['messages'],
@@ -98,15 +107,6 @@ export class ConversationRepository {
         userIds: JSON.stringify(participantIds),
       })
       .getOne()
-  }
-
-  findUnreadMessageByUserId(userId: string): Promise<Message[]> {
-    return this.messageRepository.find({
-      where: {
-        recipientId: userId,
-        isRead: false,
-      },
-    })
   }
 
   findUnreadMessageByUserAndConversationId(
