@@ -4,4 +4,8 @@ export class RequestAllMessagesDto {
 	@IsString()
 	@IsNotEmpty()
 	conversationId: string
+
+	@IsString()
+	@IsNotEmpty()
+	auth: string
 }

@@ -4,4 +4,8 @@ export class MarkMessageAsReadDto {
 	@IsString()
 	@IsNotEmpty()
 	conversationId: string
+
+	@IsString()
+	@IsNotEmpty()
+	auth: string
 }

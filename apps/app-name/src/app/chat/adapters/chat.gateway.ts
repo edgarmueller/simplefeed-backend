@@ -46,6 +46,7 @@ export class ChatGateway implements OnGatewayConnection {
       await socket.join(conversations.map((c) => c.id))
     } catch (error) {
       // we can't use WsException here, see https://github.com/nestjs/nest/issues/336
+      this.logger.error(`[handleConnection] ${error}`)
       this.logger.error(error)
       socket.disconnect()
     }
@@ -57,14 +58,14 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) dto: JoinConversationDto
   ) {
     try {
-      const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.findOneUserByToken(authHeader)
+      const user = await this.authService.findOneUserByToken(dto.auth)
       const conversation = await this.usecases.findConversationById(
         dto.conversationId, 
         user.id
       )
       await socket.join(conversation.id)
     } catch (error) {
+      this.logger.error(`[joinConversation] ${error}`)
       this.logger.error(error)
       throw new WsException(error.message)
     }
@@ -75,7 +76,7 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody() dto: SendMessageDto,
   ) {
     try {
-      const author = await this.authService.findOneUserByToken(dto.auth.Authorization)
+      const author = await this.authService.findOneUserByToken(dto.auth)
       const conversationId = dto.message.conversationId
       const msg = await this.usecases.addMessageToConversation(
         conversationId,
@@ -84,7 +85,7 @@ export class ChatGateway implements OnGatewayConnection {
       )
       this.server.to(conversationId).emit(Outgoing.RECEIVE_MESSAGE, msg)
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error(`[listenForMessages] ${error}`)
       throw new WsException(error.message)
     }
   }
@@ -95,14 +96,12 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) dto: MarkMessageAsReadDto
   ) {
     try {
-      const authHeader = socket.handshake.headers.authorization
       const conversationId = dto.conversationId
-      const user = await this.authService.findOneUserByToken(authHeader)
+      const user = await this.authService.findOneUserByToken(dto.auth)
       await this.usecases.markMessagesAsRead(user, conversationId)
       this.server.to(conversationId).emit(Outgoing.MESSAGE_READ, { conversationId, userId: user.id })
     } catch (error) {
-      this.logger.error(error)
-      // TODO: is this the right way to handle WS errors?
+      this.logger.error(`[markAsRead] ${error}`)
       throw new WsException(error.message)
     }
   }
@@ -113,15 +112,14 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody() dto: RequestAllMessagesDto
   ) {
     try {
-      const authHeader = socket.handshake.headers.authorization
-      const user = await this.authService.findOneUserByToken(authHeader)
+      const user = await this.authService.findOneUserByToken(dto.auth)
       const conversation = await this.usecases.findConversationById(
         dto.conversationId,
         user.id
       );
       socket.emit(Outgoing.SEND_ALL_MESSAGES, conversation)
     } catch (error) {
-      this.logger.error(error)
+      this.logger.error(`[requestAllMessageserror] ${error}`)
       socket.disconnect(true)
       throw new WsException(error.message)
     }

@@ -45,9 +45,7 @@ export class ConversationRepository {
       return []
     }
     const savedMessages = await this.messageRepository.save(messages)
-    console.log('savedMessages', savedMessages)
     runOnTransactionCommit(() => {
-      console.log('dispatching ', savedMessages[0].conversationId, savedMessages[0].conversation)
       DomainEvents.dispatchEventsForAggregate(
         savedMessages[0].conversationId,
         this.publisher

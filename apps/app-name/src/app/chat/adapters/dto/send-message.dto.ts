@@ -15,17 +15,12 @@ export class MessageDto {
 	authorId: string
 }
 
-export class AuthDto {
-	@IsNotEmpty()
-	Authorization: string
-}
-
 export class SendMessageDto {
 	@IsObject()
 	@Type(() => MessageDto)
 	message: MessageDto
 
-	@IsObject()
-	@Type(() => AuthDto)
-	auth: AuthDto
+	@IsString()
+	@IsNotEmpty()
+	auth: string
 }
