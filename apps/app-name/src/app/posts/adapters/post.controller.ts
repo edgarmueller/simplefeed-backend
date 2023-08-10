@@ -18,7 +18,7 @@ import { SubmitPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/
 import { PostUsecases } from '../../../../../../libs/post/src/lib/usecases/post.usecases'
 import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
 import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
-import { PaginatedPostQueryDto } from './paginated-post-query.dto'
+import { PaginatedPostQueryDto } from './dto/paginated-post-query.dto'
 
 @Controller('posts')
 export class PostController {

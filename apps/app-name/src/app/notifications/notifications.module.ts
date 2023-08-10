@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AuthModule as AuthCoreModule, AuthConfigFactory } from "@simplefeed/auth";
 import { ConfigModule } from '@nestjs/config';
-import { NotificationModule as NotificationCoreModule } from '@simplefeed/notification';
-import { NotificationsController } from './notifications.controller';
-import { NotificationsGateway } from './adapters/notifications.gateway';
-import { FriendRequestSentEventHandler } from './adapters/friend-request-sent.event-handler';
-import { PostLikedEventHandler } from './adapters/post-liked.event-handler';
-import { CommentAddedEventHandler } from './adapters/comment-added.event-handler';
-import { PostCreatedEventHandler } from './adapters/post-created.event-handler';
-import { FriendRequestAcceptedEventHandler } from './adapters/friend-request-accepted.event-handler';
+import { AuthConfigFactory, AuthModule as AuthCoreModule } from "@simplefeed/auth";
 import { ChatModule } from '@simplefeed/chat';
+import { NotificationModule as NotificationCoreModule } from '@simplefeed/notification';
+import { CommentAddedEventHandler } from './adapters/event-handlers/comment-added.event-handler';
+import { FriendRequestAcceptedEventHandler } from './adapters/event-handlers/friend-request-accepted.event-handler';
+import { FriendRequestSentEventHandler } from './adapters/event-handlers/friend-request-sent.event-handler';
+import { PostCreatedEventHandler } from './adapters/event-handlers/post-created.event-handler';
+import { PostLikedEventHandler } from './adapters/event-handlers/post-liked.event-handler';
+import { NotificationsController } from './adapters/notifications.controller';
+import { NotificationsGateway } from './adapters/notifications.gateway';
 
 const EVENT_HANDLERS = [
 	FriendRequestSentEventHandler,

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { SearchModule as SearchCoreModule } from '@simplefeed/search'
-import { SearchController } from './search.controller'
+import { SearchController } from './adapters/search.controller'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({

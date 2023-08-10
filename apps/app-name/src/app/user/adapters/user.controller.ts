@@ -1,5 +1,3 @@
-import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
-import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user'
 import {
   Body,
   Controller,
@@ -7,16 +5,17 @@ import {
   NotFoundException,
   Param,
   Patch,
-  Query,
   Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
+import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user'
 import 'multer'
-import { FileSizeValidationPipe } from '../infra/file-size-validation.pipe'
 import { UpdateUserDto } from './update-user.dto'
+import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe'
 
 @Controller('users')
 export class UserController {

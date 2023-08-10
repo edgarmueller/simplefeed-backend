@@ -1,6 +1,6 @@
 import { UserModule as UserCoreModule, UserUsecases } from '@simplefeed/user';
 import { Module } from '@nestjs/common';
-import { UserController } from './user.controller';
+import { UserController } from './adapters/user.controller';
 
 @Module({
 	controllers: [UserController],
