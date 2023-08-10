@@ -1,25 +1,24 @@
-import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common'
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
 import { Pagination } from 'nestjs-typeorm-paginate'
-import { CommentPostDto } from '../../../../../libs/post/src/lib/usecases/dto/comment-post.dto'
-import { GetCommentDto } from '../../../../../libs/post/src/lib/usecases/dto/get-comment.dto'
-import { SubmitPostDto } from '../../../../../libs/post/src/lib/usecases/dto/submit-post.dto'
-import { PostUsecases } from '../../../../../libs/post/src/lib/usecases/post.usecases'
-import { PaginatedQueryDto } from '../infra/paginated-query.dto'
-import { GetPostDto } from '../../../../../libs/post/src/lib/usecases/dto/get-post.dto'
-import { PaginatedQueryPipe } from '../infra/paginated-query.pipe'
+import { CommentPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/comment-post.dto'
+import { GetCommentDto } from '../../../../../../libs/post/src/lib/usecases/dto/get-comment.dto'
+import { GetPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/get-post.dto'
+import { SubmitPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/submit-post.dto'
+import { PostUsecases } from '../../../../../../libs/post/src/lib/usecases/post.usecases'
+import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
+import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
+import { PaginatedPostQueryDto } from './paginated-post-query.dto'
 
 @Controller('posts')
 export class PostController {
@@ -35,14 +34,18 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   getFeed(
     @Req() req: RequestWithUser,
-    @Query('userId') userId?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10
+    @Query() paginationQueryDto: PaginatedPostQueryDto,
   ): Promise<Pagination<GetPostDto>> {
-    if (userId) {
-      return this.usecases.getUserActivityFeed(userId, { page, limit })
+    if (paginationQueryDto.userId) {
+      return this.usecases.getUserActivityFeed(paginationQueryDto.userId, {
+        page: paginationQueryDto.page,
+        limit: paginationQueryDto.limit,
+      })
     }
-    return this.usecases.getPersonalFeed(req.user.id, { page, limit })
+    return this.usecases.getPersonalFeed(req.user.id, {
+      page: paginationQueryDto.page,
+      limit: paginationQueryDto.limit,
+    })
   }
 
   @Get(':postId')
@@ -51,7 +54,7 @@ export class PostController {
     @Req() req: RequestWithUser,
     @Param('postId') postId: string
   ): Promise<GetPostDto> {
-    return this.usecases.getPost(postId, req.user.id);
+    return this.usecases.getPost(postId, req.user.id)
   }
 
   @Post(':postId/comments')
