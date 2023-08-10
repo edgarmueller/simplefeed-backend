@@ -9,7 +9,7 @@
     "test:app": "PROFILE=test NODE_ENV=test nx test app --parallel=false --skip-nx-cache",
     "infra:up": "docker compose up -d",
     "infra:down": "docker compose down",
-    "schema:create": "ts-node --project tsconfig.script.json apps/app-name/scripts/create-schema",
+    "schema:create": "ts-node --project tsconfig.script.json apps/simplefeed/scripts/create-schema",
     "lint": "eslint '**/*.ts'",
     "lint:fix": "npm run lint -- --fix"
   },

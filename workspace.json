@@ -5,7 +5,7 @@
     "app": {
       "root": "apps/app",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",
-      "sourceRoot": "apps/app-name/src",
+      "sourceRoot": "apps/simplefeed/src",
       "projectType": "application",
       "targets": {
         "build": {
@@ -13,9 +13,9 @@
           "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/apps/app",
-            "main": "apps/app-name/src/main.ts",
-            "tsConfig": "apps/app-name/tsconfig.app.json",
-            "assets": ["apps/app-name/src/assets"]
+            "main": "apps/simplefeed/src/main.ts",
+            "tsConfig": "apps/simplefeed/tsconfig.app.json",
+            "assets": ["apps/simplefeed/src/assets"]
           },
           "configurations": {
             "production": {
@@ -24,8 +24,8 @@
               "inspect": false,
               "fileReplacements": [
                 {
-                  "replace": "apps/app-name/src/environments/environment.ts",
-                  "with": "apps/app-name/src/environments/environment.prod.ts"
+                  "replace": "apps/simplefeed/src/environments/environment.ts",
+                  "with": "apps/simplefeed/src/environments/environment.prod.ts"
                 }
               ]
             }
@@ -41,20 +41,20 @@
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["apps/app-name/**/*.ts"]
+            "lintFilePatterns": ["apps/simplefeed/**/*.ts"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/app"],
           "options": {
-            "jestConfig": "apps/app-name/jest.config.ts",
+            "jestConfig": "apps/simplefeed/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
       "tags": [],
-      "configFilePath": "apps/app-name/project.json"
+      "configFilePath": "apps/simplefeed/project.json"
     },
     "auth": {
       "root": "libs/auth",

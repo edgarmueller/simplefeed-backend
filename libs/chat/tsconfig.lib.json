@@ -6,6 +6,6 @@
     "types": [],
     "target": "es6"
   },
-  "include": ["**/*.ts", "../../apps/app-name/src/app/chat/chat.controller.ts"],
+  "include": ["**/*.ts", "../../apps/simplefeed/src/app/chat/chat.controller.ts"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
 }
