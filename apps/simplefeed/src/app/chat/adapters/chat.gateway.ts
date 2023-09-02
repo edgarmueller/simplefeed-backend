@@ -17,6 +17,7 @@ import { JoinConversationDto } from './dto/join-conversation.dto';
 import { MarkMessageAsReadDto } from './dto/mark-message-as-read.dto';
 import { RequestAllMessagesDto } from './dto/request-all-messages.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { RequestMessagesDto } from './dto/request-messages.dto';
 
 @WebSocketGateway({
   cors: {
@@ -120,6 +121,26 @@ export class ChatGateway implements OnGatewayConnection {
       socket.emit(Outgoing.SEND_ALL_MESSAGES, conversation)
     } catch (error) {
       this.logger.error(`[requestAllMessageserror] ${error}`)
+      socket.disconnect(true)
+      throw new WsException(error.message)
+    }
+  }
+
+  @SubscribeMessage(Incoming.REQUEST_MESSAGES)
+  async requestMessages(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() dto: RequestMessagesDto
+  ) {
+    try {
+      const user = await this.authService.findOneUserByToken(dto.auth)
+      const conversation = await this.usecases.findConversationById(
+        dto.conversationId,
+        user.id,
+        dto.page
+      );
+      socket.emit(Outgoing.SEND_MESSAGES, conversation)
+    } catch (error) {
+      this.logger.error(`[requestMessagesError] ${error}`)
       socket.disconnect(true)
       throw new WsException(error.message)
     }

@@ -63,16 +63,27 @@ export class ConversationRepository {
     return conversation
   }
 
-  async findOneByIdWithMessagesOrFail(id: string): Promise<Conversation> {
-    return this.conversationRepository.findOne({
+  // FIXME: page size
+  async findOneByIdWithMessagesOrFail(id: string, skip?: number, pageSize = 10): Promise<Conversation> {
+    const conv = await this.conversationRepository.findOne({
       where: { id },
-      relations: ['messages'],
-      order: {
-        messages: {
-          createdAt: 'ASC',
+    })
+    conv.messages = await this.messageRepository.find({
+      where: {
+        conversation: {
+          id,
         }
       },
-    })
+      order: {
+        createdAt: 'DESC',
+      },
+      skip: skip ? (skip * pageSize) : 0,
+      take: pageSize,
+    });
+    conv.messages.forEach((message) => {
+      message.conversationId = conv.id;
+    });
+    return conv;
   }
 
   findByUserId(userId: string) {
