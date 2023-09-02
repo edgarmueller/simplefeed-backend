@@ -22,6 +22,11 @@ export const UserSchema = new EntitySchema<User>({
       nullable: false,
       name: 'password',
     },
+    deletedAt: {
+      type: Date,
+      name: 'deleted_at',
+      deleteDate: true,
+    },
     createdAt: {
       type: Date,
       unique: false,

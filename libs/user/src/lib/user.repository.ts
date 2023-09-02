@@ -129,7 +129,7 @@ export class UsersRepository {
     }
   }
 
-  async findOneByEmail(email: string): Promise<User> {
+  async findOneByEmailOrFail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
       relations: { profile: true },
@@ -148,10 +148,31 @@ export class UsersRepository {
   }
 
   async deleteByEmail(email: string) {
-    const user = await this.findOneByEmail(email)
+    const user = await this.findOneByEmailOrFail(email)
     await this.friendRequestsRepository.delete({
       from: { id: user.id },
     })
     await this.userRepository.delete(user.id)
+  }
+
+  async softDeleteByEmail(email: string) {
+    const user = await this.findOneByEmailOrFail(email)
+    await this.friendRequestsRepository.softDelete({
+      from: { id: user.id },
+    })
+    await this.userRepository.softDelete(user.id)
+    DomainEvents.dispatchEventsForAggregate(user.id, this.publisher)
+  }
+
+  @Transactional()
+  async restoreByEmail(email: string) {
+    await this.userRepository.restore({ email })
+    const user = await this.findOneByEmailOrFail(email);
+    user.restore();
+    await this.friendRequestsRepository.restore({
+      from: { id: user.id },
+    })
+    DomainEvents.dispatchEventsForAggregate(user.id, this.publisher)
+    return user;
   }
 }

@@ -1,21 +1,19 @@
 import {
   Body,
-  Controller,
-  Get,
+  Controller, Delete, Get,
   NotFoundException,
   Param,
-  Patch,
-  Req,
+  Patch, Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
-} from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
-import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user'
-import 'multer'
-import { UpdateUserDto } from './update-user.dto'
-import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe'
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
+import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user';
+import 'multer';
+import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe';
+import { UpdateUserDto } from './update-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -55,5 +53,11 @@ export class UserController {
       firstName: body.firstName,
       lastName: body.lastName
     }) 
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  async closeAccount(@Req() req: RequestWithUser): Promise<void> {
+    await this.usecases.closeAccount(req.user)
   }
 }

@@ -100,16 +100,12 @@ export class UserUsecases {
     return GetMeDto.fromDomain(me);
   }
 
-  // async updateUserInfo(user: User, updateUserDto: UpdateUserDto): Promise<User> {
-  //   if (updateUserDto.user.email) {
-  //     const hashedPassword = await this.authService.hashPassword(updateUserDto.user.password)
-  //     user.updateAuthInfo(updateUserDto.user.email, hashedPassword)
-  //   }
-  //   user.updateProfile({
-  //     username: updateUserDto.user.username,
-  //     bio: updateUserDto.user.bio,
-  //     image: updateUserDto.user.image
-  //   })
-  //   return await this.userRepository.update(user)
-  // }
+  async closeAccount(user: User) {
+    user.close()
+    await this.userRepository.softDeleteByEmail(user.email)
+  }
+
+  async reactivateAccount(email: string) {
+    await this.userRepository.restoreByEmail(email)
+  }
 }

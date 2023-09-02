@@ -2,7 +2,7 @@ import { DomainEvents } from '@kittgen/shared-ddd'
 import { ForbiddenException, Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 import { Transactional, runOnTransactionCommit } from 'typeorm-transactional'
 import { Conversation } from './conversation'
 import { Message } from './message'
@@ -54,8 +54,13 @@ export class ConversationRepository {
     return savedMessages
   }
 
-  async findOneByIdAndUserIdOrFail(conversationId: string, userId: string): Promise<Conversation> {
-    const conversation = await this.findOneByIdWithMessagesOrFail(conversationId)
+  async findOneByIdAndUserIdOrFail(
+    conversationId: string,
+    userId: string
+  ): Promise<Conversation> {
+    const conversation = await this.findOneByIdWithMessagesOrFail(
+      conversationId
+    )
     if (!conversation.userIds.includes(userId)) {
       // TODO: shortcut as no domain error
       throw new ForbiddenException()
@@ -64,7 +69,11 @@ export class ConversationRepository {
   }
 
   // FIXME: page size
-  async findOneByIdWithMessagesOrFail(id: string, skip?: number, pageSize = 10): Promise<Conversation> {
+  async findOneByIdWithMessagesOrFail(
+    id: string,
+    skip?: number,
+    pageSize = 10
+  ): Promise<Conversation> {
     const conv = await this.conversationRepository.findOne({
       where: { id },
     })
@@ -72,18 +81,18 @@ export class ConversationRepository {
       where: {
         conversation: {
           id,
-        }
+        },
       },
       order: {
         createdAt: 'DESC',
       },
-      skip: skip ? (skip * pageSize) : 0,
+      skip: skip ? skip * pageSize : 0,
       take: pageSize,
-    });
+    })
     conv.messages.forEach((message) => {
-      message.conversationId = conv.id;
-    });
-    return conv;
+      message.conversationId = conv.id
+    })
+    return conv
   }
 
   findByUserId(userId: string) {
@@ -134,5 +143,32 @@ export class ConversationRepository {
         conversation: true,
       },
     })
+  }
+
+  async deleteByUserId(userId: string) {
+    const conversations = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .where('user_ids::jsonb @> :userId', {
+        userId: `["${userId}"]`,
+      })
+      .getMany()
+    await this.conversationRepository.softDelete({
+      id: In(conversations.map((c) => c.id)),
+    })
+  }
+
+  async restoreByUserId(userId: string) {
+    try {
+      const conversations = await this.conversationRepository
+        .createQueryBuilder('conversation')
+        .withDeleted()
+        .where('user_ids::jsonb @> :userId', {
+          userId: `["${userId}"]`,
+        })
+        .getMany()
+      await this.conversationRepository.restore(conversations.map((c) => c.id))
+    } catch (error) {
+      console.log({ error })
+    }
   }
 }

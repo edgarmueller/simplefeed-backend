@@ -1,4 +1,3 @@
-import { FriendRequestSent } from './lib/events/friend-request-sent.event';
 export { User } from './lib/user'
 export { UsersRepository } from './lib/user.repository'
 export { UserAlreadyExistsError } from './lib/errors/user-already-exists.error'
@@ -15,3 +14,5 @@ export { GetMeDto } from './lib/dto/get-me.dto';
 export { GetUserDto } from './lib/dto/get-user.dto';
 export { GetFriendRequestDto } from './lib/dto/get-friend-request.dto';
 export { UserCreatedEvent } from './lib/events/user-created.event';
+export { UserClosedEvent } from './lib/events/user-closed.event';
+export { UserReactivatedEvent } from './lib/events/user-reactivated.event';

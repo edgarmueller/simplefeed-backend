@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { User, UsersRepository } from '@simplefeed/user'
+import { User, UserNotFoundError, UsersRepository } from '@simplefeed/user'
 import { JwtService } from '@nestjs/jwt'
 import { Inject, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -36,8 +36,17 @@ export class AuthService {
     email: string,
     plainTextPassword: string
   ): Promise<User> {
+    let user;
     try {
-      const user = await this.userRepo.findOneByEmail(email)
+      user = await this.userRepo.findOneByEmailOrFail(email)
+    } catch (error) {
+      if (error instanceof UserNotFoundError) {
+        user = await this.userRepo.restoreByEmail(email)
+      } else {
+        throw error;
+      }
+    }
+    try {
       await this.verifyPassword(plainTextPassword, user.password)
       return user
     } catch (error) {

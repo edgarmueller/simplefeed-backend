@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
-import { User, UsersRepository } from '@simplefeed/user';
+import { EventsHandler } from '@nestjs/cqrs';
 import { AuthService } from '@simplefeed/auth';
+import { User, UserClosedEvent, UsersRepository } from '@simplefeed/user';
 import { Conversation } from './conversation';
 import { ConversationRepository } from './conversation.repository';
 import { GetConversationDto } from './dto/get-conversation.dto';
@@ -8,6 +9,7 @@ import { GetMessageDto } from './dto/get-message.dto';
 import { Message } from './message';
 
 @Injectable()
+@EventsHandler(UserClosedEvent)
 export class ChatUsecases {
   readonly logger = new Logger(ChatUsecases.name)
 
@@ -73,4 +75,12 @@ export class ChatUsecases {
     const unreadMessages = conversation.markMessagesAsRead(user.id);
     await this.conversationsRepo.saveMessages(unreadMessages);
 	}
+
+  async handleUserClosed(userId: string) {
+    await this.conversationsRepo.deleteByUserId(userId);
+  }
+
+  async handleUserReactivated(userId: string) {
+    await this.conversationsRepo.restoreByUserId(userId);
+  }
 }

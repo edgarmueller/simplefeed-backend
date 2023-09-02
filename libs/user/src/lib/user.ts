@@ -4,6 +4,8 @@ import { FriendRequestSent } from './events/friend-request-sent.event';
 import { UserCreatedEvent } from './events/user-created.event';
 import { FriendRequest } from './friend-request';
 import { Profile } from './profile';
+import { UserClosedEvent } from './events/user-closed.event';
+import { UserReactivatedEvent } from './events/user-reactivated.event';
 
 const PREFIX = 'use'
 export type UserId = string
@@ -14,10 +16,12 @@ export class User extends AggregateRoot {
   password?: string
   createdAt?: Date
   updatedAt?: Date
+  deletedAt?: Date
 
   profile: Profile
   friends?: User[]
   friendRequests?: FriendRequest[]
+  closed?: boolean;
 
   public static create(
     props: Omit<
@@ -90,5 +94,14 @@ export class User extends AggregateRoot {
       const hashedPassword = await bcrypt.hash(password, 10)
       this.password = hashedPassword;
     }
+  }
+
+  close() {
+    this.closed = true;
+    this.emitDomainEvent(new UserClosedEvent(this))
+  }
+
+  restore() {
+    this.emitDomainEvent(new UserReactivatedEvent(this))
   }
 }
