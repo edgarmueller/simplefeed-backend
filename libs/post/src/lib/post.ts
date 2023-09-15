@@ -9,10 +9,22 @@ const PREFIX = 'pos'
 export type PostId = string
 const createPostId = createId(PREFIX)
 
+export enum AttachmentType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+  LINK = 'link'
+}
+
+export type Attachment = {
+  type: AttachmentType
+  url: string
+};
+
 export class Post extends AggregateRoot {
  
   body: string
   author: User 
+  attachments?: Attachment[]
   postedTo?: User
   createdAt?: Date 
   deletedAt?: Date 
@@ -41,7 +53,6 @@ export class Post extends AggregateRoot {
     super(props, id || createPostId());
   }
 
-  // TODO: add domain logic
   like(likedBy: User) {[]
     if (this.hasLikeBy(likedBy)) { 
       return;

@@ -25,6 +25,10 @@ export const PostSchema = new EntitySchema<Post>({
       name: 'deleted_at',
       nullable: true,
       deleteDate: true,
+    },
+    attachments: {
+      type: 'json',
+      nullable: true,
     }
   },
   relations: {

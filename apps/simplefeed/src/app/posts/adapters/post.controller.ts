@@ -27,7 +27,7 @@ export class PostController {
   @Post()
   @UseGuards(JwtAuthGuard)
   submitPost(@Body() dto: SubmitPostDto, @Req() req: RequestWithUser) {
-    return this.usecases.submitPost(dto.body, req.user, dto.toUserId)
+    return this.usecases.submitPost(dto.body, req.user, dto.attachments, dto.toUserId)
   }
 
   @Get()

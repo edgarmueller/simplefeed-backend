@@ -3,7 +3,7 @@ import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { Comment } from '../comment';
-import { Post } from '../post';
+import { Attachment, Post } from '../post';
 import { PostsRepository } from '../post.repository';
 import { DEFAULT_COMMENTS_LIMIT } from './../post.repository';
 import { CommentPostDto } from './dto/comment-post.dto';
@@ -21,6 +21,7 @@ export class PostUsecases {
   async submitPost(
     body: string,
     author: User,
+    attachments?: Attachment[],
     toUserId?: string
   ): Promise<GetPostDto> {
     let postedTo: User | undefined
@@ -35,6 +36,7 @@ export class PostUsecases {
       body,
       postedTo: postedTo,
       author: author,
+      attachments,
     })
     author.profile.incrementPostCount()
     await this.usersRepository.save(author)
