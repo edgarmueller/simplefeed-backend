@@ -1,9 +1,10 @@
+import { S3Service } from '@kittgen/s3';
 import { last } from 'lodash';
 import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { Comment } from '../comment';
-import { Attachment, Post } from '../post';
+import { Attachment, AttachmentType, Post } from '../post';
 import { PostsRepository } from '../post.repository';
 import { DEFAULT_COMMENTS_LIMIT } from './../post.repository';
 import { CommentPostDto } from './dto/comment-post.dto';
@@ -15,13 +16,15 @@ import { PostNotFoundError } from '../errors/post-not-found.error';
 export class PostUsecases {
   constructor(
     readonly usersRepository: UsersRepository,
-    readonly postsRepository: PostsRepository
+    readonly postsRepository: PostsRepository,
+    readonly s3Service: S3Service,
   ) {}
 
   async submitPost(
     body: string,
     author: User,
     attachments?: Attachment[],
+    files: Express.Multer.File[] = [],
     toUserId?: string
   ): Promise<GetPostDto> {
     let postedTo: User | undefined
@@ -32,12 +35,23 @@ export class PostUsecases {
         throw new Error('User not found')
       }
     }
+    // TODO: error handling & do we wanna use event?
+    const uploads = await Promise.all(files.map(file => 
+      this.s3Service.uploadPublicFile(file.buffer, file.originalname)
+    ))
     const post = Post.create({
       body,
       postedTo: postedTo,
       author: author,
-      attachments,
+      attachments: [
+        ...attachments.filter(({ type }) => type !== AttachmentType.IMAGE),
+        ...uploads.map(({ Location }) => ({
+          type: AttachmentType.IMAGE,
+          url: Location,
+        }))
+      ],
     })
+    // TODO: use event?
     author.profile.incrementPostCount()
     await this.usersRepository.save(author)
     const savedPost = await this.postsRepository.savePost(post)

@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from "class-validator";
 import { AttachmentType } from './../../post';
 
 export class PostAttachmentDto {
@@ -8,6 +7,10 @@ export class PostAttachmentDto {
 
 	@IsUrl()
 	url: string;
+
+	@IsString()
+	@IsOptional()
+	image: string
 }
 export class SubmitPostDto {
 	@IsNotEmpty()
@@ -17,8 +20,7 @@ export class SubmitPostDto {
 	@IsOptional()
 	toUserId?: string;
 
-	@IsArray()
-	@Type(() => PostAttachmentDto)
+	@IsString()
 	@IsOptional()
-	attachments?: PostAttachmentDto[]; 
+	attachments?: string 
 }

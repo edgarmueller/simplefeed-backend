@@ -17,7 +17,9 @@ export enum AttachmentType {
 
 export type Attachment = {
   type: AttachmentType
-  url: string
+  url?: string
+  buffer?: Buffer
+  filename?: string
 };
 
 export class Post extends AggregateRoot {

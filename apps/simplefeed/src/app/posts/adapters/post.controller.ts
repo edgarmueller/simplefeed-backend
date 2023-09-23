@@ -7,15 +7,21 @@ import {
   Post,
   Query,
   Req,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors
 } from '@nestjs/common'
+import { AnyFilesInterceptor } from '@nestjs/platform-express'
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
+import {
+  Attachment,
+  CommentPostDto,
+  GetCommentDto,
+  GetPostDto,
+  PostUsecases,
+  SubmitPostDto
+} from '@simplefeed/post'
 import { Pagination } from 'nestjs-typeorm-paginate'
-import { CommentPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/comment-post.dto'
-import { GetCommentDto } from '../../../../../../libs/post/src/lib/usecases/dto/get-comment.dto'
-import { GetPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/get-post.dto'
-import { SubmitPostDto } from '../../../../../../libs/post/src/lib/usecases/dto/submit-post.dto'
-import { PostUsecases } from '../../../../../../libs/post/src/lib/usecases/post.usecases'
 import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
 import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
 import { PaginatedPostQueryDto } from './dto/paginated-post-query.dto'
@@ -26,15 +32,27 @@ export class PostController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  submitPost(@Body() dto: SubmitPostDto, @Req() req: RequestWithUser) {
-    return this.usecases.submitPost(dto.body, req.user, dto.attachments, dto.toUserId)
+  @UseInterceptors(AnyFilesInterceptor())
+  submitPost(
+    @Body() dto: SubmitPostDto,
+    @Req() req: RequestWithUser,
+    @UploadedFiles() files?: Express.Multer.File[]
+  ) {
+    const attachments: Attachment[] = JSON.parse(dto.attachments)
+    return this.usecases.submitPost(
+      dto.body,
+      req.user,
+      attachments,
+      files,
+      dto.toUserId
+    )
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   getFeed(
     @Req() req: RequestWithUser,
-    @Query() paginationQueryDto: PaginatedPostQueryDto,
+    @Query() paginationQueryDto: PaginatedPostQueryDto
   ): Promise<Pagination<GetPostDto>> {
     if (paginationQueryDto.userId) {
       return this.usecases.getUserActivityFeed(paginationQueryDto.userId, {
