@@ -2,7 +2,7 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "npmScope": "kittgen",
   "affected": {
-    "defaultBase": "app"
+    "defaultBase": "simplefeed"
   },
   "implicitDependencies": {
     "package.json": {
@@ -31,5 +31,5 @@
       ]
     }
   },
-  "defaultProject": "app"
+  "defaultProject": "simplefeed"
 }

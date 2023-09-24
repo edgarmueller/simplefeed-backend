@@ -2,8 +2,8 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
-    "app": {
-      "root": "apps/app",
+    "simplefeed": {
+      "root": "apps/simplefeed",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "sourceRoot": "apps/simplefeed/src",
       "projectType": "application",
@@ -12,7 +12,7 @@
           "executor": "@nrwl/node:webpack",
           "outputs": ["{options.outputPath}"],
           "options": {
-            "outputPath": "dist/apps/app",
+            "outputPath": "dist/apps/simplefeed",
             "main": "apps/simplefeed/src/main.ts",
             "tsConfig": "apps/simplefeed/tsconfig.app.json",
             "assets": ["apps/simplefeed/src/assets"]
