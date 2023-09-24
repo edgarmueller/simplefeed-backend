@@ -3,6 +3,7 @@ import { last } from 'lodash';
 import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import 'multer';
 import { Comment } from '../comment';
 import { Attachment, AttachmentType, Post } from '../post';
 import { PostsRepository } from '../post.repository';
