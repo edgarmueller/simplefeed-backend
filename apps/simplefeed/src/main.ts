@@ -18,10 +18,10 @@ async function bootstrap() {
     // FIXME
     origin: ["http://localhost:3000", "https://simplefeed-frontend.vercel.app"],
     credentials: true,
-    // allowedHeaders: ['Content-Type', 'Authorization', 'Origin'],
-    // exposedHeaders: [],
-    // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    // preflightContinue: false,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin'],
+    exposedHeaders: [],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
   })
   app.useGlobalPipes(new ValidationPipe({
     forbidNonWhitelisted: true,
