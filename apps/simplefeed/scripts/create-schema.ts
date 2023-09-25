@@ -27,7 +27,6 @@ const createSchema = async () => {
     }
 
     const queryRunner = connection.createQueryRunner();
-    // TODO: schema name
     await queryRunner.createSchema(configService.get('database.schema'), true);
   } catch (error) {
     // eslint-disable-next-line no-console

@@ -14,7 +14,7 @@ export class S3Service {
       return
     }
     const s3 = new S3({
-      // TODO
+      // TODO: clean up and find out what we actually need
       endpoint: {
         host:  this.configService.get('s3.host'),
         href: this.configService.get('s3.href'),

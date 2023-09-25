@@ -50,7 +50,7 @@ export class UserController {
     @Body() body: UpdateUserDto,
     @UploadedFile(new FileSizeValidationPipe()) file: File,
   ): Promise<GetMeDto> {
-    // FIXME
+    // FIXME: types
     return await this.usecases.updateUserInfo(req.user, body.email, body.password, (file as any)?.buffer, (file as any)?.originalname, {
       firstName: body.firstName,
       lastName: body.lastName

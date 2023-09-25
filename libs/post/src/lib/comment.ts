@@ -33,6 +33,4 @@ export class Comment implements Entity {
     Object.assign(this, props)
     this.id = id || createCommentId()
   }
-
-  // TODO: add domain logic
 }

@@ -53,7 +53,6 @@ export class NotificationsGateway implements OnGatewayConnection {
     }
   }
 
-  // FIXME: usecase?
   @SubscribeMessage('mark_notification_as_read')
   async listenForMessages(
     @MessageBody(new ValidationPipe({ transform: true })) rawBody: any,

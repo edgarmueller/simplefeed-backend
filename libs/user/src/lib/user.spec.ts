@@ -48,7 +48,6 @@ describe('User', () => {
     const friendRequest = fry.sendFriendRequestTo(lisa)
     friendRequest.cancel()
     expect(fry.friendRequests).toHaveLength(0)
-    // TODO: provide getter
     expect(fry.friends).toBeUndefined();
   });
 })
