@@ -2,11 +2,31 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "scripts": {
+      "root": "apps/simplefeed/scripts",
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
+      "sourceRoot": "apps/simplefeed/scripts",
+      "projectType": "application",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/node:webpack",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/apps/scripts",
+            "main": "apps/simplefeed/scripts/create-schema.ts",
+            "tsConfig": "apps/simplefeed/tsconfig.app.json"
+          }
+        }
+      },
+      "tags": [],
+      "configFilePath": "apps/simplefeed/project.json"
+    },
     "simplefeed": {
       "root": "apps/simplefeed",
       "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "sourceRoot": "apps/simplefeed/src",
       "projectType": "application",
+      "implicitDependencies": ["scripts"],
       "targets": {
         "build": {
           "executor": "@nrwl/node:webpack",
@@ -34,7 +54,7 @@
         "serve": {
           "executor": "@nrwl/node:node",
           "options": {
-            "buildTarget": "app:build"
+            "buildTarget": "simplefeed:build"
           }
         },
         "lint": {
@@ -46,7 +66,7 @@
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/app"],
+          "outputs": ["coverage/apps/simplefeed"],
           "options": {
             "jestConfig": "apps/simplefeed/jest.config.ts",
             "passWithNoTests": true

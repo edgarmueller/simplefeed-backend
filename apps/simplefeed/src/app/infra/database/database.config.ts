@@ -1,10 +1,13 @@
+import { registerAs } from '@nestjs/config'
 import Joi from 'joi'
 
 export const DatabaseConfigSchema = {
-	POSTGRES_HOST: Joi.string().required(),
-	POSTGRES_PORT: Joi.number().required(),
-	POSTGRES_USER: Joi.string().required(),
-	POSTGRES_PASSWORD: Joi.string().required(),
-	POSTGRES_DB: Joi.string().required(),
-	PORT: Joi.number(),
+	DATABASE_URL: Joi.string().required(),
 }
+
+export const databaseConfig = registerAs('database', () => ({
+	url: process.env.DATABASE_URL,
+	type: 'postgres',
+	schema: 'simplefeed',
+	ssl: process.env.DATABASE_SSL === 'true'
+}))

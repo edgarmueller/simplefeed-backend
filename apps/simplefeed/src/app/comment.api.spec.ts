@@ -118,14 +118,17 @@ describe('comment api', () => {
   })
 
   async function createPost(token: string, content: string, expectedStatus = 201) {
+    try {
     const { body } = await request(app.getHttpServer())
       .post('/api/posts')
       .set('Authorization', `Bearer ${token}`)
-      .send({
-        body: content
-      })
+      .set('Content-Type', 'multipart/form-data')
+      .field('body', content)
       .expect(expectedStatus)
     return body;
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async function commentPost(token: string, content: string, postId: string, expectedStatus = 201) {
@@ -147,6 +150,7 @@ describe('comment api', () => {
   }
 })
 
+// FIXME
 export async function createDbSchema(): Promise<void> {
   const connection = await createConnection({
     type: 'postgres',
@@ -154,8 +158,8 @@ export async function createDbSchema(): Promise<void> {
     port: 5433,
     username: 'admin',
     password: 'admin',
-    database: 'kittgen_testing',
+    database: 'simplefeed_testing',
   })
-  await connection.createQueryRunner().createSchema('kittgen', true)
+  await connection.createQueryRunner().createSchema('simplefeed', true)
   await connection.close()
 }

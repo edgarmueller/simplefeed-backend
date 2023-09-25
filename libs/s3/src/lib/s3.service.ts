@@ -10,6 +10,9 @@ export class S3Service {
   ) {}
  
   async uploadPublicFile(dataBuffer: Buffer, filename: string) {
+    if (!this.configService.get<boolean>('s3.enabled')) {
+      return
+    }
     const s3 = new S3({
       // TODO
       endpoint: {

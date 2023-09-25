@@ -3,7 +3,7 @@ import { last } from 'lodash';
 import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import 'multer';
+import type { Multer } from 'multer';
 import { Comment } from '../comment';
 import { Attachment, AttachmentType, Post } from '../post';
 import { PostsRepository } from '../post.repository';
@@ -12,6 +12,8 @@ import { CommentPostDto } from './dto/comment-post.dto';
 import { GetCommentDto } from './dto/get-comment.dto';
 import { GetPostDto } from './dto/get-post.dto';
 import { PostNotFoundError } from '../errors/post-not-found.error';
+
+type File = Multer;
 
 @Injectable()
 export class PostUsecases {
@@ -25,7 +27,7 @@ export class PostUsecases {
     body: string,
     author: User,
     attachments?: Attachment[],
-    files: Express.Multer.File[] = [],
+    files: File[] = [],
     toUserId?: string
   ): Promise<GetPostDto> {
     let postedTo: User | undefined
@@ -38,7 +40,7 @@ export class PostUsecases {
     }
     // TODO: error handling & do we wanna use event?
     const uploads = await Promise.all(files.map(file => 
-      this.s3Service.uploadPublicFile(file.buffer, file.originalname)
+      this.s3Service.uploadPublicFile((file as any).buffer, (file as any).originalname)
     ))
     const post = Post.create({
       body,

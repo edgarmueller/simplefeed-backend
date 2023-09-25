@@ -15,9 +15,7 @@ const createSchema = async () => {
   const connection = await createConnection({
     name: 'script',
     type: configService.get('database.type'),
-    username: configService.get('database.user'),
-    password: configService.get('database.password'),
-    database: configService.get('database.db'),
+    url: configService.get('database.url'),
     ssl: configService.get('database.ssl') !== undefined ? configService.get('database.ssl') : true,
   });
 
@@ -30,7 +28,7 @@ const createSchema = async () => {
 
     const queryRunner = connection.createQueryRunner();
     // TODO: schema name
-    await queryRunner.createSchema('kittgen', true);
+    await queryRunner.createSchema(configService.get('database.schema'), true);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Database schema could not be created!')

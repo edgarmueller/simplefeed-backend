@@ -10,7 +10,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
-import { DatabaseConfigSchema } from './infra/database/database.config';
+import { DatabaseConfigSchema, databaseConfig } from './infra/database/database.config';
 import { DatabaseModule } from './infra/database/database.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PostModule } from './posts/post.module';
@@ -21,7 +21,7 @@ import { UserModule } from './user/user.module';
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}}`],
-      load: [authConfig, s3Config, searchConfig],
+      load: [authConfig, s3Config, searchConfig, databaseConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
       ).keys(S3Schema).keys(SearchSchema)
@@ -37,6 +37,7 @@ import { UserModule } from './user/user.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
+        enabled: configService.get('s3.enabled'),
         accessKeyId: configService.get('s3.accessKeyId'),
         secretAccessKey: configService.get('s3.secretAccessKey'),
         region: configService.get('s3.region'),

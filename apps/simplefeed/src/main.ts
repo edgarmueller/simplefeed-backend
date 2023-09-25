@@ -29,7 +29,7 @@ async function bootstrap() {
     whitelist: true
   }))
 
-  await createSchemaIfNecessary(app)
+  // await createSchemaIfNecessary(app)
   await app.listen(port)
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`

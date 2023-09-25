@@ -9,18 +9,16 @@ import { DataSource } from 'typeorm';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        port: configService.get('POSTGRES_PORT'),
-        username: configService.get('POSTGRES_USER'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DB'),
-        schema: 'kittgen',
-        autoLoadEntities: true,
-        entities: [],
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'postgres',
+          url: configService.get('database.url'),
+          schema: configService.get('database.schema'),
+          autoLoadEntities: true,
+          entities: [],
+          synchronize: true,
+        }
+      },
       async dataSourceFactory(options) {
         if (!options) {
           throw new Error('Invalid options passed');

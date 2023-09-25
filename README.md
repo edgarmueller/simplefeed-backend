@@ -34,6 +34,11 @@ Run `nx build app` to build the project. The build artifacts will be stored in t
 
 ### Libraries
 
+## Deploy
+
+### fly.io 
+Once authenticated with fly.io, run `fly deploy`.
+
 Run `nx build my-lib`. 
 ## Running unit tests
 

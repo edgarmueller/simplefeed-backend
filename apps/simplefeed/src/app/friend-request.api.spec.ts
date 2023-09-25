@@ -185,6 +185,7 @@ describe('friend request api', () => {
   })
 })
 
+// FIXME
 export async function createDbSchema(): Promise<void> {
   const connection = await createConnection({
     type: 'postgres',
@@ -192,8 +193,8 @@ export async function createDbSchema(): Promise<void> {
     port: 5433,
     username: 'admin',
     password: 'admin',
-    database: 'kittgen_testing',
+    database: 'simplefeed_testing',
   })
-  await connection.createQueryRunner().createSchema('kittgen', true)
+  await connection.createQueryRunner().createSchema('simplefeed', true)
   await connection.close()
 }

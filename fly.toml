@@ -1,0 +1,31 @@
+# fly.toml app configuration file generated for simplefeed on 2023-09-24T19:07:15+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "simplefeed"
+primary_region = "ams"
+
+[build]
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[env]
+  PORT = "8080"
+  DATABASE_ENVIRONMENT = "production"
+  AWS_REGION="eu-central-1"
+  AWS_ACCESS_KEY_ID="fakeKey"
+  AWS_SECRET_ACCESS_KEY="not-a-secret-right-now"
+  S3_HOST="fake-host.example.com"
+  S3_HREF="fakeHref"
+  S3_PORT="3333"
+  S3_HOSTNAME="example.com"
+  S3_PROTOCOL="https"
+  ELASTICSEARCH_ENABLED="false"
+  ELASTICSEARCH_NODE="http://elastic.example.com"

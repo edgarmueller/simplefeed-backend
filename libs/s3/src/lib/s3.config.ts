@@ -13,6 +13,7 @@ export const S3Schema = {
 }
 
 export const s3Config = registerAs('s3', () => ({
+  enabled: process.env.S3_ENABLED === 'true',
   region: process.env.AWS_REGION,
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,

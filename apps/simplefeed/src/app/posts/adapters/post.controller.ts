@@ -9,7 +9,7 @@ import {
   Req,
   UploadedFiles,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common'
 import { AnyFilesInterceptor } from '@nestjs/platform-express'
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
@@ -19,12 +19,15 @@ import {
   GetCommentDto,
   GetPostDto,
   PostUsecases,
-  SubmitPostDto
+  SubmitPostDto,
 } from '@simplefeed/post'
+import { Multer } from 'multer'
 import { Pagination } from 'nestjs-typeorm-paginate'
 import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
 import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
 import { PaginatedPostQueryDto } from './dto/paginated-post-query.dto'
+
+type File = Multer
 
 @Controller('posts')
 export class PostController {
@@ -36,9 +39,12 @@ export class PostController {
   submitPost(
     @Body() dto: SubmitPostDto,
     @Req() req: RequestWithUser,
-    @UploadedFiles() files?: Express.Multer.File[]
+    @UploadedFiles() files?: File[]
   ) {
-    const attachments: Attachment[] = JSON.parse(dto.attachments)
+    let attachments: Attachment[] = []
+    if (dto.attachments) {
+      attachments = JSON.parse(dto.attachments)
+    }
     return this.usecases.submitPost(
       dto.body,
       req.user,
