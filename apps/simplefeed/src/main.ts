@@ -1,10 +1,8 @@
-import { INestApplication } from '@nestjs/common';
-import { Logger, ValidationPipe } from '@nestjs/common'
-import { NestFactory } from '@nestjs/core'
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
-import { Connection } from 'typeorm';
 import { initializeTransactionalContext } from 'typeorm-transactional';
-import { AppModule } from './app/app.module'
+import { AppModule } from './app/app.module';
 
 
 async function bootstrap() {
@@ -17,7 +15,8 @@ async function bootstrap() {
   const port = process.env.PORT || 3333
   app.use(cookieParser())
   app.enableCors({
-    origin: ["http://localhost:3000"],
+    // FIXME
+    origin: ["http://localhost:3000", "https://simplefeed-frontend.vercel.app"],
     credentials: true,
     // allowedHeaders: ['Content-Type', 'Authorization', 'Origin'],
     // exposedHeaders: [],
@@ -29,23 +28,10 @@ async function bootstrap() {
     whitelist: true
   }))
 
-  // await createSchemaIfNecessary(app)
   await app.listen(port)
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
   );
 }
-
-const createSchemaIfNecessary = async (app: INestApplication) => {
-  // TODO: schema name
-  const schema = 'kittgen'
-  const connection = app.get(Connection)
-  const queryRunner = connection.createQueryRunner()
-  const hasSchema = await queryRunner.hasSchema(schema)
-  if (hasSchema) {
-    return
-  }
-  await queryRunner.createSchema(schema, true)
-};
 
 bootstrap();
