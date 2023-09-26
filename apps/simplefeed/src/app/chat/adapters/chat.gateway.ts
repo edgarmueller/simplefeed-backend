@@ -24,6 +24,7 @@ import { RequestMessagesDto } from './dto/request-messages.dto';
     origin: '*',
     methods: ['GET', 'POST'],
   },
+  namespace: 'chat',
 })
 @UseFilters(BaseWsExceptionFilter)
 @UsePipes(new ValidationPipe({ transform: true }))

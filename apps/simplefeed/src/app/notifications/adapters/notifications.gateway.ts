@@ -20,6 +20,7 @@ import { NotificationCreatedEvent } from '../../../../../../libs/notification/sr
     origin: '*',
     methods: ['GET', 'POST'],
   },
+  namespace: 'notifications',
 })
 @EventsHandler(NotificationCreatedEvent)
 // @UseFilters(WebsocketExceptionsFilter)
@@ -45,9 +46,11 @@ export class NotificationsGateway implements OnGatewayConnection {
       const authHeader = socket.handshake.headers.authorization
       const user = await this.authService.findOneUserByToken(authHeader)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(user.id)
-      socket.join(`notifications-${user.id}`)
-      await socket.to(`notifications-${user.id}`).emit('send_all_notifications', notifications)
+      await socket.join(`notifications-${user.id}`)
+      console.log(`User ${user.id} connected to notifications gateway`, notifications)
+      this.server.to(`notifications-${user.id}`).emit('send_all_notifications', notifications)
     } catch (error) {
+      console.log(error)
       socket.emit('error', { message: 'Invalid credentials.' })
       socket.disconnect()
     }

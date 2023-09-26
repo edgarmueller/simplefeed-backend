@@ -12,6 +12,7 @@ export enum AuthConfigKeys {
 const DEFAULT_ACCESS_TOKEN_EXPIRATION = 300
 const DEFAULT_REFRESH_TOKEN_EXPIRATION = 3600
 
+// TODO: is this actually useful?
 export const AuthConfigSchema = {
   USE_COOKIES: Joi.boolean().default(false),
   JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
@@ -28,10 +29,10 @@ export const authConfig = registerAs('auth', () => ({
   useCookies: process.env.USE_COOKIES === 'true',
   accessToken: {
     secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-    expirationInSeconds: process.env.JWT_ACCESS_TOKEN_EXPIRATION_IN_SECONDS,
+    expirationInSeconds: process.env.JWT_ACCESS_TOKEN_EXPIRATION_IN_SECONDS || DEFAULT_ACCESS_TOKEN_EXPIRATION,
   },
   refreshToken: {
     secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-    expirationInSeconds: process.env.JWT_REFRESH_TOKEN_EXPIRATION_IN_SECONDS,
+    expirationInSeconds: process.env.JWT_REFRESH_TOKEN_EXPIRATION_IN_SECONDS || DEFAULT_REFRESH_TOKEN_EXPIRATION,
   },
 }))
