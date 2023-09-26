@@ -35,4 +35,8 @@ export class Like implements Entity {
   unlike() {
     this.unliked = true
   }
+
+  like() {
+    this.unliked = false
+  }
 }

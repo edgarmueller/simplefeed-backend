@@ -56,15 +56,20 @@ export class Post extends AggregateRoot {
   }
 
   like(likedBy: User) {[]
-    if (this.hasLikeBy(likedBy)) { 
-      return;
-    }
+    let like;
+    const existingLike = this.findExistingLike(likedBy);
     likedBy.profile.incrementLikeCount();
-    const like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
-    if (!this.likes) {
-      this.likes = [];
+
+    if (existingLike) {
+      like = existingLike;
+      existingLike.like();
+    } else {
+      like = Like.create({ post: this, user: likedBy, userId: likedBy.id })
+      if (!this.likes) {
+        this.likes = [];
+      }
+      this.likes.push(like);
     }
-    this.likes.push(like);
     // don't emit event if author liked their own post
     if (this.author.id !== likedBy.id) {
       this.emitDomainEvent(new PostLikedEvent(this, likedBy));
@@ -72,8 +77,8 @@ export class Post extends AggregateRoot {
     return like;
   }
 
-  hasLikeBy(user: User): boolean {
-    return !!this.likes?.find(({ userId }) => userId === user.id);
+  findExistingLike(user: User): Like | undefined {
+    return this.likes?.find(({ userId }) => userId === user.id);
   }
 
   unlike(unlikedBy: User): Like {
