@@ -11,11 +11,10 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
 import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user';
-import { Multer } from 'multer';
 import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe';
 import { UpdateUserDto } from './update-user.dto';
 
-type File = Multer;
+type File = Express.Multer.File
 @Controller('users')
 export class UserController {
   constructor(private readonly usecases: UserUsecases) {}
@@ -51,7 +50,7 @@ export class UserController {
     @UploadedFile(new FileSizeValidationPipe()) file: File,
   ): Promise<GetMeDto> {
     // FIXME: types
-    return await this.usecases.updateUserInfo(req.user, body.email, body.password, (file as any)?.buffer, (file as any)?.originalname, {
+    return await this.usecases.updateUserInfo(req.user, body.email, body.password, file?.buffer, file.originalname, {
       firstName: body.firstName,
       lastName: body.lastName
     }) 

@@ -71,7 +71,8 @@ export class AuthController {
     @Req()
     request: RequestWithUser /*@Res({ passthrough: true }) response: Response*/
   ) {
-    // TODO: if we were to use cookies
+    // if we were to use cookies
+    // -- 
     // if (this.useCookies) {
     //   const accessTokenCookie = await this.authService.createAccessTokenCookie(request.user.id)
     //   response.setHeader('Set-Cookie', accessTokenCookie);

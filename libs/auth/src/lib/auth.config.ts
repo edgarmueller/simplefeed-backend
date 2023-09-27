@@ -12,7 +12,6 @@ export enum AuthConfigKeys {
 const DEFAULT_ACCESS_TOKEN_EXPIRATION = 300
 const DEFAULT_REFRESH_TOKEN_EXPIRATION = 3600
 
-// TODO: is this actually useful?
 export const AuthConfigSchema = {
   USE_COOKIES: Joi.boolean().default(false),
   JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),

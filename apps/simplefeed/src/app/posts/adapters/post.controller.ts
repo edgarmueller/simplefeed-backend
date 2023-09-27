@@ -21,13 +21,12 @@ import {
   PostUsecases,
   SubmitPostDto,
 } from '@simplefeed/post'
-import { Multer } from 'multer'
 import { Pagination } from 'nestjs-typeorm-paginate'
 import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
 import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
 import { PaginatedPostQueryDto } from './dto/paginated-post-query.dto'
 
-type File = Multer
+type File = Express.Multer.File
 
 @Controller('posts')
 export class PostController {

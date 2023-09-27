@@ -2,7 +2,7 @@ import { S3Module, S3Schema, s3Config } from '@kittgen/s3';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { authConfig } from '@simplefeed/auth';
+import { AuthConfigSchema, authConfig } from '@simplefeed/auth';
 import { SearchSchema, searchConfig } from '@simplefeed/search';
 import Joi from 'joi';
 import { AppController } from './app.controller';
@@ -25,7 +25,7 @@ import redisConfig from './infra/redis.config';
       load: [authConfig, s3Config, searchConfig, databaseConfig, redisConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
-      ).keys(S3Schema).keys(SearchSchema)
+      ).keys(AuthConfigSchema).keys(S3Schema).keys(SearchSchema)
     }),
     DatabaseModule,
     ScheduleModule.forRoot(),
