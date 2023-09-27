@@ -5,7 +5,6 @@ import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "../user/user.module";
 import { ChatController } from "./adapters/chat.controller";
 import { ChatGateway } from "./adapters/chat.gateway";
-import { FriendRequestAcceptedEventHandler } from "./adapters/event-handlers/friend-request-accepted.event-handler";
 import { MessagesGateway } from "./adapters/messages.gateway";
 import { NotificationModule } from "@simplefeed/notification";
 
@@ -20,7 +19,7 @@ import { NotificationModule } from "@simplefeed/notification";
     }),
 	], 
 	controllers: [ChatController],
-	providers: [ChatGateway, MessagesGateway, FriendRequestAcceptedEventHandler],
+	providers: [ChatGateway, MessagesGateway],
 	exports: []
 })
 export class ChatModule {

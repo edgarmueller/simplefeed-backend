@@ -44,7 +44,6 @@ export class NotificationsGateway implements OnGatewayConnection {
       const user = await this.authService.findOneUserByToken(authHeader)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(user.id)
       await socket.join(`notifications-${user.id}`)
-      console.log(`User ${user.id} connected to notifications gateway`, notifications)
       this.server.to(`notifications-${user.id}`).emit('send_all_notifications', notifications)
     } catch (error) {
       console.log(error)
