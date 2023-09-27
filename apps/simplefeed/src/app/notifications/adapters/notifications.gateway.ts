@@ -10,10 +10,8 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { AuthService } from '@simplefeed/auth';
-import { NotificationUsecases } from '@simplefeed/notification';
+import { NotificationUsecases, GetNotificationDto, NotificationCreatedEvent } from '@simplefeed/notification';
 import { Server, Socket } from 'socket.io';
-import { GetNotificationDto } from '../../../../../../libs/notification/src/lib/dto/get-notification.dto';
-import { NotificationCreatedEvent } from '../../../../../../libs/notification/src/lib/events/notification-created.event';
 
 @WebSocketGateway({
   cors: {
@@ -23,7 +21,6 @@ import { NotificationCreatedEvent } from '../../../../../../libs/notification/sr
   namespace: 'notifications',
 })
 @EventsHandler(NotificationCreatedEvent)
-// @UseFilters(WebsocketExceptionsFilter)
 @UsePipes(new ValidationPipe({ transform: true }))
 export class NotificationsGateway implements OnGatewayConnection {
 
@@ -61,9 +58,10 @@ export class NotificationsGateway implements OnGatewayConnection {
     @MessageBody(new ValidationPipe({ transform: true })) rawBody: any,
     @ConnectedSocket() socket: Socket
   ) {
+    console.log('mark_notification_as_read', rawBody)
     try {
       const body = rawBody;
-      const authHeader = socket.handshake.headers.authorization
+      const authHeader = socket.handshake.query.Authorization as string
       const user = await this.authService.findOneUserByToken(authHeader)
       const readNotification = await this.usecases.markNotificationAsRead(body.notificationId);
       this.logger.log(`User ${user.id} marked notification ${body.notificationId} as read`)
@@ -80,7 +78,7 @@ export class NotificationsGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket,
   ) {
     try {
-      const authHeader = socket.handshake.headers.authorization
+      const authHeader = socket.handshake.query.Authorization as string
       const user = await this.authService.findOneUserByToken(authHeader)
       this.logger.log(`User ${user.id} requested all notifications`)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(
