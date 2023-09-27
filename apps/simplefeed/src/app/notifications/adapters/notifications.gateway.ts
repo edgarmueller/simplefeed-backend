@@ -43,7 +43,7 @@ export class NotificationsGateway implements OnGatewayConnection {
 
   async handleConnection(socket: Socket) {
     try {
-      const authHeader = socket.handshake.headers.authorization
+      const authHeader = socket.handshake.query.Authorization as string
       const user = await this.authService.findOneUserByToken(authHeader)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(user.id)
       await socket.join(`notifications-${user.id}`)

@@ -16,12 +16,13 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PostModule } from './posts/post.module';
 import { SearchModule } from './search/search.module';
 import { UserModule } from './user/user.module';
+import redisConfig from './infra/redis.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}}`],
-      load: [authConfig, s3Config, searchConfig, databaseConfig],
+      load: [authConfig, s3Config, searchConfig, databaseConfig, redisConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
       ).keys(S3Schema).keys(SearchSchema)

@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import { AppModule } from './app/app.module';
+import { RedisIoAdapter } from './app/chat/adapters/redis.adapter';
 
 
 async function bootstrap() {
@@ -27,6 +28,11 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     whitelist: true
   }))
+
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis(app);
+  app.useWebSocketAdapter(redisIoAdapter);
+
 
   await app.listen(port)
   Logger.log(
