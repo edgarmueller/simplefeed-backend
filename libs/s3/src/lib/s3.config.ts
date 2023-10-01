@@ -6,6 +6,7 @@ export const S3Schema = {
 	AWS_ACCESS_KEY_ID: Joi.string().required(),
 	AWS_SECRET_ACCESS_KEY: Joi.string().required(),
 	S3_ENDPOINT: Joi.string().required(),
+	S3_BUCKET_NAME: Joi.string().required(),
 }
 
 export const s3Config = registerAs('s3', () => ({
@@ -13,5 +14,6 @@ export const s3Config = registerAs('s3', () => ({
   region: process.env.AWS_REGION,
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-	endpoint: process.env.S3_ENDPOINT
+	endpoint: process.env.S3_ENDPOINT,
+	bucketName: process.env.S3_BUCKET_NAME
 }))

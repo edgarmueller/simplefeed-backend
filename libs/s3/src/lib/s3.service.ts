@@ -18,7 +18,7 @@ export class S3Service {
       s3ForcePathStyle: true
     });
     const uploadResult = await s3.upload({
-      Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'),
+      Bucket: this.configService.get('s3.bucketName'),
       Body: dataBuffer,
       Key: `${uuid()}-${filename}`
     })
