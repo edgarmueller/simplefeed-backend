@@ -14,13 +14,7 @@ export class S3Service {
       return
     }
     const s3 = new S3({
-      endpoint: {
-        host:  this.configService.get('s3.host'),
-        href: this.configService.get('s3.href'),
-        port: this.configService.get('s3.port'),
-        hostname: this.configService.get('s3.hostname'),
-        protocol: this.configService.get('s3.protocol'),
-      },
+      endpoint: this.configService.get('s3.endpoint'),
       s3ForcePathStyle: true
     });
     const uploadResult = await s3.upload({
