@@ -64,32 +64,9 @@ Run `nx graph` to see a diagram of the dependencies of your projects.
 
 Visit the [Nx Documentation](https://nx.dev) to learn more.
 
+ ## Local infra 
 
-
-## ☁ Nx Cloud
-
-### Distributed Computation Caching & Distributed Task Execution
-
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.
-
-
-## Notes
-
-Some parts of realworld specs are slightly weird, but I've followed 
-* Auth 
-  - no separation of concerns, we're mixing responsibilities with CRUD functionality for user
-  - no proper support of bearer token (there is an GH issue already), instead `Token` is being user
-* User
-  - `PUT` user has `PATCH` semantics actually
-  - why is token part of the user entity?
- 
- ## Local infra (WIP)
+ ### s3
 
  To provide a s3 instance locally one can make use of [localstack](https://localstack.cloud/).
 
@@ -105,3 +82,12 @@ Some parts of realworld specs are slightly weird, but I've followed
 - Create a s3 bucket:
   `awslocal s3api create-bucket --bucket simplefeed-avatar`
 
+### elastic
+
+Listing by username:
+
+`curl -X GET http://localhost:9200/users/_search\?q\=$USERNAME | jq .`
+
+Delete by id:
+
+`curl -X DELETE http://localhost:9200/users/_doc/$ID`
