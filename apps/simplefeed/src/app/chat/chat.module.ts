@@ -7,6 +7,7 @@ import { ChatController } from "./adapters/chat.controller";
 import { ChatGateway } from "./adapters/chat.gateway";
 import { MessagesGateway } from "./adapters/messages.gateway";
 import { NotificationModule } from "@simplefeed/notification";
+import { FriendRequestAcceptedEventHandler } from "./adapters/friend-request-accepted.event-handler";
 
 @Module({
 	imports: [
@@ -19,7 +20,7 @@ import { NotificationModule } from "@simplefeed/notification";
     }),
 	], 
 	controllers: [ChatController],
-	providers: [ChatGateway, MessagesGateway],
+	providers: [ChatGateway, MessagesGateway, FriendRequestAcceptedEventHandler],
 	exports: []
 })
 export class ChatModule {
