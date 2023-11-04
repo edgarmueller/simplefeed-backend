@@ -17,7 +17,7 @@ import { UpdateUserDto } from './update-user.dto';
 type File = Express.Multer.File
 @Controller('users')
 export class UserController {
-  constructor(private readonly usecases: UserUsecases) {}
+  constructor(private readonly usecases: UserUsecases) { }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -46,14 +46,17 @@ export class UserController {
   @UseInterceptors(FileInterceptor('image'))
   async updateUser(
     @Req() req: RequestWithUser,
-    @Body() body: UpdateUserDto,
-    @UploadedFile(new FileSizeValidationPipe()) file: File,
+    @Body() dto: UpdateUserDto,
+    @UploadedFile(new FileSizeValidationPipe()) file?: File,
   ): Promise<GetMeDto> {
-    // FIXME: types
-    return await this.usecases.updateUserInfo(req.user, body.email, body.password, file?.buffer, file.originalname, {
-      firstName: body.firstName,
-      lastName: body.lastName
-    }) 
+    return await this.usecases.updateUserInfo(req.user.id, {
+      email: dto.email,
+      password: dto.password,
+      imageBuffer: file?.buffer,
+      filename: file?.originalname,
+      firstName: dto.firstName,
+      lastName: dto.lastName
+    })
   }
 
   @UseGuards(JwtAuthGuard)

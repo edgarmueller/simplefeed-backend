@@ -2,9 +2,9 @@ import { Injectable, Logger } from '@nestjs/common'
 import { S3Service } from '@kittgen/s3'
 import { UsersRepository } from './user.repository'
 import { User } from './user'
-import { Profile } from './profile'
 import { GetMeDto } from './dto/get-me.dto'
 import { GetUserDto } from './dto/get-user.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserUsecases {
@@ -13,7 +13,7 @@ export class UserUsecases {
   constructor(
     private readonly userRepository: UsersRepository,
     private s3Service: S3Service
-  ) {}
+  ) { }
 
   // async followUser(follower: User, followeeUsername: string): Promise<User> {
   //   const followee = await this.userRepository.findOneByUsername(followeeUsername)
@@ -73,31 +73,31 @@ export class UserUsecases {
     return mutualFriends.map((friend) => friend.id)
   }
 
+  async updateUserInfo(
+    userId: string,
+    updateDto: UpdateUserDto,
+  ): Promise<GetMeDto> {
+    const user = await this.userRepository.findOneByIdOrFail(userId)
+    user.updateEmail(updateDto.email)
+    await user.updatePassword(updateDto.password)
+    user.profile.updateProfile({
+      firstName: updateDto.firstName,
+      lastName: updateDto.lastName,
+    })
+    const me = await this.updateAvatar(updateDto.imageBuffer, updateDto.filename, user)
+    await this.userRepository.save(me)
+    return GetMeDto.fromDomain(me);
+  }
+
   async updateAvatar(imageBuffer: Buffer, filename: string, user: User) {
     if (!imageBuffer) {
       return user;
     }
     const uploadResult = await this.s3Service.uploadPublicFile(
       imageBuffer,
-      filename 
+      filename
     )
     user.profile.updateAvatar(uploadResult.Location)
-    return await this.userRepository.save(user)
-  }
-
-  async updateUserInfo(
-    user: User,
-    email?: string,
-    password?: string,
-    imageBuffer?: Buffer,
-    filename?: string,
-    updatedProfile?: Pick<Profile, 'firstName' | 'lastName'>
-  ): Promise<GetMeDto> {
-    user.updateEmail(email)
-    await user.updatePassword(password)
-    user.profile.updateProfile(updatedProfile)
-    const me = await this.updateAvatar(imageBuffer, filename, user)
-    return GetMeDto.fromDomain(me);
   }
 
   async closeAccount(user: User) {
