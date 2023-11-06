@@ -55,7 +55,7 @@ export class User extends AggregateRoot {
     if (!this.friendRequests) {
       this.friendRequests = []
     }
-    if (otherUser.friendRequests.find((fr) => fr.from.id === this.id)) {
+    if (otherUser.friendRequests?.find((fr) => fr.from.id === this.id)) {
       throw new Error('Friend request already sent')
     }
     this.friendRequests.push(friendRequest);

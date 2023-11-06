@@ -8,7 +8,6 @@ import { FriendRequestAcceptedEventHandler } from './adapters/event-handlers/fri
 import { FriendRequestSentEventHandler } from './adapters/event-handlers/friend-request-sent.event-handler';
 import { PostCreatedEventHandler } from './adapters/event-handlers/post-created.event-handler';
 import { PostLikedEventHandler } from './adapters/event-handlers/post-liked.event-handler';
-import { NotificationsController } from './adapters/notifications.controller';
 import { NotificationsGateway } from './adapters/notifications.gateway';
 
 const EVENT_HANDLERS = [
@@ -29,7 +28,7 @@ const EVENT_HANDLERS = [
 			useClass: AuthConfigFactory,
     }),
 	],
-	controllers: [NotificationsController],
+	controllers: [],
 	providers: [NotificationsGateway, FriendRequestSentEventHandler, ...EVENT_HANDLERS],
 	exports: []
 })

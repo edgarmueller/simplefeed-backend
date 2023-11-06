@@ -8,9 +8,6 @@ import { Comment } from '../comment';
 import { Attachment, AttachmentType, Post } from '../post';
 import { PostsRepository } from '../post.repository';
 import { DEFAULT_COMMENTS_LIMIT } from './../post.repository';
-import { CommentPostDto } from './dto/comment-post.dto';
-import { GetCommentDto } from './dto/get-comment.dto';
-import { GetPostDto } from './dto/get-post.dto';
 import { PostNotFoundError } from '../errors/post-not-found.error';
 
 type File = Express.Multer.File;
@@ -29,7 +26,7 @@ export class PostUsecases {
     attachments?: Attachment[],
     files: File[] = [],
     toUserId?: string
-  ): Promise<GetPostDto> {
+  ): Promise<Post> {
     let postedTo: User | undefined
     if (toUserId) {
       try {
@@ -58,24 +55,24 @@ export class PostUsecases {
     author.profile.incrementPostCount()
     await this.usersRepository.save(author)
     const savedPost = await this.postsRepository.savePost(post)
-    return GetPostDto.fromDomain(savedPost);
+    return savedPost
   }
 
-  async getUserActivityFeed(userId: string, paginationOpts: IPaginationOptions): Promise<Pagination<GetPostDto>> {
+  async getUserActivityFeed(userId: string, paginationOpts: IPaginationOptions): Promise<Pagination<Post>> {
     const posts = await this.postsRepository.findUserActivityFeed(
       userId,
       paginationOpts
     )
     return {
       ...posts,
-      items: posts.items.map(GetPostDto.fromDomain),
+      items: posts.items
     }
   }
 
   async getPersonalFeed(
     userId: string,
     paginationOpts: IPaginationOptions
-  ): Promise<Pagination<GetPostDto>> {
+  ): Promise<Pagination<Post>> {
     const { friends: friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(userId)
     const posts = await this.postsRepository.findPostsByUsers(
       userId,
@@ -84,11 +81,11 @@ export class PostUsecases {
     )
     return {
       ...posts,
-      items: posts.items.map(GetPostDto.fromDomain),
+      items: posts.items
     }
   }
 
-  async getPost(postId: string, userId: string): Promise<GetPostDto> {
+  async getPost(postId: string, userId: string): Promise<Post> {
     const { friends } = await this.usersRepository.findOneByIdWithFriendsOrFail(userId)
     const friendIds = friends.map(friend => friend.id)
     const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
@@ -96,7 +93,7 @@ export class PostUsecases {
       throw new PostNotFoundError()
     }
     
-    return GetPostDto.fromDomain(post)
+    return post
   }
 
   async findLikedPostsByUser(
@@ -108,17 +105,18 @@ export class PostUsecases {
   async postComment(
     user: User,
     postId: string,
-    dto: CommentPostDto
+    content: string,
+    stringifiedPath?: string
   ): Promise<Comment> {
     const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
-    const path = dto.path || postId
-    const parentId = last(dto.path?.split('/'))
+    const path = stringifiedPath || postId
+    const parentId = last(stringifiedPath?.split('/'))
     let parentComment: Comment | undefined
     if (parentId !== postId) {
       parentComment = await this.postsRepository.findOneCommentByIdWithAuthor(parentId)
     }
     const comment = Comment.create({
-      content: dto.content,
+      content,
       author: user,
       post,
       path: path.endsWith('/') ? path.substring(0, path.length - 1) : path,
@@ -131,7 +129,7 @@ export class PostUsecases {
     postId: string,
     commentId?: string,
     paginationOpts: IPaginationOptions = { page: 1, limit: DEFAULT_COMMENTS_LIMIT }
-  ): Promise<Pagination<GetCommentDto>> {
+  ): Promise<Pagination<Comment>> {
     const res = await this.postsRepository.findComments(
       postId,
       commentId,
@@ -139,7 +137,7 @@ export class PostUsecases {
     )
     return {
       ...res,
-      items: res.items.map(GetCommentDto.fromDomain),
+      items: res.items
     }
   }
 

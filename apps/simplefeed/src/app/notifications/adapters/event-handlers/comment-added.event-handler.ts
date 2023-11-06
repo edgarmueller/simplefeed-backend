@@ -21,6 +21,7 @@ export class CommentAddedEventHandler {
           viewed: false,
           type: 'comment-replied',
           resourceId: event.comment.id,
+        link: `/posts/${event.post.id}`,
         })
       )
       return
@@ -34,6 +35,7 @@ export class CommentAddedEventHandler {
         viewed: false,
         type: 'comment-posted',
         resourceId: event.comment.id,
+        link: `/posts/${event.post.id}`,
       })
     )
   }

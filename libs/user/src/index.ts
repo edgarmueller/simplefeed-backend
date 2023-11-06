@@ -10,9 +10,6 @@ export { FriendRequestAccepted } from './lib/events/friend-request-accepted.even
 export { FriendRequestSent } from './lib/events/friend-request-sent.event';
 export { UserUsecases } from './lib/user.usecases';
 export { FriendUsecases } from './lib/friends.usecases';
-export { GetMeDto } from './lib/dto/get-me.dto';
-export { GetUserDto } from './lib/dto/get-user.dto';
-export { GetFriendRequestDto } from './lib/dto/get-friend-request.dto';
 export { UserCreatedEvent } from './lib/events/user-created.event';
 export { UserClosedEvent } from './lib/events/user-closed.event';
 export { UserReactivatedEvent } from './lib/events/user-reactivated.event';

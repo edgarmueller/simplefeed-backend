@@ -1,4 +1,4 @@
-import { Comment } from '../../comment'
+import { Comment } from '@simplefeed/post'
 
 export class GetCommentDto {
   static fromDomain(comment: Comment): GetCommentDto {

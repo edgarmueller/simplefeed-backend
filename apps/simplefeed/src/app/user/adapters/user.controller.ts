@@ -10,9 +10,11 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
-import { GetMeDto, GetUserDto, UserNotFoundError, UserUsecases } from '@simplefeed/user';
+import { UserNotFoundError, UserUsecases } from '@simplefeed/user';
 import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe';
-import { UpdateUserDto } from './update-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { GetMeDto } from '../dto/get-me.dto';
+import { GetUserDto } from '../dto/get-user.dto';
 
 type File = Express.Multer.File
 @Controller('users')
@@ -22,7 +24,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async me(@Req() request: RequestWithUser): Promise<GetMeDto> {
-    return this.usecases.getMe(request.user)
+    return GetMeDto.fromDomain(await this.usecases.getMe(request.user))
   }
 
   @UseGuards(JwtAuthGuard)
@@ -32,7 +34,12 @@ export class UserController {
     @Req() req: RequestWithUser
   ): Promise<GetMeDto | GetUserDto> {
     try {
-      return await this.usecases.getUserByUserName(req.user, username)
+      const user = await this.usecases.getUserByUserName(req.user, username)
+      if (req.user.profile.username === username) {
+        return GetMeDto.fromDomain(user)
+      }
+      const mutualFriends = await this.usecases.getMutualFriends(req.user, user)
+      return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length)
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         throw new NotFoundException()
@@ -49,14 +56,17 @@ export class UserController {
     @Body() dto: UpdateUserDto,
     @UploadedFile(new FileSizeValidationPipe()) file?: File,
   ): Promise<GetMeDto> {
-    return await this.usecases.updateUserInfo(req.user.id, {
-      email: dto.email,
-      password: dto.password,
-      imageBuffer: file?.buffer,
-      filename: file?.originalname,
-      firstName: dto.firstName,
-      lastName: dto.lastName
-    })
+    const me = await this.usecases.updateUserInfo(req.user.id, 
+      dto.email,
+      dto.password,
+      {
+        imageBuffer: file?.buffer,
+        filename: file?.originalname,
+      },
+      dto.firstName,
+      dto.lastName
+    )
+    return GetMeDto.fromDomain(me)
   }
 
   @UseGuards(JwtAuthGuard)

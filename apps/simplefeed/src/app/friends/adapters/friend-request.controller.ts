@@ -1,6 +1,8 @@
+import { FriendRequest } from '@simplefeed/user';
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
 import { Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
-import { FriendUsecases, GetFriendRequestDto } from '@simplefeed/user';
+import { FriendUsecases } from '@simplefeed/user';
+import { GetFriendRequestDto } from '../dto/get-friend-request.dto';
 
 @Controller('friend-requests')
 export class FriendRequestsController {
@@ -13,7 +15,7 @@ export class FriendRequestsController {
     @Param('username') toUserName: string
   ): Promise<GetFriendRequestDto> {
     const fromUser = req.user
-    return this.usecases.sendFriendRequest(fromUser, toUserName)
+    return GetFriendRequestDto.fromDomain(await this.usecases.sendFriendRequest(fromUser, toUserName))
   }
 
   @UseGuards(JwtAuthGuard)
@@ -21,7 +23,8 @@ export class FriendRequestsController {
   async getPendingFriendRequests(
     @Req() req: RequestWithUser
   ): Promise<GetFriendRequestDto[]> {
-    return this.usecases.getReceivedFriendRequests(req.user)
+    const friendRequests = await this.usecases.getReceivedFriendRequests(req.user)
+    return friendRequests.map(GetFriendRequestDto.fromDomain)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -29,7 +32,8 @@ export class FriendRequestsController {
   async getSentFriendRequests(
     @Req() req: RequestWithUser
   ): Promise<GetFriendRequestDto[]> {
-    return this.usecases.getSentFriendRequests(req.user)
+    const friendRequests = await this.usecases.getSentFriendRequests(req.user)
+    return friendRequests.map(GetFriendRequestDto.fromDomain)
   }
 
   @UseGuards(JwtAuthGuard)

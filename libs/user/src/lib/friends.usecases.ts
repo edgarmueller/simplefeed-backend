@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { UsersRepository } from './user.repository';
 import { FriendRequestRepository } from './friend-request.repository';
 import { User } from './user';
-import { GetFriendRequestDto } from './dto/get-friend-request.dto';
+import { FriendRequest } from './friend-request';
 
 @Injectable()
 export class FriendUsecases {
@@ -13,21 +13,21 @@ export class FriendUsecases {
 		private readonly friendRequestRepository: FriendRequestRepository
 	) {}
 	
-  async sendFriendRequest(from: User, toUserName: string): Promise<GetFriendRequestDto> {
+  async sendFriendRequest(from: User, toUserName: string): Promise<FriendRequest> {
     const toUser = await this.userRepository.findOneByUsernameWithFriendRequestsOrFail(toUserName)
     const friendRequest = from.sendFriendRequestTo(toUser)
     await this.userRepository.saveMany([from, toUser])
-    return GetFriendRequestDto.fromDomain(friendRequest);
+    return friendRequest
   }
 
-  async getSentFriendRequests(forUser: User): Promise<GetFriendRequestDto[]> {
-    const friendRequests = await this.friendRequestRepository.findFriendRequestsFromUserId(forUser.id);
-    return friendRequests.map(friendRequest => GetFriendRequestDto.fromDomain(friendRequest));
+  async getSentFriendRequests(forUser: User): Promise<FriendRequest[]> {
+    const friendRequests = await this.friendRequestRepository.findFriendRequestsFromUserId(forUser.id)
+    return friendRequests
   }
 
-  async getReceivedFriendRequests(forUser: User): Promise<GetFriendRequestDto[]> {
+  async getReceivedFriendRequests(forUser: User): Promise<FriendRequest[]> {
     const friendRequests = await this.friendRequestRepository.findFriendRequestsForUserId(forUser.id);
-    return friendRequests.map(friendRequest => GetFriendRequestDto.fromDomain(friendRequest));
+    return friendRequests
   }
 
   async cancelFriendRequest(actor: User, friendRequestId: string): Promise<void> {

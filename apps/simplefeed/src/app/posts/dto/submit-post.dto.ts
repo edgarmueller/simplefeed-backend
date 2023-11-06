@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from "class-validator";
-import { AttachmentType } from './../../post';
+import { AttachmentType } from '@simplefeed/post';
 
 export class PostAttachmentDto {
 	@IsEnum(AttachmentType)

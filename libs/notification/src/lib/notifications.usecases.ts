@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { GetNotificationDto } from './dto/get-notification.dto'
 import { NotificationsRepository } from './notifications.repository'
 import { Notification } from './notification'
 
@@ -9,9 +8,9 @@ export class NotificationUsecases {
 
   async findUnviewedNotificationsForUserId(
     userId: string
-  ): Promise<GetNotificationDto[]> {
+  ): Promise<Notification[]> {
     const notifications = await this.notificaitonsRepository.findManyUnviewedByUserId(userId)
-    return notifications.map(GetNotificationDto.fromDomain)
+    return notifications
   }
 
   async createNotification(notification: Notification): Promise<void> {

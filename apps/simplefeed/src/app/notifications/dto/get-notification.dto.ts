@@ -1,4 +1,4 @@
-import { Notification } from "../notification";
+import { Notification } from "@simplefeed/notification";
 
 export class GetNotificationDto {
 		id: string;

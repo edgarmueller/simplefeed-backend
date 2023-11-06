@@ -10,8 +10,9 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { AuthService } from '@simplefeed/auth';
-import { NotificationUsecases, GetNotificationDto, NotificationCreatedEvent } from '@simplefeed/notification';
+import { NotificationUsecases,  NotificationCreatedEvent } from '@simplefeed/notification';
 import { Server, Socket } from 'socket.io';
+import { GetNotificationDto } from '../dto/get-notification.dto';
 
 @WebSocketGateway({
   cors: {

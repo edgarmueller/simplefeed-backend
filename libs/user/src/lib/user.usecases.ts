@@ -2,10 +2,6 @@ import { Injectable, Logger } from '@nestjs/common'
 import { S3Service } from '@kittgen/s3'
 import { UsersRepository } from './user.repository'
 import { User } from './user'
-import { GetMeDto } from './dto/get-me.dto'
-import { GetUserDto } from './dto/get-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
-
 @Injectable()
 export class UserUsecases {
   private logger = new Logger(UserUsecases.name)
@@ -34,34 +30,40 @@ export class UserUsecases {
 
   async getUserByUserName(
     requestingUser: User,
-    username: string
-  ): Promise<GetMeDto | GetUserDto> {
+    username: string,
+  ): Promise<User & { mutualFriends?: string[] }> {
     if (requestingUser.profile.username === username) {
       return await this.getMe(requestingUser)
     }
     const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(
       username
     )
-    const mutualFriends = await this.getMutualFriends(requestingUser, user)
-    return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length)
+    return user;
+    // const mutualFriends = await this.getMutualFriends(requestingUser, user)
+    // if (withMutualFriends) {
+    //   return {
+    //     mutualFriends,
+    //   }
+    // }
+    // return user
   }
 
-  async getFriendsOfUser(username: string): Promise<GetUserDto[]> {
+
+  async getFriendsOfUser(username: string): Promise<User[]> {
     const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(
       username
     )
     const friends = await this.userRepository.findMany(
       user.friends.map((friend) => friend.id)
     )
-    return friends.map((friend) => GetUserDto.fromDomain(friend))
+    return friends;
   }
 
-  async getMe(requestingUser: User): Promise<GetMeDto> {
+  async getMe(requestingUser: User): Promise<User> {
     const user = await this.userRepository.findOneByIdWithFriendsOrFail(
       requestingUser.id
     )
-    // const conversations = await this.conversationRepository.findByUserId(user.id)
-    return GetMeDto.fromDomain(user)//.withConversations(conversations)
+    return user;
   }
 
   async getMutualFriends(user: User, otherUser: User): Promise<string[]> {
@@ -75,18 +77,25 @@ export class UserUsecases {
 
   async updateUserInfo(
     userId: string,
-    updateDto: UpdateUserDto,
-  ): Promise<GetMeDto> {
+    email?: string,
+    password?: string,
+    avatar?: {
+      imageBuffer: Buffer,
+      filename: string,
+    },
+    firstName?: string,
+    lastName?: string
+  ): Promise<User> {
     const user = await this.userRepository.findOneByIdOrFail(userId)
-    user.updateEmail(updateDto.email)
-    await user.updatePassword(updateDto.password)
+    user.updateEmail(email)
+    await user.updatePassword(password)
     user.profile.updateProfile({
-      firstName: updateDto.firstName,
-      lastName: updateDto.lastName,
+      firstName,
+      lastName,
     })
-    const me = await this.updateAvatar(updateDto.imageBuffer, updateDto.filename, user)
+    const me = await this.updateAvatar(avatar.imageBuffer, avatar.filename, user)
     await this.userRepository.save(me)
-    return GetMeDto.fromDomain(me);
+    return me
   }
 
   async updateAvatar(imageBuffer: Buffer, filename: string, user: User) {

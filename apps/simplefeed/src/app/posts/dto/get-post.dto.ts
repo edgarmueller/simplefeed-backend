@@ -1,4 +1,4 @@
-import { Post } from "../../post";
+import { Post } from "@simplefeed/post";
 
 export class GetPostDto {
 	static fromDomain(post: Post): GetPostDto {

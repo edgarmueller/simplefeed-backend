@@ -15,16 +15,16 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express'
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
 import {
   Attachment,
-  CommentPostDto,
-  GetCommentDto,
-  GetPostDto,
   PostUsecases,
-  SubmitPostDto,
 } from '@simplefeed/post'
 import { Pagination } from 'nestjs-typeorm-paginate'
 import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
 import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
-import { PaginatedPostQueryDto } from './dto/paginated-post-query.dto'
+import { PaginatedPostQueryDto } from '../dto/paginated-post-query.dto'
+import { CommentPostDto } from '../dto/comment-post.dto'
+import { GetCommentDto } from '../dto/get-comment.dto'
+import { GetPostDto } from '../dto/get-post.dto'
+import { SubmitPostDto } from '../dto/submit-post.dto'
 
 type File = Express.Multer.File
 
@@ -87,7 +87,7 @@ export class PostController {
     @Param('postId') postId: string,
     @Body() dto: CommentPostDto
   ): Promise<GetCommentDto> {
-    const comment = await this.usecases.postComment(req.user, postId, dto)
+    const comment = await this.usecases.postComment(req.user, postId, dto.content, dto.path)
     return GetCommentDto.fromDomain(comment)
   }
 
@@ -99,11 +99,15 @@ export class PostController {
     @Param('commentId') commentId?: string,
     @Query(new PaginatedQueryPipe()) paginationOpts?: PaginatedQueryDto
   ): Promise<Pagination<GetCommentDto>> {
-    return this.usecases.fetchComments(
+    const page = await this.usecases.fetchComments(
       postId,
       commentId || postId,
       paginationOpts
     )
+    return {
+      ...page,
+      items: page.items.map(GetCommentDto.fromDomain)
+    }
   }
 
   @Post(':postId/like')

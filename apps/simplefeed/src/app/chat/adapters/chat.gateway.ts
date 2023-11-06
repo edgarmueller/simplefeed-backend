@@ -13,11 +13,11 @@ import { AuthService } from '@simplefeed/auth';
 import { ChatUsecases } from '@simplefeed/chat';
 import { Server, Socket } from 'socket.io';
 import { Incoming, Outgoing } from './chat.constants';
-import { JoinConversationDto } from './dto/join-conversation.dto';
-import { MarkMessageAsReadDto } from './dto/mark-message-as-read.dto';
-import { RequestAllMessagesDto } from './dto/request-all-messages.dto';
-import { SendMessageDto } from './dto/send-message.dto';
-import { RequestMessagesDto } from './dto/request-messages.dto';
+import { JoinConversationDto } from '../dto/join-conversation.dto';
+import { MarkMessageAsReadDto } from '../dto/mark-message-as-read.dto';
+import { RequestAllMessagesDto } from '../dto/request-all-messages.dto';
+import { SendMessageDto } from '../dto/send-message.dto';
+import { RequestMessagesDto } from '../dto/request-messages.dto';
 
 @WebSocketGateway({
   cors: {

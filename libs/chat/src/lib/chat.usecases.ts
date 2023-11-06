@@ -4,8 +4,6 @@ import { AuthService } from '@simplefeed/auth';
 import { User, UserClosedEvent, UsersRepository } from '@simplefeed/user';
 import { Conversation } from './conversation';
 import { ConversationRepository } from './conversation.repository';
-import { GetConversationDto } from './dto/get-conversation.dto';
-import { GetMessageDto } from './dto/get-message.dto';
 import { Message } from './message';
 
 @Injectable()
@@ -31,7 +29,7 @@ export class ChatUsecases {
     return await this.conversationsRepo.saveConversation(conversation)
   }
 
-  async addMessageToConversation(conversationId: string, authorId: string, messageText: string): Promise<GetMessageDto> {
+  async addMessageToConversation(conversationId: string, authorId: string, messageText: string): Promise<Message> {
     // TODO: dont load all messages
     const conversation = await this.conversationsRepo.findOneByIdAndUserIdOrFail(conversationId, authorId)
     const message = Message.create({
@@ -43,30 +41,30 @@ export class ChatUsecases {
     })
     conversation.addMessage(message)
     const savedMessage =  await this.conversationsRepo.saveMessage(message)
-    return GetMessageDto.fromDomain(savedMessage);
+    return savedMessage
   }
 
-  async findConversationById(id: string, userId: string, page?: number): Promise<GetConversationDto> {
+  async findConversationById(id: string, userId: string, page?: number): Promise<Conversation> {
     const conversation = await this.conversationsRepo.findOneByIdWithMessagesOrFail(id, page)
     if (!conversation.userIds.includes(userId)) {
       this.logger.warn('User not found in conversation', conversation, userId)
       throw new ForbiddenException()
     }
-    return GetConversationDto.fromDomain(conversation);
+    return conversation
   }
 
-  async findConversationsByUserId(userId: string): Promise<GetConversationDto[]> {
+  async findConversationsByUserId(userId: string): Promise<Conversation[]> {
     const conversations = await this.conversationsRepo.findByUserId(userId);
-    return conversations.map(GetConversationDto.fromDomain);
+    return conversations
   }
 
   async findConversationsByUserIds(userIds: string[]): Promise<Conversation> {
     return this.conversationsRepo.findConversationByParticipantIds(userIds);
   }
 
-  async findConversationsByUserIdWithMessages(userId: string): Promise<GetConversationDto[]> {
+  async findConversationsByUserIdWithMessages(userId: string): Promise<Conversation[]> {
     const conversations = await this.conversationsRepo.findByUserIdWithMessages(userId);
-    return conversations.map(GetConversationDto.fromDomain);
+    return conversations
   
   }
 
