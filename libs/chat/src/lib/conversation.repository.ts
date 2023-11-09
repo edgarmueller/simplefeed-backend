@@ -115,6 +115,7 @@ export class ConversationRepository {
       .where('user_ids::jsonb @> :userId', {
         userId: `["${userId}"]`,
       })
+      .orderBy('message.createdAt', 'DESC')
       .getMany()
   }
 
