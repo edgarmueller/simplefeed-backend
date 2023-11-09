@@ -3,7 +3,7 @@ import { GetMessageDto } from './get-message.dto';
 export class GetConversationDto {
 
 	id: string;
-	participantIds: string[];
+	userIds: string[];
 	messages: GetMessageDto[];
 
 	constructor(props: Partial<GetConversationDto>) {
@@ -13,7 +13,7 @@ export class GetConversationDto {
 	static fromDomain(conversation: Conversation): GetConversationDto {
 		return new GetConversationDto({
 			id: conversation.id,
-			participantIds: conversation.userIds.map((participantId) => participantId),
+			userIds: conversation.userIds.map((participantId) => participantId),
 			messages: conversation?.messages?.map((message) => GetMessageDto.fromDomain(message)) || [],
 		});
 	}

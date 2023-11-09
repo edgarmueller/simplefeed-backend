@@ -15,9 +15,9 @@ import { Server, Socket } from 'socket.io';
 import { Incoming, Outgoing } from './chat.constants';
 import { JoinConversationDto } from '../dto/join-conversation.dto';
 import { MarkMessageAsReadDto } from '../dto/mark-message-as-read.dto';
-import { RequestAllMessagesDto } from '../dto/request-all-messages.dto';
 import { SendMessageDto } from '../dto/send-message.dto';
 import { RequestMessagesDto } from '../dto/request-messages.dto';
+import { GetMessageDto } from '../dto/get-message.dto';
 
 @WebSocketGateway({
   cors: {
@@ -73,6 +73,7 @@ export class ChatGateway implements OnGatewayConnection {
     }
   }
 
+  // client sent a message
   @SubscribeMessage(Incoming.SEND_MESSAGE)
   async listenForMessages(
     @MessageBody() dto: SendMessageDto,
@@ -85,7 +86,8 @@ export class ChatGateway implements OnGatewayConnection {
         author.id,
         dto.message.content
       )
-      this.server.to(conversationId).emit(Outgoing.RECEIVE_MESSAGE, msg)
+      // send message to all participants
+      this.server.to(conversationId).emit(Outgoing.RECEIVE_MESSAGE, GetMessageDto.fromDomain(msg))
     } catch (error) {
       this.logger.error(`[listenForMessages] ${error}`)
       throw new WsException(error.message)
@@ -104,25 +106,6 @@ export class ChatGateway implements OnGatewayConnection {
       this.server.to(conversationId).emit(Outgoing.MESSAGE_READ, { conversationId, userId: user.id })
     } catch (error) {
       this.logger.error(`[markAsRead] ${error}`)
-      throw new WsException(error.message)
-    }
-  }
-
-  @SubscribeMessage(Incoming.REQUEST_ALL_MESSAGES)
-  async requestAllMessages(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() dto: RequestAllMessagesDto
-  ) {
-    try {
-      const user = await this.authService.findOneUserByToken(dto.auth)
-      const conversation = await this.usecases.findConversationById(
-        dto.conversationId,
-        user.id
-      );
-      socket.emit(Outgoing.SEND_ALL_MESSAGES, conversation)
-    } catch (error) {
-      this.logger.error(`[requestAllMessageserror] ${error}`)
-      socket.disconnect(true)
       throw new WsException(error.message)
     }
   }
