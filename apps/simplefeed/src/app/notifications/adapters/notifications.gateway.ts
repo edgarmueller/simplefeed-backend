@@ -10,9 +10,10 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { AuthService } from '@simplefeed/auth';
-import { NotificationUsecases,  NotificationCreatedEvent } from '@simplefeed/notification';
+import { NotificationUsecases, NotificationCreatedEvent } from '@simplefeed/notification';
 import { Server, Socket } from 'socket.io';
 import { GetNotificationDto } from '../dto/get-notification.dto';
+import { Incoming, Outgoing, NotificationRoomId } from './notification.constants';
 
 @WebSocketGateway({
   cors: {
@@ -30,13 +31,10 @@ export class NotificationsGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server
 
-  constructor(
-    readonly authService: AuthService,
-    readonly usecases: NotificationUsecases,
-  ) {}
+  constructor(readonly authService: AuthService, readonly usecases: NotificationUsecases) { }
 
   handle(event: NotificationCreatedEvent) {
-    this.server.to(`notifications-${event.notification.recipientId}`).emit('receive_notification', GetNotificationDto.fromDomain(event.notification))
+    this.server.to(NotificationRoomId(event.notification.recipientId)).emit(Outgoing.NotificationRead, GetNotificationDto.fromDomain(event.notification))
   }
 
   async handleConnection(socket: Socket) {
@@ -44,51 +42,42 @@ export class NotificationsGateway implements OnGatewayConnection {
       const authHeader = socket.handshake.query.Authorization as string
       const user = await this.authService.findOneUserByToken(authHeader)
       const notifications = await this.usecases.findUnviewedNotificationsForUserId(user.id)
-      await socket.join(`notifications-${user.id}`)
-      this.server.to(`notifications-${user.id}`).emit('send_all_notifications', notifications)
+      await socket.join(NotificationRoomId(user.id))
+      this.server.to(NotificationRoomId(user.id)).emit(Outgoing.SendAllNotifications, notifications.map(GetNotificationDto.fromDomain))
     } catch (error) {
-      console.log(error)
-      socket.emit('error', { message: 'Invalid credentials.' })
-      socket.disconnect()
+      throw new WsException(error.message)
     }
   }
 
-  @SubscribeMessage('mark_notification_as_read')
-  async listenForMessages(
-    @MessageBody(new ValidationPipe({ transform: true })) rawBody: any,
+  @SubscribeMessage(Incoming.MarkNotificationAsRead)
+  async handleMarkNotificationAsRead(
+    @MessageBody(new ValidationPipe({ transform: true })) body: any,
     @ConnectedSocket() socket: Socket
   ) {
-    console.log('mark_notification_as_read', rawBody)
     try {
-      const body = rawBody;
       const authHeader = socket.handshake.query.Authorization as string
       const user = await this.authService.findOneUserByToken(authHeader)
       const readNotification = await this.usecases.markNotificationAsRead(body.notificationId);
       this.logger.log(`User ${user.id} marked notification ${body.notificationId} as read`)
-      this.logger.log(`body: ${JSON.stringify(body)}`)
-      socket.to(`notifications-${user.id}`).emit('notification_read', GetNotificationDto.fromDomain(readNotification))
-      socket.emit('notification_read', GetNotificationDto.fromDomain(readNotification))
+      socket.to(`notifications-${user.id}`).emit(Outgoing.NotificationRead, GetNotificationDto.fromDomain(readNotification))
+      socket.emit(Outgoing.NotificationRead, GetNotificationDto.fromDomain(readNotification))
     } catch (error) {
-      throw new WsException('Invalid credentials.')
+      throw new WsException(error.message)
     }
   }
 
-  @SubscribeMessage('request_all_notifications')
-  async requestAllMessages(
-    @ConnectedSocket() socket: Socket,
-  ) {
-    try {
-      const authHeader = socket.handshake.query.Authorization as string
-      const user = await this.authService.findOneUserByToken(authHeader)
-      this.logger.log(`User ${user.id} requested all notifications`)
-      const notifications = await this.usecases.findUnviewedNotificationsForUserId(
-        user.id
-      )
-
-      socket.emit('send_all_notification', notifications)
-    } catch (error) {
-      socket.emit('error', { message: 'Invalid credentials.' })
-      socket.disconnect()
-    }
-  }
+  // @SubscribeMessage(Incoming.RequestAllNotifications)
+  // async handleRequestAllNotifications(@ConnectedSocket() socket: Socket) {
+  //   try {
+  //     const authHeader = socket.handshake.query.Authorization as string
+  //     const user = await this.authService.findOneUserByToken(authHeader)
+  //     this.logger.log(`User ${user.id} requested all notifications`)
+  //     const notifications = await this.usecases.findUnviewedNotificationsForUserId(
+  //       user.id
+  //     )
+  //     socket.emit(Outgoing.SendAllNotifications, notifications.map(GetNotificationDto.fromDomain))
+  //   } catch (error) {
+  //     throw new WsException(error.message)
+  //   }
+  // }
 }
