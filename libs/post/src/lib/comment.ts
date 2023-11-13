@@ -22,7 +22,7 @@ export class Comment implements Entity {
 
   public static escapePath(path: string) {
     const escapedPath = path.replace(/-/g, '_').replace(/\//g, '.')
-    return escapedPath.endsWith('.') ? path.substring(0, path.length - 1) : path
+    return escapedPath.endsWith('.') ? escapedPath.substring(0, escapedPath.length - 1) : escapedPath
   }
 
   public static create(props: Props<Comment>, id?: string): Comment {
