@@ -34,15 +34,6 @@ Run `nx build app` to build the project. The build artifacts will be stored in t
 
 ### Libraries
 
-## Deploy
-
-### fly.io 
-Once authenticated with fly.io, run `fly deploy`.
-
-### Secrets
-
-
-
 Run `nx build my-lib`. 
 ## Running unit tests
 
@@ -63,6 +54,14 @@ Run `nx graph` to see a diagram of the dependencies of your projects.
 ## Further help
 
 Visit the [Nx Documentation](https://nx.dev) to learn more.
+
+## Deploy
+
+### via fly.io 
+Once authenticated with fly.io, run `fly deploy`.
+
+### Secrets
+Run `fly secrets set KEY=$VALUE``
 
  ## Local infra 
 

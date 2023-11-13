@@ -44,6 +44,7 @@ export class ChatGateway implements OnGatewayConnection {
     try {
       const authHeader = socket.handshake.query.Authorization as string
       const user = await this.authService.findOneUserByToken(authHeader)
+      this.logger.log(`Fetching conversations for user ${user.id}`)
       const conversations = await this.usecases.findConversationsByUserId(user.id)
       await socket.join(conversations.map((c) => c.id))
     } catch (error) {

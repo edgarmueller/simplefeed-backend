@@ -47,7 +47,7 @@ export class ChatUsecases {
   async findConversationById(id: string, userId: string, page?: number): Promise<Conversation> {
     const conversation = await this.conversationsRepo.findOneByIdWithMessagesOrFail(id, page)
     if (!conversation.userIds.includes(userId)) {
-      this.logger.warn('User not found in conversation', conversation, userId)
+      this.logger.warn(`User not found in conversation: conversation ${conversation.id}, userId ${userId}`)
       throw new ForbiddenException()
     }
     return conversation
