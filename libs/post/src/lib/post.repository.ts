@@ -164,9 +164,7 @@ export class PostsRepository {
           'profile',
           'profile.user_id = user.id'
         )
-      query.where('comment.path LIKE :commentId', {
-        commentId: `%${commentId || postId}%`,
-      })
+      query.where('comment.path ~ :inputPath', { inputPath: `*.${commentId.replace(/-/g, '_').replace(/\//g, '.')}` })
       query.orderBy('comment.path')
       return await paginate(query, paginationOpts)
     } catch (error) {

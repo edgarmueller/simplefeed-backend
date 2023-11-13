@@ -14,7 +14,7 @@ export const CommentSchema = new EntitySchema<Comment>({
       type: String,
     },
     path: {
-      type: String,
+      type: 'ltree',
       nullable: true,
     },
     createdAt: {

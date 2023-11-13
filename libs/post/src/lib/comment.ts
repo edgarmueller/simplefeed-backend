@@ -20,6 +20,11 @@ export class Comment implements Entity {
   post?: Post
   path?: string
 
+  public static escapePath(path: string) {
+    const escapedPath = path.replace(/-/g, '_').replace(/\//g, '.')
+    return escapedPath.endsWith('.') ? path.substring(0, path.length - 1) : path
+  }
+
   public static create(props: Props<Comment>, id?: string): Comment {
     const comment = new Comment({ ...props }, id);
     const isNewComment = !!id === false;
