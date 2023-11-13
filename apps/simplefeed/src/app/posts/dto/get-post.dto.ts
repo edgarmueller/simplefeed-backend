@@ -5,12 +5,16 @@ export class GetPostDto {
 		return {
 			...post,
 			author: {
-				...post.author.profile,
 				id: post.author.id,
+				firstName: post.author.profile.firstName,
+				lastName: post.author.profile.lastName,
+				username: post.author.profile.username,
+				imageUrl: post.author.profile.imageUrl
 			},
 			postedTo: {
-				...post.postedTo?.profile,
 				id: post.postedTo?.id,
+				firstName: post.postedTo?.profile.firstName,
+				lastName: post.postedTo?.profile.lastName,
 			}
 		}
 	}

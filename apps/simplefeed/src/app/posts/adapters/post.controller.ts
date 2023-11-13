@@ -35,49 +35,59 @@ export class PostController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(AnyFilesInterceptor())
-  submitPost(
+  async submitPost(
     @Body() dto: SubmitPostDto,
     @Req() req: RequestWithUser,
     @UploadedFiles() files?: File[]
-  ) {
+  ): Promise<GetPostDto> {
     let attachments: Attachment[] = []
     if (dto.attachments) {
       attachments = JSON.parse(dto.attachments)
     }
-    return this.usecases.submitPost(
+    const post = await this.usecases.submitPost(
       dto.body,
       req.user,
       attachments,
       files,
       dto.toUserId
     )
+    return GetPostDto.fromDomain(post)
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  getFeed(
+  async getFeed(
     @Req() req: RequestWithUser,
     @Query() paginationQueryDto: PaginatedPostQueryDto
   ): Promise<Pagination<GetPostDto>> {
     if (paginationQueryDto.userId) {
-      return this.usecases.getUserActivityFeed(paginationQueryDto.userId, {
+      const page =  await this.usecases.getUserActivityFeed(paginationQueryDto.userId, {
         page: paginationQueryDto.page,
         limit: paginationQueryDto.limit,
       })
+      return {
+        ...page,
+        items: page.items.map(GetPostDto.fromDomain)
+      }
     }
-    return this.usecases.getPersonalFeed(req.user.id, {
+    const page = await this.usecases.getPersonalFeed(req.user.id, {
       page: paginationQueryDto.page,
       limit: paginationQueryDto.limit,
     })
+    return {
+      ...page,
+      items: page.items.map(GetPostDto.fromDomain)
+    }
   }
 
   @Get(':postId')
   @UseGuards(JwtAuthGuard)
-  getPost(
+  async getPost(
     @Req() req: RequestWithUser,
     @Param('postId') postId: string
   ): Promise<GetPostDto> {
-    return this.usecases.getPost(postId, req.user.id)
+    const post = await this.usecases.getPost(postId, req.user.id)
+    return GetPostDto.fromDomain(post)
   }
 
   @Post(':postId/comments')
@@ -126,12 +136,6 @@ export class PostController {
     @Param('postId') postId: string
   ): Promise<void> {
     return this.usecases.unlikePost(postId, req.user)
-  }
-
-  @Post('likes')
-  @UseGuards(JwtAuthGuard)
-  async fetchLikes(@Req() req: RequestWithUser): Promise<any> {
-    return this.usecases.findLikedPostsByUser(req.user)
   }
 
   @Delete(':postId')
