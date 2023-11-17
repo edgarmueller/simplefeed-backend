@@ -34,7 +34,8 @@ export class NotificationsGateway implements OnGatewayConnection {
   constructor(readonly authService: AuthService, readonly usecases: NotificationUsecases) { }
 
   handle(event: NotificationCreatedEvent) {
-    this.server.to(NotificationRoomId(event.notification.recipientId)).emit(Outgoing.NotificationRead, GetNotificationDto.fromDomain(event.notification))
+    const roomId = NotificationRoomId(event.notification.recipientId)
+    this.server.to(roomId).emit(Outgoing.ReceiveNotification, GetNotificationDto.fromDomain(event.notification))
   }
 
   async handleConnection(socket: Socket) {
