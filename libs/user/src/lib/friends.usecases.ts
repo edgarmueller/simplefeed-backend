@@ -42,7 +42,7 @@ export class FriendUsecases {
     await this.friendRequestRepository.delete(friendRequest);
   }
 
-  async confirmRequest(friendRequestId: string): Promise<void> {
+  async confirmRequest(friendRequestId: string): Promise<FriendRequest> {
     const foundRequest = await this.friendRequestRepository.findOneByIdWithFriends(friendRequestId);
     if (!foundRequest) {
       throw new Error('Friend request has not been sent');
@@ -50,6 +50,7 @@ export class FriendUsecases {
     foundRequest.accept();
     await this.userRepository.saveMany([foundRequest.from, foundRequest.to]);
     await this.friendRequestRepository.delete(foundRequest);
+    return foundRequest
   }
 
   async removeFriend(userId: string, friendId: string): Promise<void> {
