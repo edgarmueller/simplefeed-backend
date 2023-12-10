@@ -35,6 +35,7 @@ export class NotificationsGateway implements OnGatewayConnection {
 
   handle(event: NotificationCreatedEvent) {
     const roomId = NotificationRoomId(event.notification.recipientId)
+    console.log('handle room id', roomId)
     this.server.to(roomId).emit(Outgoing.ReceiveNotification, GetNotificationDto.fromDomain(event.notification))
   }
 

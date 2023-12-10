@@ -7,7 +7,7 @@
     "predev": "PROFILE=local npm run schema:create",
     "build": "nx build",
     "test:libs": "PROFILE=test NODE_ENV=test nx run-many --projects=post,user,auth,chat --target=test --parallel=false",
-    "test:app": "PROFILE=test NODE_ENV=test nx test simplefeed --parallel=false --skip-nx-cache",
+    "test:app": "PROFILE=test NODE_ENV=test nx test simplefeed --runInBand --skip-nx-cache",
     "infra:up": "docker compose up -d",
     "infra:down": "docker compose down",
     "schema:create": "ts-node --project tsconfig.script.json apps/simplefeed/scripts/create-schema",
@@ -31,6 +31,7 @@
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^10.0.3",
     "@nestjs/platform-socket.io": "^10.0.3",
+    "@nestjs/platform-ws": "^10.2.9",
     "@nestjs/schedule": "^3.0.1",
     "@nestjs/typeorm": "^10.0.0",
     "@nestjs/websockets": "^10.0.3",
@@ -92,9 +93,11 @@
     "jest": "27.5.1",
     "pluralize": "^8.0.0",
     "prettier": "2.8.3",
+    "socket.io-client": "^4.7.2",
     "supertest": "^6.2.4",
     "ts-jest": "27.1.4",
     "ts-node": "~10.8.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.2",
+    "ws": "^8.14.2"
   }
 }
