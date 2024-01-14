@@ -1,6 +1,7 @@
-import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { EventsHandler } from '@nestjs/cqrs';
 import {
+  BaseWsExceptionFilter,
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
@@ -23,6 +24,7 @@ import { Incoming, Outgoing, NotificationRoomId } from './notification.constants
   namespace: 'notifications',
 })
 @EventsHandler(NotificationCreatedEvent)
+@UseFilters(BaseWsExceptionFilter)
 @UsePipes(new ValidationPipe({ transform: true }))
 export class NotificationsGateway implements OnGatewayConnection {
 
@@ -47,20 +49,22 @@ export class NotificationsGateway implements OnGatewayConnection {
       await socket.join(NotificationRoomId(user.id))
       this.server.to(NotificationRoomId(user.id)).emit(Outgoing.SendAllNotifications, notifications.map(GetNotificationDto.fromDomain))
     } catch (error) {
-      throw new WsException(error.message)
+      // we can't use WsException here, see https://github.com/nestjs/nest/issues/336
+      this.logger.error(`[handleConnection] ${error}`)
+      this.logger.error(error)
+      socket.disconnect()
     }
   }
 
   @SubscribeMessage(Incoming.MarkNotificationAsRead)
   async handleMarkNotificationAsRead(
-    @MessageBody(new ValidationPipe({ transform: true })) body: any,
+    @MessageBody(new ValidationPipe({ transform: true })) dto: any,
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      const authHeader = socket.handshake.query.Authorization as string
-      const user = await this.authService.findOneUserByToken(authHeader)
-      const readNotification = await this.usecases.markNotificationAsRead(body.notificationId);
-      this.logger.log(`User ${user.id} marked notification ${body.notificationId} as read`)
+      const user = await this.authService.findOneUserByToken(dto.auth)
+      const readNotification = await this.usecases.markNotificationAsRead(dto.notificationId);
+      this.logger.log(`User ${user.id} marked notification ${dto.notificationId} as read`)
       socket.to(`notifications-${user.id}`).emit(Outgoing.NotificationRead, GetNotificationDto.fromDomain(readNotification))
       socket.emit(Outgoing.NotificationRead, GetNotificationDto.fromDomain(readNotification))
     } catch (error) {
