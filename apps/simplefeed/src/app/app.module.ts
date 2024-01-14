@@ -5,8 +5,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AuthConfigSchema, authConfig } from '@simplefeed/auth';
 import { SearchSchema, searchConfig } from '@simplefeed/search';
 import Joi from 'joi';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
@@ -17,6 +15,8 @@ import { PostModule } from './posts/post.module';
 import { SearchModule } from './search/search.module';
 import { UserModule } from './user/user.module';
 import redisConfig from './infra/redis.config';
+import { APP_FILTER } from '@nestjs/core';
+import { EntityNotFoundFilter } from './infra/not-found.exception-filter';
 
 @Module({
   imports: [
@@ -52,7 +52,11 @@ import redisConfig from './infra/redis.config';
     SearchModule,
     NotificationsModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: EntityNotFoundFilter,
+    },
+  ]
 })
 export class AppModule { }
