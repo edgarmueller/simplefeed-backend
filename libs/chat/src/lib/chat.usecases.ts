@@ -69,7 +69,7 @@ export class ChatUsecases {
   }
 
 	async markMessagesAsRead(user: User, conversationId: string): Promise<void> {
-    const conversation = await this.conversationsRepo.findOneByIdWithMessagesOrFail(conversationId);
+    const conversation = await this.conversationsRepo.findOneByIdWithUnreadMessagesOrFail(conversationId);
     const unreadMessages = conversation.markMessagesAsRead(user.id);
     await this.conversationsRepo.saveMessages(unreadMessages);
 	}

@@ -95,6 +95,27 @@ export class ConversationRepository {
     return conv
   }
 
+  async findOneByIdWithUnreadMessagesOrFail(id: string): Promise<Conversation> {
+    const conv = await this.conversationRepository.findOne({
+      where: { id },
+    })
+    conv.messages = await this.messageRepository.find({
+      where: {
+        conversation: {
+          id,
+        },
+        isRead: false,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    })
+    conv.messages.forEach((message) => {
+      message.conversationId = conv.id
+    })
+    return conv
+  }
+
   findByUserId(userId: string) {
     return this.conversationRepository
       .createQueryBuilder('conversation')

@@ -25,6 +25,8 @@ import { GetMessageDto } from '../dto/get-message.dto';
     methods: ['GET', 'POST'],
   },
   namespace: 'chat',
+  pingTimeout: 60000,
+  pingInterval: 15000,
 })
 @UseFilters(BaseWsExceptionFilter)
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -97,7 +99,6 @@ export class ChatGateway implements OnGatewayConnection {
 
   @SubscribeMessage(Incoming.MARK_AS_READ)
   async markAsRead(
-    @ConnectedSocket() socket: Socket,
     @MessageBody(new ValidationPipe({ transform: true })) dto: MarkMessageAsReadDto
   ) {
     try {
@@ -126,7 +127,6 @@ export class ChatGateway implements OnGatewayConnection {
       socket.emit(Outgoing.SEND_MESSAGES, conversation)
     } catch (error) {
       this.logger.error(`[requestMessagesError] ${error}`)
-      socket.disconnect(true)
       throw new WsException(error.message)
     }
   }
