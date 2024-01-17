@@ -12,6 +12,6 @@ export class ChatController {
 	@Get()
 	@UseGuards(JwtAuthGuard)
 	async getConversations(@Req() req: RequestWithUser): Promise<Conversation[]> {
-		return this.usecases.findConversationsByUserIdWithMessages(req.user.id);
+		return this.usecases.findConversationsByUserIdWithMostRecentMessbage(req.user.id);
 	}
 }

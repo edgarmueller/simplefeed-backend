@@ -7,7 +7,6 @@ export class Incoming {
 
 export class Outgoing {
 	static MESSAGE_READ = 'message_read'
-	static SEND_ALL_MESSAGES = 'send_all_messages'
 	static SEND_MESSAGES = 'send_messages'
 	static RECEIVE_MESSAGE = 'receive_message'
 }

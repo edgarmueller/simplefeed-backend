@@ -62,8 +62,8 @@ export class ChatUsecases {
     return this.conversationsRepo.findConversationByParticipantIds(userIds);
   }
 
-  async findConversationsByUserIdWithMessages(userId: string): Promise<Conversation[]> {
-    const conversations = await this.conversationsRepo.findByUserIdWithMessages(userId);
+  async findConversationsByUserIdWithMostRecentMessbage(userId: string): Promise<Conversation[]> {
+    const conversations = await this.conversationsRepo.findByUserIdWithMostRecentMessage(userId);
     return conversations
   
   }

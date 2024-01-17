@@ -71,7 +71,7 @@ export class ConversationRepository {
   // FIXME: page size
   async findOneByIdWithMessagesOrFail(
     id: string,
-    skip?: number,
+    page?: number,
     pageSize = 10
   ): Promise<Conversation> {
     const conv = await this.conversationRepository.findOne({
@@ -86,7 +86,7 @@ export class ConversationRepository {
       order: {
         createdAt: 'DESC',
       },
-      skip: skip ? skip * pageSize : 0,
+      skip: page ? (page - 1) * pageSize : 0,
       take: pageSize,
     })
     conv.messages.forEach((message) => {
@@ -125,10 +125,11 @@ export class ConversationRepository {
       .getMany()
   }
 
-  findByUserIdWithMessages(userId: string) {
-    return this.conversationRepository
+  async findByUserIdWithMostRecentMessage(userId: string) {
+    const conversationsWithMostRecentMessage = await this.conversationRepository
       .createQueryBuilder('conversation')
-      .leftJoinAndSelect(
+      .leftJoinAndMapOne(
+        'conversation.message',
         'conversation.messages',
         'message',
         'message.deleted_at IS NULL AND message.conversationId = conversation.id'
@@ -138,6 +139,12 @@ export class ConversationRepository {
       })
       .orderBy('message.createdAt', 'DESC')
       .getMany()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return conversationsWithMostRecentMessage.map((c: any) => {
+      c.messages = c.message !== null ? [c.message] : []
+      delete c.message
+      return c
+    })
   }
 
   async findConversationByParticipantIds(participantIds: string[]) {
