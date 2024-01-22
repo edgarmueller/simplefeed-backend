@@ -107,6 +107,7 @@ export class UserUsecases {
       filename
     )
     user.profile.updateAvatar(uploadResult.Location)
+    return user
   }
 
   async closeAccount(user: User) {
