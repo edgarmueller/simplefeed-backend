@@ -50,4 +50,8 @@ export class Conversation extends AggregateRoot {
     }
     return unreadMsgs
   }
+
+  hasMessage(messageId: string) {
+    return this.messages.some((msg) => msg.id === messageId)
+  }
 }

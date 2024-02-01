@@ -125,7 +125,7 @@ export class ConversationRepository {
       .getMany()
   }
 
-  async findByUserIdWithMostRecentMessage(userId: string) {
+  async findByUserIdWithMostRecentMessage(userId: string): Promise<Conversation[]> {
     const conversationsWithMostRecentMessage = await this.conversationRepository
       .createQueryBuilder('conversation')
       .leftJoinAndMapOne(
@@ -156,20 +156,24 @@ export class ConversationRepository {
       .getOne()
   }
 
+  findUnreadMessageCountByUser(userId: string) {
+    return this.messageRepository.countBy({
+      recipientId: userId,
+      isRead: false,
+    })
+  }
+
   findUnreadMessageByUserAndConversationId(
     userId: string,
-    converationId: string
+    converationIds: string[]
   ) {
     return this.messageRepository.find({
       where: {
         recipientId: userId,
         isRead: false,
         conversation: {
-          id: converationId,
+          id: In(converationIds),
         },
-      },
-      relations: {
-        conversation: true,
       },
     })
   }

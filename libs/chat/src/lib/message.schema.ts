@@ -18,6 +18,9 @@ export const MessageSchema = new EntitySchema<Message>({
     recipientId: {
       type: String,
     },
+    conversationId: {
+      type: String,
+    },
     isRead: {
       type: Boolean,
     },
@@ -40,6 +43,10 @@ export const MessageSchema = new EntitySchema<Message>({
       type: 'many-to-one',
       target: 'Conversation',
       inverseSide: 'messages',
+      joinColumn: {
+        name: 'conversationId',
+        referencedColumnName: 'id',
+      },
     },
   },
 })

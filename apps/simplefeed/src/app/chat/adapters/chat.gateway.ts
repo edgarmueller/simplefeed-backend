@@ -48,9 +48,12 @@ export class ChatGateway implements OnGatewayConnection {
       const user = await this.authService.findOneUserByToken(authHeader)
       this.logger.log(`Fetching conversations for user ${user.id}`)
       const conversations = await this.usecases.findConversationsByUserId(user.id)
-      await socket.join(conversations.map((c) => c.id))
+      const conversationIds = conversations.map((c) => c.id)
+      await socket.join(conversationIds)
+      socket.emit('conversations_joined', { conversationIds })
     } catch (error) {
       // we can't use WsException here, see https://github.com/nestjs/nest/issues/336
+      console.log(`[handleConnection] ${error}`)
       this.logger.error(`[handleConnection] ${error}`)
       this.logger.error(error)
       socket.disconnect()

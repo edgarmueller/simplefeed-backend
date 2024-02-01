@@ -1,6 +1,8 @@
 import { Controller, Get, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
-import { ChatUsecases, Conversation } from '@simplefeed/chat';
+import { ChatUsecases} from '@simplefeed/chat';
+import { GetConversationDto } from "../dto/get-conversation.dto";
+import { GetMessageDto } from "../dto/get-message.dto";
 
 @Controller('chat')
 export class ChatController {
@@ -11,7 +13,12 @@ export class ChatController {
 
 	@Get()
 	@UseGuards(JwtAuthGuard)
-	async getConversations(@Req() req: RequestWithUser): Promise<Conversation[]> {
-		return this.usecases.findConversationsByUserIdWithMostRecentMessbage(req.user.id);
+	async getConversations(@Req() req: RequestWithUser): Promise<GetConversationDto[]> {
+		const conversations = await this.usecases.findConversationsByUserIdWithUnreadMessages(req.user.id);
+		return conversations.map((conversation) => {
+			const conversationDto = GetConversationDto.fromDomain(conversation);
+			conversationDto.messages = conversation.messages.map(GetMessageDto.fromDomain);
+			return conversationDto;
+		})
 	}
 }

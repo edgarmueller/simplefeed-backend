@@ -15,7 +15,7 @@ export class ChatUsecases {
     readonly conversationsRepo: ConversationRepository,
     readonly userRepository: UsersRepository,
     readonly authService: AuthService,
-  ) {}
+  ) { }
 
   async createConversation(participantIds: string[]) {
     const existingConversation = await this.conversationsRepo.findConversationByParticipantIds(participantIds);
@@ -40,7 +40,7 @@ export class ChatUsecases {
       conversationId,
     })
     conversation.addMessage(message)
-    const savedMessage =  await this.conversationsRepo.saveMessage(message)
+    const savedMessage = await this.conversationsRepo.saveMessage(message)
     return savedMessage
   }
 
@@ -62,17 +62,29 @@ export class ChatUsecases {
     return this.conversationsRepo.findConversationByParticipantIds(userIds);
   }
 
-  async findConversationsByUserIdWithMostRecentMessbage(userId: string): Promise<Conversation[]> {
+  async findConversationsByUserIdWithUnreadMessages(userId: string): Promise<Conversation[]> {
     const conversations = await this.conversationsRepo.findByUserIdWithMostRecentMessage(userId);
+    const unreadMessages = await this.conversationsRepo.findUnreadMessageByUserAndConversationId(userId, conversations.map(c => c.id));
+    unreadMessages.forEach((message) => {
+      // TODO: message.conversationId is undefined?
+      const foundConversation = conversations.find((conversation) => conversation.id === message.conversationId)
+      if (!foundConversation.hasMessage(message.id)) {
+        foundConversation.addMessage(message);
+      }
+    });
     return conversations
-  
   }
 
-	async markMessagesAsRead(user: User, conversationId: string): Promise<void> {
+  async findUnreadMessagesCount(userId: string): Promise<number> {
+    return this.conversationsRepo.findUnreadMessageCountByUser(userId)
+  }
+
+  async markMessagesAsRead(user: User, conversationId: string): Promise<void> {
+    this.logger.log(`Marking messages as read for user ${user.id} in conversation ${conversationId}`)
     const conversation = await this.conversationsRepo.findOneByIdWithUnreadMessagesOrFail(conversationId);
     const unreadMessages = conversation.markMessagesAsRead(user.id);
     await this.conversationsRepo.saveMessages(unreadMessages);
-	}
+  }
 
   async handleUserClosed(userId: string) {
     await this.conversationsRepo.deleteByUserId(userId);

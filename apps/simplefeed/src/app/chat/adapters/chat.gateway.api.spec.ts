@@ -1,21 +1,20 @@
-import { initializeTransactionalContext } from 'typeorm-transactional'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
+import { PostsRepository } from '@simplefeed/post'
 import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
+import * as io from 'socket.io-client'
+import { Socket } from 'socket.io-client'
 import request from 'supertest'
 import { createConnection } from 'typeorm'
-import { PostsRepository } from '@simplefeed/post'
-import { NotificationCreatedEvent, Notification } from '@simplefeed/notification'
-import * as io from 'socket.io-client';
+import { initializeTransactionalContext } from 'typeorm-transactional'
 import { AppModule } from '../../app.module'
-import { NotificationsGateway } from './notifications.gateway'
-import { Outgoing } from './notification.constants'
+import { ChatGateway } from './chat.gateway'
 
-describe('Notifications gateway', () => {
+describe('Chat gateway', () => {
   let app: INestApplication
   let userRepo: UsersRepository
   let postRepo: PostsRepository
-  let notificationsGateway: NotificationsGateway
+  let chatGateway: ChatGateway
 
   beforeAll(async () => {
     await createDbSchema()
@@ -34,7 +33,7 @@ describe('Notifications gateway', () => {
     )
     userRepo = app.get(UsersRepository)
     postRepo = app.get(PostsRepository)
-    notificationsGateway = app.get(NotificationsGateway)
+    chatGateway = app.get(ChatGateway)
     await app.init()
   })
 
@@ -42,6 +41,21 @@ describe('Notifications gateway', () => {
     return request(app.getHttpServer())
       .post('/api/auth/register')
       .send(payload)
+      .expect(expectedStatus)
+  }
+
+  async function sendFriendRequest(toUser, withToken, expectedStatus = 201) {
+    const friendRequest = await request(app.getHttpServer())
+      .post(`/api/friend-requests/${toUser}`)
+      .set('Authorization', withToken)
+      .expect(expectedStatus)
+    return friendRequest.body
+  }
+
+  async function acceptFriendRequest(friendRequestId, withToken, expectedStatus = 200) {
+    return request(app.getHttpServer())
+      .patch(`/api/friend-requests/${friendRequestId}`)
+      .set('Authorization', withToken)
       .expect(expectedStatus)
   }
 
@@ -57,6 +71,10 @@ describe('Notifications gateway', () => {
       user('homer', 'Homer', 'Simpson', 'homer@example.com', 'secret'),
       201
     )
+  }
+  async function befriend(senderToken, receiverToken, otherUser) {
+    const friendRequest = await sendFriendRequest(otherUser, senderToken)
+    await acceptFriendRequest(friendRequest.id, receiverToken)
   }
 
   function user(
@@ -104,9 +122,9 @@ describe('Notifications gateway', () => {
     }
   })
 
-  describe("notification usecases", () => {
+  describe("chat usecases", () => {
 
-    let clientSocket;
+    let clientSocket: Socket;
     let baseAddress;
 
     beforeAll(() => {
@@ -118,24 +136,29 @@ describe('Notifications gateway', () => {
       clientSocket.disconnect();
     });
 
-    it("should receive messages when connecting", (done) => {
+    it("should join conversations when connecting", (done) => {
       registerBart()
-        .then(() => login('bart@example.com', 'secret'))
+        .then(() => registerHomer())
+        .then(async () => {
+          const bartToken = await login('bart@example.com', 'secret')
+          const homerToken = await login('homer@example.com', 'secret')
+          await befriend(bartToken, homerToken, 'homer')
+          return bartToken
+        })
         .then((bartToken) => {
-          clientSocket = io.connect(`${baseAddress}/notifications`, {
+          clientSocket = io.connect(`${baseAddress}/chat`, {
             query: {
-              Authorization: bartToken
-            }
+              Authorization: `Bearer ${bartToken}`,
+            },
           });
-          clientSocket.on("send_all_notifications", (arg) => {
-            // no messages
-            expect(arg).toEqual([]);
+          clientSocket.on('conversations_joined', convs => {
+            expect(convs.conversationIds.length).toEqual(1);
             done();
-          });
+          })
         })
     });
 
-    it("should receive notification", (done) => {
+    it.skip("should receive notification", (done) => {
       registerBart()
         .then(bart => {
           login('bart@example.com', 'secret')
@@ -145,22 +168,22 @@ describe('Notifications gateway', () => {
                   Authorization: token
                 }
               });
-              clientSocket.on("send_all_notifications", (arg) => {
-                notificationsGateway.handle(new NotificationCreatedEvent(Notification.create({
-                  recipientId: bart.body.user.id,
-                  senderId: 'sender-id',
-                  content: 'content',
-                  opened: false,
-                  viewed: false,
-                  type: 'type',
-                  resourceId: 'resource-id'
-                })))
-              });
-              clientSocket.on(Outgoing.ReceiveNotification, (arg) => {
-                // no messages
-                expect(arg.recipientId).toEqual(bart.body.user.id);
-                done();
-              });
+              // clientSocket.on("send_all_notifications", (arg) => {
+              //   chatGateway.handle(new NotificationCreatedEvent(Notification.create({
+              //     recipientId: bart.body.user.id,
+              //     senderId: 'sender-id',
+              //     content: 'content',
+              //     opened: false,
+              //     viewed: false,
+              //     type: 'type',
+              //     resourceId: 'resource-id'
+              //   })))
+              // });
+              // clientSocket.on(Outgoing.ReceiveNotification, (arg) => {
+              //   // no messages
+              //   expect(arg.recipientId).toEqual(bart.body.user.id);
+              //   done();
+              // });
             })
         });
     });

@@ -15,6 +15,7 @@ export class GetPostDto {
 				id: post.postedTo?.id,
 				firstName: post.postedTo?.profile.firstName,
 				lastName: post.postedTo?.profile.lastName,
+				username: post.postedTo?.profile.username,
 			}
 		}
 	}
