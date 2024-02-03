@@ -144,6 +144,7 @@ export class PostUsecases {
   async likePost(postId: string, likedBy: User) {
     const post = await this.postsRepository.findOneWithAuthorByIdAndLikedById(postId, likedBy.id)
     post.like(likedBy)
+    await this.usersRepository.save(likedBy)
     await this.postsRepository.savePost(post)
   }
 

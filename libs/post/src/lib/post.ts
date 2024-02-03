@@ -74,6 +74,7 @@ export class Post extends AggregateRoot {
     if (this.author.id !== likedBy.id) {
       this.emitDomainEvent(new PostLikedEvent(this, likedBy));
     }
+    
     return like;
   }
 

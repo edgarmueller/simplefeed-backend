@@ -39,13 +39,6 @@ export class UserUsecases {
       username
     )
     return user;
-    // const mutualFriends = await this.getMutualFriends(requestingUser, user)
-    // if (withMutualFriends) {
-    //   return {
-    //     mutualFriends,
-    //   }
-    // }
-    // return user
   }
 
 
