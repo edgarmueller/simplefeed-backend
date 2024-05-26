@@ -37,17 +37,13 @@ import { EntityNotFoundFilter } from './infra/not-found.exception-filter';
     S3Module.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        enabled: configService.get('s3.enabled'),
-        accessKeyId: configService.get('s3.accessKeyId'),
-        secretAccessKey: configService.get('s3.secretAccessKey'),
-        region: configService.get('s3.region'),
-        host: configService.get('s3.host'),
-        href: configService.get('s3.href'),
-        port: configService.get('s3.port'),
-        hostname: configService.get('s3.hostname'),
-        protocol: configService.get('s3.protocol'),
-      }),
+      useFactory: (configService: ConfigService) => {
+        return {
+          enabled: configService.get('s3.enabled'),
+          bucketName: configService.get('s3.bucketName'),
+          endpoint: configService.get('s3.endpoint'),
+        }
+      },
     }),
     SearchModule,
     NotificationsModule
