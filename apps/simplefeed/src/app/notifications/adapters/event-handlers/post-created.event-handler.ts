@@ -10,6 +10,7 @@ export class PostCreatedEventHandler {
   constructor(readonly usecases: NotificationUsecases) {}
 
   async handle(event: PostCreatedEvent) {
+    // check target & don't self notify 
     if (event.post.postedTo && event.post.author.id !== event.post.postedTo.id) {
       await this.usecases.createNotification(
         Notification.create({

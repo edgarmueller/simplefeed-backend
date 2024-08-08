@@ -10,8 +10,11 @@ export class CommentAddedEventHandler {
   constructor(readonly usecases: NotificationUsecases) {}
 
   handle(event: CommentAddedEvent) {
+    // don't self notify
+    if (event.comment.author.id === event.post.author.id) {
+      return
+    }
     if (event.comment.parentComment) {
-			console.log({ event })
       this.usecases.createNotification(
         Notification.create({
           recipientId: event.comment.parentComment.author.id,

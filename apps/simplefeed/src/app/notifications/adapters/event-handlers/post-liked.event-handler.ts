@@ -13,6 +13,10 @@ export class PostLikedEventHandler {
 
   async handle(event: PostLikedEvent) {
 		this.logger.log("Creating notification for liked post")
+    // dont self-notify
+    if (event.likedBy.id === event.post.author.id) {
+      return
+    }
     await this.usecases.createNotification(Notification.create({
       recipientId: event.post.author.id,
       senderId: event.likedBy.id,

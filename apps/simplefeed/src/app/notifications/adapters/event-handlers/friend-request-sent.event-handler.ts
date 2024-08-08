@@ -13,7 +13,6 @@ export class FriendRequestSentEventHandler {
 	}
 
 	async handle(event: FriendRequestSent) {
-		this.logger.log("creating notification for friend request sent")
 		await this.usecases.createNotification(Notification.create({
 			recipientId: event.friendRequest.to.id,
   		senderId: event.friendRequest.from.id,

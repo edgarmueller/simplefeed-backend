@@ -15,7 +15,8 @@ export class FriendRequestsController {
     @Param('username') toUserName: string
   ): Promise<GetFriendRequestDto> {
     const fromUser = req.user
-    return GetFriendRequestDto.fromDomain(await this.usecases.sendFriendRequest(fromUser, toUserName))
+    const friendRequest = await this.usecases.sendFriendRequest(fromUser, toUserName)
+    return GetFriendRequestDto.fromDomain(friendRequest)
   }
 
   @UseGuards(JwtAuthGuard)
