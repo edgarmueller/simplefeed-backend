@@ -67,7 +67,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
     entrypoint: /bin/sh -c
-    command: "aws --endpoint-url=https://localstack:4566 s3api create-bucket --bucket simplefeed-avatar --region us-east-1"
+    command: "aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket simplefeed-avatar --region us-east-1"
 
 volumes:
   cache:
