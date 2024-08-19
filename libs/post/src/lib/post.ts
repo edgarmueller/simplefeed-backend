@@ -1,4 +1,4 @@
-import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd';
+import { AggregateRoot, Props, createId } from '@simplefeed/shared-ddd';
 import { User } from "@simplefeed/user";
 import { PostCreatedEvent } from './events/post-created.event';
 import { PostLikedEvent } from './events/post-liked.event';

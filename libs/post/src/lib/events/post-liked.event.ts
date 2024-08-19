@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@kittgen/shared-ddd';
+import { IDomainEvent } from '@simplefeed/shared-ddd';
 import { User } from '@simplefeed/user';
 import { Post } from '../post';
 

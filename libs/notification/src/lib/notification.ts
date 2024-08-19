@@ -1,4 +1,4 @@
-import { AggregateRoot, Props, createId } from "@kittgen/shared-ddd";
+import { AggregateRoot, Props, createId } from "@simplefeed/shared-ddd";
 import { NotificationCreatedEvent } from "./events/notification-created.event";
 
 const PREFIX = 'not'

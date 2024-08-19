@@ -1,5 +1,5 @@
 
-import { IDomainEvent } from '@kittgen/shared-ddd';
+import { IDomainEvent } from '@simplefeed/shared-ddd';
 import { FriendRequest } from '../friend-request';
 
 export class FriendRequestAccepted implements IDomainEvent {

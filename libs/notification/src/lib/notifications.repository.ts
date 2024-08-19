@@ -3,7 +3,7 @@ import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
 import { Transactional, runOnTransactionCommit } from 'typeorm-transactional'
-import { DomainEvents } from '@kittgen/shared-ddd'
+import { DomainEvents } from '@simplefeed/shared-ddd'
 import { Notification } from './notification'
 
 @Injectable()

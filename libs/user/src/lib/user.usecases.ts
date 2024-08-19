@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { S3Service } from '@kittgen/s3'
+import { S3Service } from '@simplefeed/s3'
 import { UsersRepository } from './user.repository'
 import { User } from './user'
 @Injectable()

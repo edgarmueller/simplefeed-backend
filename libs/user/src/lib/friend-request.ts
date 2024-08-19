@@ -1,4 +1,4 @@
-import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd'
+import { AggregateRoot, Props, createId } from '@simplefeed/shared-ddd'
 import { FriendRequestAccepted } from './events/friend-request-accepted.event'
 import { User } from './user'
 

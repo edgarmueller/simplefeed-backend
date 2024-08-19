@@ -1,4 +1,4 @@
-import { AggregateRoot, Props, createId } from '@kittgen/shared-ddd'
+import { AggregateRoot, Props, createId } from '@simplefeed/shared-ddd'
 import { ConversationAddedEvent } from './events/conversation-added.event'
 import { Message } from './message'
 import { MessagesReadEvent } from './events/messages-read.event'

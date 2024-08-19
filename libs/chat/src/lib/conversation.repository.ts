@@ -1,4 +1,4 @@
-import { DomainEvents } from '@kittgen/shared-ddd'
+import { DomainEvents } from '@simplefeed/shared-ddd'
 import { ForbiddenException, Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'

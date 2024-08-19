@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DomainEvents } from '@kittgen/shared-ddd'
+import { DomainEvents } from '@simplefeed/shared-ddd'
 import { Propagation, Transactional } from 'typeorm-transactional'
 import { In } from 'typeorm'
 import { QueryFailedError, Repository } from 'typeorm'

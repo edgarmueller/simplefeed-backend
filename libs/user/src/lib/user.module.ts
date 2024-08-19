@@ -1,4 +1,4 @@
-import { S3Module } from '@kittgen/s3';
+import { S3Module } from '@simplefeed/s3';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';

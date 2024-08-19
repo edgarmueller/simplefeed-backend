@@ -1,4 +1,4 @@
-import { S3Service } from '@kittgen/s3';
+import { S3Service } from '@simplefeed/s3';
 import { last } from 'lodash';
 import { User, UsersRepository } from '@simplefeed/user';
 import { Injectable } from '@nestjs/common';

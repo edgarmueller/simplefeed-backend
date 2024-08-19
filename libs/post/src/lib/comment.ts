@@ -1,5 +1,5 @@
 import { User } from '@simplefeed/user';
-import { Entity, Props, createId } from '@kittgen/shared-ddd';
+import { Entity, Props, createId } from '@simplefeed/shared-ddd';
 
 import { Post } from "./post" 
 import { CommentAddedEvent } from './events/commet-added.event';

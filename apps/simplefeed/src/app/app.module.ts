@@ -1,4 +1,4 @@
-import { S3Module, S3Schema, s3Config } from '@kittgen/s3';
+import { S3Module, S3Schema, s3Config } from '@simplefeed/s3';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';

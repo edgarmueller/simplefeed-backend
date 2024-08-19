@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@kittgen/shared-ddd';
+import { IDomainEvent } from '@simplefeed/shared-ddd';
 import { Notification } from '../notification';
 
 export class NotificationCreatedEvent implements IDomainEvent {

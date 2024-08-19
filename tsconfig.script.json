@@ -17,7 +17,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@kittgen/shared-ddd": ["libs/shared-ddd/src/index.ts"]
+      "@simplefeed/shared-ddd": ["libs/shared-ddd/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
