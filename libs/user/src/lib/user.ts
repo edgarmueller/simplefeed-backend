@@ -6,6 +6,7 @@ import { FriendRequest } from './friend-request';
 import { Profile } from './profile';
 import { UserClosedEvent } from './events/user-closed.event';
 import { UserReactivatedEvent } from './events/user-reactivated.event';
+import { FriendRequestAlreadyExistsError } from './errors/friend-request-already-exists.error';
 
 const PREFIX = 'use'
 export type UserId = string
@@ -56,7 +57,7 @@ export class User extends AggregateRoot {
       this.friendRequests = []
     }
     if (otherUser.friendRequests?.find((fr) => fr.from.id === this.id)) {
-      throw new Error('Friend request already sent')
+      throw new FriendRequestAlreadyExistsError(this.id, otherUser.id)
     }
     this.friendRequests.push(friendRequest);
     this.emitDomainEvent(new FriendRequestSent(friendRequest))

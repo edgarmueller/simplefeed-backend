@@ -144,6 +144,11 @@ export class UsersRepository {
     })
   }
 
+  async deleteAll() {
+    await this.friendRequestsRepository.delete({})
+    await this.userRepository.delete({})
+  }
+
   async deleteByEmail(email: string) {
     const user = await this.findOneByEmailOrFail(email)
     await this.friendRequestsRepository.delete({

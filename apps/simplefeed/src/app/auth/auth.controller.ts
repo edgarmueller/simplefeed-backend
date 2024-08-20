@@ -1,25 +1,24 @@
 import {
-  AuthService,
-  AuthUsecases,
-  JwtRefreshGuard,
-  LocalAuthGuard,
-  RequestWithUser,
-} from '@simplefeed/auth'
-import {
   Body,
-  ConflictException,
   Controller,
   HttpCode,
   Logger,
   Patch,
   Post,
   Req,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common'
-import { Profile, User, UserAlreadyExistsError } from '@simplefeed/user'
+import {
+  AuthService,
+  AuthUsecases,
+  JwtRefreshGuard,
+  LocalAuthGuard,
+  RequestWithUser,
+} from '@simplefeed/auth'
+import { Profile, User } from '@simplefeed/user'
+import { GetTokenDto } from './dto/get-token.dto'
 import { GetUserDto } from './dto/get-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
-import { GetTokenDto } from './dto/get-token.dto'
 import { UpdatePasswordDto } from './dto/update-password.dto'
 
 @Controller('auth')
@@ -34,26 +33,19 @@ export class AuthController {
   async register(
     @Body() { user }: RegisterUserDto
   ): Promise<{ user: GetUserDto }> {
-    try {
-      const registeredUser = await this.usecases.register(
-        User.create({
-          email: user.email,
-          password: user.password,
-          profile: Profile.create({ 
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            imageUrl: user.imageUrl,
-          }),
-        })
-      )
-      return { user: GetUserDto.fromDomain(registeredUser) }
-    } catch (error) {
-      if (error instanceof UserAlreadyExistsError) {
-        throw new ConflictException(error.message)
-      }
-      throw error
-    }
+    const registeredUser = await this.usecases.register(
+      User.create({
+        email: user.email,
+        password: user.password,
+        profile: Profile.create({
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          imageUrl: user.imageUrl,
+        }),
+      })
+    )
+    return { user: GetUserDto.fromDomain(registeredUser) }
   }
 
   @HttpCode(200)
@@ -72,7 +64,7 @@ export class AuthController {
     request: RequestWithUser /*@Res({ passthrough: true }) response: Response*/
   ) {
     // if we were to use cookies
-    // -- 
+    // --
     // if (this.useCookies) {
     //   const accessTokenCookie = await this.authService.createAccessTokenCookie(request.user.id)
     //   response.setHeader('Set-Cookie', accessTokenCookie);
@@ -87,7 +79,13 @@ export class AuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Patch('update-password')
-  async updatePassword(@Req() request: RequestWithUser, @Body() updatePasswordDto: UpdatePasswordDto) {
-    return this.authService.updatePassword(request.user, updatePasswordDto.password);
+  async updatePassword(
+    @Req() request: RequestWithUser,
+    @Body() updatePasswordDto: UpdatePasswordDto
+  ) {
+    return this.authService.updatePassword(
+      request.user,
+      updatePasswordDto.password
+    )
   }
 }

@@ -3,6 +3,7 @@ import { UsersRepository } from './user.repository';
 import { FriendRequestRepository } from './friend-request.repository';
 import { User } from './user';
 import { FriendRequest } from './friend-request';
+import { FriendRequestAlreadyExistsError } from './errors/friend-request-already-exists.error';
 
 @Injectable()
 export class FriendUsecases {
@@ -45,7 +46,7 @@ export class FriendUsecases {
   async confirmRequest(friendRequestId: string): Promise<FriendRequest> {
     const foundRequest = await this.friendRequestRepository.findOneByIdWithFriends(friendRequestId);
     if (!foundRequest) {
-      throw new Error('Friend request has not been sent');
+      throw new FriendRequestAlreadyExistsError(foundRequest.from.id, foundRequest.to.id);
     }
     foundRequest.accept();
     await this.userRepository.saveMany([foundRequest.from, foundRequest.to]);

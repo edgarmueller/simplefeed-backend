@@ -1,25 +1,28 @@
 import {
   Body,
-  Controller, Delete, Get,
+  Controller,
+  Delete,
+  Get,
   NotFoundException,
   Param,
-  Patch, Req,
+  Patch,
+  Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
-import { UserNotFoundError, UserUsecases } from '@simplefeed/user';
-import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { GetMeDto } from '../dto/get-me.dto';
-import { GetUserDto } from '../dto/get-user.dto';
+  UseInterceptors,
+} from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
+import { UserNotFoundError, UserUsecases } from '@simplefeed/user'
+import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe'
+import { UpdateUserDto } from '../dto/update-user.dto'
+import { GetMeDto } from '../dto/get-me.dto'
+import { GetUserDto } from '../dto/get-user.dto'
 
 type File = Express.Multer.File
 @Controller('users')
 export class UserController {
-  constructor(private readonly usecases: UserUsecases) { }
+  constructor(private readonly usecases: UserUsecases) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -33,19 +36,12 @@ export class UserController {
     @Param('username') username: string,
     @Req() req: RequestWithUser
   ): Promise<GetMeDto | GetUserDto> {
-    try {
-      const user = await this.usecases.getUserByUserName(req.user, username)
-      if (req.user.profile.username === username) {
-        return GetMeDto.fromDomain(user)
-      }
-      const mutualFriends = await this.usecases.getMutualFriends(req.user, user)
-      return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length)
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        throw new NotFoundException()
-      }
-      throw error
+    const user = await this.usecases.getUserByUserName(req.user, username)
+    if (req.user.profile.username === username) {
+      return GetMeDto.fromDomain(user)
     }
+    const mutualFriends = await this.usecases.getMutualFriends(req.user, user)
+    return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -54,9 +50,10 @@ export class UserController {
   async updateUser(
     @Req() req: RequestWithUser,
     @Body() dto: UpdateUserDto,
-    @UploadedFile(new FileSizeValidationPipe()) file?: File,
+    @UploadedFile(new FileSizeValidationPipe()) file?: File
   ): Promise<GetMeDto> {
-    const me = await this.usecases.updateUserInfo(req.user.id, 
+    const me = await this.usecases.updateUserInfo(
+      req.user.id,
       dto.email,
       dto.password,
       {

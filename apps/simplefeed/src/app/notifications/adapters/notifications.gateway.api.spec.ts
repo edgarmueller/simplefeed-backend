@@ -91,17 +91,8 @@ describe('Notifications gateway', () => {
   }
 
   beforeEach(async () => {
-    try {
-      await postRepo.deleteAll()
-      await userRepo.deleteByEmail('bart@example.com')
-      await userRepo.deleteByEmail('homer@example.com')
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        // ignore
-        return
-      }
-      throw error
-    }
+    await postRepo.deleteAll()
+    await userRepo.deleteAll()
   })
 
   describe("notification usecases", () => {
