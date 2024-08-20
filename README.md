@@ -1,6 +1,10 @@
 
-
 # simplefeed-backend
+
+Backend for a naive social network including notifications and chat.
+This project does not claim to be finished, complete or thoroughly tested.
+
+Also see https://github.com/edgarmueller/simplefeed-frontend.
 
 ## Getting started
 
