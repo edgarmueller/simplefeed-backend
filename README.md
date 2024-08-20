@@ -20,6 +20,11 @@ As such, reusable libraries have been placed under `libs`
 
 ## Deploy
 
+
+This project can be deployed via `fly.io`. Postgres and Redis are configured accordingly.
+
+For s3 buckets it uses `tebi.io`. elastic is disabled.
+
 ### via fly.io 
 Once authenticated with fly.io, run `fly deploy`.
 

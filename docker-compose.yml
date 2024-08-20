@@ -78,6 +78,8 @@ volumes:
     driver: local
     driver_opts:
       o: "size=100m"
+      device: "tmpfs"
+      type: "tmpfs"
  
 networks:
   postgres:
