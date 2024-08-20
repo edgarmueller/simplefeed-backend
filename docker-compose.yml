@@ -36,6 +36,7 @@ services:
       - node.name=es01
       - cluster.name=es-docker-cluster
       - cluster.initial_master_nodes=es01
+      - cluster.routing.allocation.disk.threshold_enabled=false
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -67,13 +68,16 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
     entrypoint: /bin/sh -c
-    command: "aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket simplefeed-avatar --region us-east-1"
+    command: >
+      "aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket simplefeed-avatar --region us-east-1"
 
 volumes:
   cache:
   pgdata:
   data01:
     driver: local
+    driver_opts:
+      o: "size=100m"
  
 networks:
   postgres:
