@@ -1,15 +1,15 @@
-import { initializeTransactionalContext } from 'typeorm-transactional'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
-import request from 'supertest'
-import { createConnection } from 'typeorm'
+import { Notification, NotificationCreatedEvent } from '@simplefeed/notification'
 import { PostsRepository } from '@simplefeed/post'
-import { NotificationCreatedEvent, Notification } from '@simplefeed/notification'
-import * as io from 'socket.io-client';
+import { UsersRepository } from '@simplefeed/user'
+import * as io from 'socket.io-client'
+import request from 'supertest'
+import { initializeTransactionalContext } from 'typeorm-transactional'
 import { AppModule } from '../../app.module'
-import { NotificationsGateway } from './notifications.gateway'
+import { createDbSchema } from '../../test/helpers'
 import { Outgoing } from './notification.constants'
+import { NotificationsGateway } from './notifications.gateway'
 
 describe('Notifications gateway', () => {
   let app: INestApplication
@@ -161,17 +161,3 @@ describe('Notifications gateway', () => {
     await app.close()
   })
 })
-
-// FIXME
-export async function createDbSchema(): Promise<void> {
-  const connection = await createConnection({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5433,
-    username: 'admin',
-    password: 'admin',
-    database: 'simplefeed_testing',
-  })
-  await connection.createQueryRunner().createSchema('simplefeed', true)
-  await connection.close()
-}

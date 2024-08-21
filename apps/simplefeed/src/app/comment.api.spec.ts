@@ -1,11 +1,11 @@
-import { initializeTransactionalContext } from 'typeorm-transactional'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
-import request from 'supertest'
-import { createConnection } from 'typeorm'
-import { AppModule } from './app.module'
 import { PostsRepository } from '@simplefeed/post'
+import { UsersRepository } from '@simplefeed/user'
+import request from 'supertest'
+import { initializeTransactionalContext } from 'typeorm-transactional'
+import { AppModule } from './app.module'
+import { createDbSchema } from './test/helpers'
 
 describe('comment api', () => {
   let app: INestApplication
@@ -81,27 +81,18 @@ describe('comment api', () => {
         },
       })
       .expect(expectedStatus)
-    return body.accessToken;
+    return body.accessToken
   }
 
   beforeEach(async () => {
-    try {
-      await postRepo.deleteAll()
-      await userRepo.deleteByEmail('bart@example.com')
-      await userRepo.deleteByEmail('homer@example.com')
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        // ignore
-        return
-      }
-      throw error
-    }
+    await postRepo.deleteAll()
+    await userRepo.deleteAll()
   })
 
-  describe("comment usecases", () => {
-    it("should allow commenting a post ", async () => {
-      await registerBart();
-      await registerHomer();
+  describe('comment usecases', () => {
+    it('should allow commenting a post ', async () => {
+      await registerBart()
+      await registerHomer()
       const bartToken = await login('bart@example.com', 'secret')
       const homerToken = await login('homer@example.com', 'secret')
 
@@ -110,56 +101,55 @@ describe('comment api', () => {
       const comments = await getCommentsOfPost(bartToken, post.id)
 
       expect(comments.items).toHaveLength(1)
-    });
-  });
+    })
+  })
 
   afterAll(async () => {
     await app.close()
   })
 
-  async function createPost(token: string, content: string, expectedStatus = 201) {
+  async function createPost(
+    token: string,
+    content: string,
+    expectedStatus = 201
+  ) {
     try {
-    const { body } = await request(app.getHttpServer())
-      .post('/api/posts')
-      .set('Authorization', `Bearer ${token}`)
-      .set('Content-Type', 'multipart/form-data')
-      .field('body', content)
-      .expect(expectedStatus)
-    return body;
+      const { body } = await request(app.getHttpServer())
+        .post('/api/posts')
+        .set('Authorization', `Bearer ${token}`)
+        .set('Content-Type', 'multipart/form-data')
+        .field('body', content)
+        .expect(expectedStatus)
+      return body
     } catch (error) {
       console.log(error)
     }
   }
 
-  async function commentPost(token: string, content: string, postId: string, expectedStatus = 201) {
+  async function commentPost(
+    token: string,
+    content: string,
+    postId: string,
+    expectedStatus = 201
+  ) {
     await request(app.getHttpServer())
       .post(`/api/posts/${postId}/comments`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        content
+        content,
       })
       .expect(expectedStatus)
   }
 
-  async function getCommentsOfPost(token: string, postId: string, expectedStatus = 200) {
+  async function getCommentsOfPost(
+    token: string,
+    postId: string,
+    expectedStatus = 200
+  ) {
     const { body } = await request(app.getHttpServer())
       .get(`/api/posts/${postId}/comments`)
       .set('Authorization', `Bearer ${token}`)
-//      .expect(expectedStatus)
-    return body;
+      .expect(expectedStatus)
+    return body
   }
 })
-
-// FIXME
-export async function createDbSchema(): Promise<void> {
-  const connection = await createConnection({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5433,
-    username: 'admin',
-    password: 'admin',
-    database: 'simplefeed_testing',
-  })
-  await connection.createQueryRunner().createSchema('simplefeed', true)
-  await connection.close()
-}

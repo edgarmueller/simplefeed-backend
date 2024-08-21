@@ -68,7 +68,7 @@ export class ConversationRepository {
     return conversation
   }
 
-  // FIXME: page size
+  // FIXME: increase page size
   async findOneByIdWithMessagesOrFail(
     id: string,
     page?: number,
@@ -139,7 +139,7 @@ export class ConversationRepository {
       })
       .orderBy('message.createdAt', 'DESC')
       .getMany()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // FIXME: types
     return conversationsWithMostRecentMessage.map((c: any) => {
       c.messages = c.message !== null ? [c.message] : []
       delete c.message

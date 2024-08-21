@@ -32,8 +32,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           return (
             request?.headers?.authorization
               ?.replace('Bearer', '')
-              // spec specifies a Token schema for some reason
-              .replace('Token', '')
               .trim()
           )
         },

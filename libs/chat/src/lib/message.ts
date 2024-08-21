@@ -13,7 +13,6 @@ export class Message implements Entity {
   isRead: boolean
   content: string
   createdAt?: Date 
-  // sentAt?: Date 
   deletedAt?: Date 
 
   public static create(props: Props<Message>, id?: string): Message {

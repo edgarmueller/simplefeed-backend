@@ -3,21 +3,21 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Patch,
   Req,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common'
+import 'multer'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
-import { UserNotFoundError, UserUsecases } from '@simplefeed/user'
+import { UserUsecases } from '@simplefeed/user'
 import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe'
-import { UpdateUserDto } from '../dto/update-user.dto'
 import { GetMeDto } from '../dto/get-me.dto'
 import { GetUserDto } from '../dto/get-user.dto'
+import { UpdateUserDto } from '../dto/update-user.dto'
 
 type File = Express.Multer.File
 @Controller('users')

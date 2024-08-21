@@ -1,13 +1,13 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { PostsRepository } from '@simplefeed/post'
-import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
+import { UsersRepository } from '@simplefeed/user'
 import * as io from 'socket.io-client'
 import { Socket } from 'socket.io-client'
 import request from 'supertest'
-import { createConnection } from 'typeorm'
 import { initializeTransactionalContext } from 'typeorm-transactional'
 import { AppModule } from '../../app.module'
+import { createDbSchema } from '../../test/helpers'
 import { ChatGateway } from './chat.gateway'
 
 describe('Chat gateway', () => {
@@ -52,7 +52,11 @@ describe('Chat gateway', () => {
     return friendRequest.body
   }
 
-  async function acceptFriendRequest(friendRequestId, withToken, expectedStatus = 200) {
+  async function acceptFriendRequest(
+    friendRequestId,
+    withToken,
+    expectedStatus = 200
+  ) {
     return request(app.getHttpServer())
       .patch(`/api/friend-requests/${friendRequestId}`)
       .set('Authorization', withToken)
@@ -105,38 +109,28 @@ describe('Chat gateway', () => {
         },
       })
       .expect(expectedStatus)
-    return body.accessToken;
+    return body.accessToken
   }
 
   beforeEach(async () => {
-    try {
-      await postRepo.deleteAll()
-      await userRepo.deleteByEmail('bart@example.com')
-      await userRepo.deleteByEmail('homer@example.com')
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        // ignore
-        return
-      }
-      throw error
-    }
+    await postRepo.deleteAll()
+    await userRepo.deleteAll()
   })
 
-  describe("chat usecases", () => {
-
-    let clientSocket: Socket;
-    let baseAddress;
+  describe('chat usecases', () => {
+    let clientSocket: Socket
+    let baseAddress
 
     beforeAll(() => {
       const address = app.getHttpServer().listen().address()
       baseAddress = `http://[${address.address}]:${address.port}`
-    });
+    })
 
     afterEach(() => {
-      clientSocket.disconnect();
-    });
+      clientSocket.disconnect()
+    })
 
-    it("should join conversations when connecting", (done) => {
+    it('should join conversations when connecting', (done) => {
       registerBart()
         .then(() => registerHomer())
         .then(async () => {
@@ -150,60 +144,28 @@ describe('Chat gateway', () => {
             query: {
               Authorization: `Bearer ${bartToken}`,
             },
-          });
-          clientSocket.on('conversations_joined', convs => {
-            expect(convs.conversationIds.length).toEqual(1);
-            done();
+          })
+          clientSocket.on('conversations_joined', (convs) => {
+            expect(convs.conversationIds.length).toEqual(1)
+            done()
           })
         })
-    });
+    })
 
-    it.skip("should receive notification", (done) => {
-      registerBart()
-        .then(bart => {
-          login('bart@example.com', 'secret')
-            .then(token => {
-              clientSocket = io.connect(`${baseAddress}/notifications`, {
-                query: {
-                  Authorization: token
-                }
-              });
-              // clientSocket.on("send_all_notifications", (arg) => {
-              //   chatGateway.handle(new NotificationCreatedEvent(Notification.create({
-              //     recipientId: bart.body.user.id,
-              //     senderId: 'sender-id',
-              //     content: 'content',
-              //     opened: false,
-              //     viewed: false,
-              //     type: 'type',
-              //     resourceId: 'resource-id'
-              //   })))
-              // });
-              // clientSocket.on(Outgoing.ReceiveNotification, (arg) => {
-              //   // no messages
-              //   expect(arg.recipientId).toEqual(bart.body.user.id);
-              //   done();
-              // });
-            })
-        });
-    });
-  });
+    it.skip('should receive notification', (done) => {
+      registerBart().then((bart) => {
+        login('bart@example.com', 'secret').then((token) => {
+          clientSocket = io.connect(`${baseAddress}/notifications`, {
+            query: {
+              Authorization: token,
+            },
+          })
+        })
+      })
+    })
+  })
 
   afterAll(async () => {
     await app.close()
   })
 })
-
-// FIXME
-export async function createDbSchema(): Promise<void> {
-  const connection = await createConnection({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5433,
-    username: 'admin',
-    password: 'admin',
-    database: 'simplefeed_testing',
-  })
-  await connection.createQueryRunner().createSchema('simplefeed', true)
-  await connection.close()
-}

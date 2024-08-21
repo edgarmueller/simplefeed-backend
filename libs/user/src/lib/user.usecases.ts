@@ -11,23 +11,6 @@ export class UserUsecases {
     private s3Service: S3Service
   ) { }
 
-  // async followUser(follower: User, followeeUsername: string): Promise<User> {
-  //   const followee = await this.userRepository.findOneByUsername(followeeUsername)
-  //   follower.follow(followee)
-  //   await this.userRepository.update(follower)
-  //   return followee
-  // }
-
-  // async unfollowUser(follower: User, followeeUsername: string): Promise<User> {
-  //   const followee = await this.userRepository.findOneByUsername(followeeUsername)
-  //   follower.unfollow(followee)
-  //   return await this.userRepository.update(follower)
-  // }
-
-  // async getUser(userId: string) {
-  //   return this.userRepository.findOneById(userId)
-  // }
-
   async getUserByUserName(
     requestingUser: User,
     username: string,
@@ -40,7 +23,6 @@ export class UserUsecases {
     )
     return user;
   }
-
 
   async getFriendsOfUser(username: string): Promise<User[]> {
     const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(

@@ -30,7 +30,7 @@ export class ChatUsecases {
   }
 
   async addMessageToConversation(conversationId: string, authorId: string, messageText: string): Promise<Message> {
-    // TODO: dont load all messages
+    // TODO: don't load all messages
     const conversation = await this.conversationsRepo.findOneByIdAndUserIdOrFail(conversationId, authorId)
     const message = Message.create({
       content: messageText,
@@ -66,7 +66,6 @@ export class ChatUsecases {
     const conversations = await this.conversationsRepo.findByUserIdWithMostRecentMessage(userId);
     const unreadMessages = await this.conversationsRepo.findUnreadMessageByUserAndConversationId(userId, conversations.map(c => c.id));
     unreadMessages.forEach((message) => {
-      // TODO: message.conversationId is undefined?
       const foundConversation = conversations.find((conversation) => conversation.id === message.conversationId)
       if (!foundConversation.hasMessage(message.id)) {
         foundConversation.addMessage(message);

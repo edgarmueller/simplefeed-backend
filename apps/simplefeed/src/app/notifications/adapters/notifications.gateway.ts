@@ -70,19 +70,4 @@ export class NotificationsGateway implements OnGatewayConnection {
       throw new WsException(error.message)
     }
   }
-
-  // @SubscribeMessage(Incoming.RequestAllNotifications)
-  // async handleRequestAllNotifications(@ConnectedSocket() socket: Socket) {
-  //   try {
-  //     const authHeader = socket.handshake.query.Authorization as string
-  //     const user = await this.authService.findOneUserByToken(authHeader)
-  //     this.logger.log(`User ${user.id} requested all notifications`)
-  //     const notifications = await this.usecases.findUnviewedNotificationsForUserId(
-  //       user.id
-  //     )
-  //     socket.emit(Outgoing.SendAllNotifications, notifications.map(GetNotificationDto.fromDomain))
-  //   } catch (error) {
-  //     throw new WsException(error.message)
-  //   }
-  // }
 }

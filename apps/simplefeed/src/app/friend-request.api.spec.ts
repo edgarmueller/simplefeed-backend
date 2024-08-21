@@ -1,12 +1,12 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { PostsRepository } from '@simplefeed/post'
-import { UserNotFoundError, UsersRepository } from '@simplefeed/user'
+import { UsersRepository } from '@simplefeed/user'
 import request from 'supertest'
-import { createConnection } from 'typeorm'
 import { initializeTransactionalContext } from 'typeorm-transactional'
 import { AppModule } from './app.module'
 import { GetFriendRequestDto } from './friends/dto/get-friend-request.dto'
+import { createDbSchema } from './test/helpers'
 
 describe('friend request api', () => {
   let app: INestApplication
@@ -54,23 +54,32 @@ describe('friend request api', () => {
     )
   }
 
-  async function sendFriendRequest(userToken: string, toUsername: string): Promise<GetFriendRequestDto> {
+  async function sendFriendRequest(
+    userToken: string,
+    toUsername: string
+  ): Promise<GetFriendRequestDto> {
     const { body } = await request(app.getHttpServer())
       .post(`/api/friend-requests/${toUsername}`)
       .set('Authorization', `Bearer ${userToken}`)
       .send()
       .expect(201)
-    return body;
+    return body
   }
 
-  async function confirmFriendRequest(userToken: string, friendRequestId: string) {
+  async function confirmFriendRequest(
+    userToken: string,
+    friendRequestId: string
+  ) {
     await request(app.getHttpServer())
       .patch(`/api/friend-requests/${friendRequestId}`)
       .set('Authorization', `Bearer ${userToken}`)
       .expect(200)
   }
 
-  async function declineFriendRequest(userToken: string, friendRequestId: string) {
+  async function declineFriendRequest(
+    userToken: string,
+    friendRequestId: string
+  ) {
     await request(app.getHttpServer())
       .delete(`/api/friend-requests/${friendRequestId}`)
       .set('Authorization', `Bearer ${userToken}`)
@@ -80,14 +89,14 @@ describe('friend request api', () => {
     const { body } = await request(app.getHttpServer())
       .get(`/api/friend-requests/pending`)
       .set('Authorization', `Bearer ${userToken}`)
-    return body;
+    return body
   }
 
   async function getFriendsOf(username: string, userToken: string) {
     const { body } = await request(app.getHttpServer())
       .get(`/api/users/${username}`)
       .set('Authorization', `Bearer ${userToken}`)
-    return body.friends;
+    return body.friends
   }
 
   function user(
@@ -118,25 +127,16 @@ describe('friend request api', () => {
         },
       })
       .expect(expectedStatus)
-    return body.accessToken;
+    return body.accessToken
   }
 
   beforeEach(async () => {
-    try {
-      await postRepo.deleteAll()
-      await userRepo.deleteByEmail('fry@example.com')
-      await userRepo.deleteByEmail('lisa@example.com')
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        // ignore
-        return
-      }
-      throw error
-    }
+    await postRepo.deleteAll()
+    await userRepo.deleteAll()
   })
 
-  describe("friends usecases", () => {
-    it("should send friend request to another user", async () => {
+  describe('friends usecases', () => {
+    it('should send friend request to another user', async () => {
       await registerFry()
       await registerLisa()
       const fryToken = await login('fry@example.com', 'secret')
@@ -146,56 +146,39 @@ describe('friend request api', () => {
       const pendingRequests = await getPendingFriendRequests(lisaToken)
 
       expect(pendingRequests).toHaveLength(1)
-    });
+    })
 
-    it("should accept friend request", async () => {
+    it('should accept friend request', async () => {
       await registerFry()
       await registerLisa()
       const frysToken = await login('fry@example.com', 'secret')
       const lisasToken = await login('lisa@example.com', 'secret')
-      // send request
       const friendRequest = await sendFriendRequest(frysToken, 'lisa')
-      // confirm
       await confirmFriendRequest(lisasToken, friendRequest.id)
-      // get friends of try
-      const pendingFriendRequests = await getPendingFriendRequests(lisasToken) 
+      const pendingFriendRequests = await getPendingFriendRequests(lisasToken)
       const frysFriends = await getFriendsOf('fry', frysToken)
       const lisasFriends = await getFriendsOf('lisa', frysToken)
 
       expect(pendingFriendRequests).toHaveLength(0)
       expect(frysFriends).toHaveLength(1)
       expect(lisasFriends).toHaveLength(1)
-    });
+    })
 
-    it("should cancel friend request to another user", async () => {
-      await registerFry();
-      await registerLisa();
+    it('should cancel friend request to another user', async () => {
+      await registerFry()
+      await registerLisa()
       const fryToken = await login('fry@example.com', 'secret')
       const lisaToken = await login('lisa@example.com', 'secret')
 
       const friendRequest = await sendFriendRequest(fryToken, 'lisa')
-      await declineFriendRequest(lisaToken, friendRequest.id);
+      await declineFriendRequest(lisaToken, friendRequest.id)
       const pendingRequests = await getPendingFriendRequests(lisaToken)
 
       expect(pendingRequests).toHaveLength(0)
-    });
-  });
+    })
+  })
 
   afterAll(async () => {
     await app.close()
   })
 })
-
-// FIXME
-export async function createDbSchema(): Promise<void> {
-  const connection = await createConnection({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5433,
-    username: 'admin',
-    password: 'admin',
-    database: 'simplefeed_testing',
-  })
-  await connection.createQueryRunner().createSchema('simplefeed', true)
-  await connection.close()
-}

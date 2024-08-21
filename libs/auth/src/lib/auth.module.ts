@@ -68,7 +68,6 @@ export class AuthModule {
   private static createAsyncOptionsProvider(
     options: AuthModuleAsyncOptions
   ): Provider {
-    // brudi
     if (options.useFactory) {
       return {
         provide: AUTH_MODULE_OPTIONS,

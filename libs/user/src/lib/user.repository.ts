@@ -26,7 +26,6 @@ export class UsersRepository {
   async save(user: User): Promise<User> {
     try {
       const savedUser = await this.userRepository.save(user)
-      // await this.profileRepository.save(user.profile)
       DomainEvents.dispatchEventsForAggregate(user.id, this.publisher)
       return savedUser
     } catch (error) {
