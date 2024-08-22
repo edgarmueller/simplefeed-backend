@@ -1,23 +1,20 @@
 import { isString } from 'lodash';
-import { createConnection } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ConfigService } from "@nestjs/config";
 import { ScriptModule } from './script.module';
 
-// The first thing that happens is to create the migration table.
-// Since we configure a schema TypeORM creates the migration table under the configured schema.
-// This doesn't make it possible to have the schema creation as a migration step.
-// Therefore we need a pre script that generates for us the migration if it's not already existing.
 const createSchema = async () => {
   const app = await NestFactory.create<NestExpressApplication>(ScriptModule);
   const configService = app.get(ConfigService);
-  const connection = await createConnection({
+  const dataSource = new DataSource({
     name: 'script',
-    type: configService.get('database.type'),
+    type: 'postgres',
     url: configService.get('database.url'),
     ssl: configService.get('database.ssl') !== undefined ? configService.get('database.ssl') : true,
-  });
+  })
+  await dataSource.initialize();
 
   try {
     if (!isString(configService.get('database.schema')) || configService.get('database.schema') === '') {
@@ -26,14 +23,14 @@ const createSchema = async () => {
       process.exit(2);
     }
 
-    const queryRunner = connection.createQueryRunner();
+    const queryRunner = dataSource.createQueryRunner();
     await queryRunner.createSchema(configService.get('database.schema'), true);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Database schema could not be created!')
     throw error
   } finally {
-    await connection.close();
+    await dataSource.destroy();
   }
 };
 

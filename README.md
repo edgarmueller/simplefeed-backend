@@ -31,7 +31,7 @@ Once authenticated with fly.io, run `fly deploy`.
 ### Secrets
 Run `fly secrets set KEY=$VALUE`
 
-# Local infra 
+## Local infra 
 
  ### s3
 
