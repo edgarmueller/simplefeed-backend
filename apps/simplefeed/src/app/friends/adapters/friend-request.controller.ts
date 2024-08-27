@@ -1,6 +1,5 @@
-import { FriendRequest } from '@simplefeed/user';
-import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
 import { Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth';
 import { FriendUsecases } from '@simplefeed/user';
 import { GetFriendRequestDto } from '../dto/get-friend-request.dto';
 

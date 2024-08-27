@@ -199,7 +199,9 @@ export class ConversationRepository {
           userId: `["${userId}"]`,
         })
         .getMany()
-      await this.conversationRepository.restore(conversations.map((c) => c.id))
+      if (conversations.length > 0) {
+        await this.conversationRepository.restore(conversations.map((c) => c.id))
+      }
     } catch (error) {
       console.log({ error })
     }
