@@ -13,7 +13,7 @@ export class PaginatedQueryPipe implements PipeTransform {
       throw new BadRequestException('Validation failed');
     }
 
-    const { limit = 10, page = 0 } = paginationQueryDto;
+    const { limit = 10, page = 1 } = paginationQueryDto;
     return { limit, page };
   }
 }

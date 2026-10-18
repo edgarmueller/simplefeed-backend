@@ -1,53 +1,27 @@
 {
+  "name": "simplefeed",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/simplefeed/src",
   "projectType": "application",
+  "tags": ["type:app"],
   "targets": {
-    "build": {
-      "executor": "@nrwl/node:webpack",
-      "outputs": ["{options.outputPath}"],
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
       "options": {
-        "outputPath": "dist/apps/simplefeed",
-        "main": "apps/simplefeed/src/main.ts",
-        "tsConfig": "apps/simplefeed/tsconfig.app.json",
-        "assets": ["apps/simplefeed/src/assets"]
+        "buildTarget": "simplefeed:build",
+        "runBuildTargetDependencies": false
       },
       "configurations": {
+        "development": {
+          "buildTarget": "simplefeed:build:development"
+        },
         "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false,
-          "fileReplacements": [
-            {
-              "replace": "apps/simplefeed/src/environments/environment.ts",
-              "with": "apps/simplefeed/src/environments/environment.prod.ts"
-            }
-          ]
+          "buildTarget": "simplefeed:build:production"
         }
       }
-    },
-    "serve": {
-      "executor": "@nrwl/node:node",
-      "options": {
-        "buildTarget": "simplefeed:build"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/simplefeed/**/*.ts"]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/simplefeed"],
-      "options": {
-        "jestConfig": "apps/simplefeed/jest.config.ts",
-        "passWithNoTests": true,
-        "runInBand": true
-      }
     }
-  },
-  "tags": []
+  }
 }

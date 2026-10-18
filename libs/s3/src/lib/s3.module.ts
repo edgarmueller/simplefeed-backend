@@ -1,11 +1,10 @@
-import { Module } from '@nestjs/common';
-import { ConfigurableModuleClass } from './s3.module-definition';
-import { S3Service } from './s3.service';
-import { ConfigModule } from '@nestjs/config';
+import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { S3Service } from './s3.service'
 
 @Module({
-	imports: [ConfigModule],
-	providers: [S3Service],
-	exports: [S3Service]
+  imports: [ConfigModule],
+  providers: [S3Service],
+  exports: [S3Service],
 })
-export class S3Module extends ConfigurableModuleClass {}
+export class S3Module {}

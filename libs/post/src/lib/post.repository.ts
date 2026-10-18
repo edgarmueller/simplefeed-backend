@@ -1,13 +1,8 @@
-import { DomainEvents } from '@simplefeed/shared-ddd'
+import { DomainEvents, Page, PageOptions, paginate } from '@simplefeed/shared-ddd'
 import { User } from '@simplefeed/user'
 import { ForbiddenException, Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
-import {
-  IPaginationOptions,
-  Pagination,
-  paginate,
-} from 'nestjs-typeorm-paginate'
 import { Repository } from 'typeorm'
 import { Transactional } from 'typeorm-transactional'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
@@ -136,11 +131,11 @@ export class PostsRepository {
   async findComments(
     postId: string,
     commentId?: string,
-    paginationOpts: IPaginationOptions = {
+    paginationOpts: PageOptions = {
       page: 1,
       limit: DEFAULT_COMMENTS_LIMIT,
     }
-  ): Promise<Pagination<Comment>> {
+  ): Promise<Page<Comment>> {
     try {
       const query = this.commentRepository
         .createQueryBuilder('comment')
@@ -173,8 +168,8 @@ export class PostsRepository {
   }
   async findUserActivityFeed(
     userId: string,
-    paginationOpts: IPaginationOptions
-  ): Promise<Pagination<Post>> {
+    paginationOpts: PageOptions
+  ): Promise<Page<Post>> {
     const qb = this.postRepository.createQueryBuilder('post')
     qb.leftJoinAndSelect('post.author', 'author', 'post.author_id = author.id')
       .leftJoinAndSelect(
@@ -201,8 +196,8 @@ export class PostsRepository {
   async findPostsByUsers(
     userId: string,
     friendIds: string[],
-    paginationOpts: IPaginationOptions
-  ): Promise<Pagination<Post>> {
+    paginationOpts: PageOptions
+  ): Promise<Page<Post>> {
     const qb = this.postRepository.createQueryBuilder('post')
     qb.innerJoinAndSelect(
       'post.author',
@@ -262,8 +257,8 @@ export class PostsRepository {
 
   @Transactional()
   async deleteAll() {
-    await this.likeRepository.delete({})
-    await this.commentRepository.delete({})
-    await this.postRepository.delete({})
+    await this.likeRepository.createQueryBuilder().delete().execute()
+    await this.commentRepository.createQueryBuilder().delete().execute()
+    await this.postRepository.createQueryBuilder().delete().execute()
   }
 }

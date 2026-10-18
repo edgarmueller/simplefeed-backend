@@ -6,7 +6,6 @@ const PREFIX = 'frq'
 const createFriendRequestId = createId(PREFIX)
 
 export class FriendRequest extends AggregateRoot {
-  id: string
   from: User
   to: User
   createdAt?: Date

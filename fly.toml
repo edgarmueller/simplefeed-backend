@@ -19,7 +19,6 @@ primary_region = "ams"
 [env]
   PORT = "8080"
   CORS_ORIGINS = "https://simplefeed-frontend.vercel.app"
-  DATABASE_ENVIRONMENT = "production"
   AWS_REGION="eu-central-1"
   S3_ENABLED="true"
   S3_ENDPOINT="https://s3.tebi.io"

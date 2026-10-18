@@ -77,11 +77,8 @@ export class UserUsecases {
     if (!imageBuffer) {
       return user;
     }
-    const uploadResult = await this.s3Service.uploadPublicFile(
-      imageBuffer,
-      filename
-    )
-    user.profile.updateAvatar(uploadResult.Location)
+    const imageUrl = await this.s3Service.uploadPublicFile(imageBuffer, filename)
+    user.profile.updateAvatar(imageUrl)
     return user
   }
 

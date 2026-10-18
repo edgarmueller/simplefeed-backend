@@ -4,35 +4,13 @@ import { PostsRepository } from '@simplefeed/post'
 import { UsersRepository } from '@simplefeed/user'
 import { AddressInfo } from 'net'
 import request from 'supertest'
-import { DataSource } from 'typeorm'
 import { initializeTransactionalContext } from 'typeorm-transactional'
 import { AppModule } from '../app.module'
 import { configureApp } from '../app.setup'
 
-const SCHEMA = 'simplefeed'
-
-let transactionalContextInitialized = false
-
-async function createDbSchema(): Promise<void> {
-  const dataSource = new DataSource({
-    type: 'postgres',
-    url: process.env.DATABASE_URL,
-  })
-  await dataSource.initialize()
-  try {
-    await dataSource.createQueryRunner().createSchema(SCHEMA, true)
-  } finally {
-    await dataSource.destroy()
-  }
-}
-
-/** Boots the full application against the test database. */
+/** Boots the full application against the test database, applying pending migrations. */
 export async function createTestApp(): Promise<INestApplication> {
-  await createDbSchema()
-  if (!transactionalContextInitialized) {
-    initializeTransactionalContext()
-    transactionalContextInitialized = true
-  }
+  initializeTransactionalContext()
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   }).compile()

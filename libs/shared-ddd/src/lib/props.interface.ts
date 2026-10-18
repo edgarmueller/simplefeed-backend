@@ -5,7 +5,7 @@ import { Entity } from './entity.interface'
 type ExcludeFunctionPropertyNames<T> = Pick<
   T,
   {
-    [K in keyof T]: T[K] extends Function ? K : never
+    [K in keyof T]: T[K] extends (...args: never[]) => unknown ? K : never
   }[keyof T]
 >
 

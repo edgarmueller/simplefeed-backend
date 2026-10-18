@@ -38,7 +38,8 @@ testem.log
 .DS_Store
 Thumbs.db
 
-.env
-.env.development.local
-
-volume/cache
+.env.local
+.env.*.local
+# nx
+.nx/cache
+.nx/workspace-data

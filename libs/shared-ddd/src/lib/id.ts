@@ -1,6 +1,6 @@
-import { uuid } from 'short-uuid'
+import { randomUUID } from 'crypto'
 
 export const createId =
   (prefix: string): (() => string) =>
   () =>
-    `${prefix}-${uuid()}`
+    `${prefix}-${randomUUID()}`

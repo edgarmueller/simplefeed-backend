@@ -156,8 +156,8 @@ export class UsersRepository {
   }
 
   async deleteAll() {
-    await this.friendRequestsRepository.delete({})
-    await this.userRepository.delete({})
+    await this.friendRequestsRepository.createQueryBuilder().delete().execute()
+    await this.userRepository.createQueryBuilder().delete().execute()
   }
 
   async deleteByEmail(email: string) {

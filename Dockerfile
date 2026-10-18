@@ -1,27 +1,16 @@
-FROM node:16 AS builder
-ARG NODE_ENV="production"
+FROM node:22-slim AS builder
 WORKDIR /usr/src/app
-COPY ./package*.json ./
-# COPY .npmrc ./
+COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
-# RUN rm .npmrc
+RUN NODE_ENV=production npx nx build simplefeed --skip-nx-cache
 
-# Smaller image for production
-FROM node:16-alpine
-ARG NODE_ENV="production"
+# The build emits a pruned package.json and lockfile next to the bundle,
+# so the runtime image only installs what the server actually needs.
+FROM node:22-slim
+ENV NODE_ENV=production
 WORKDIR /usr/src/app
-# COPY scripts ./scripts
-# COPY config ./config
-COPY package*.json ./
-COPY tsconfig* ./
-# COPY ormconfig.js ./
-# COPY .npmrc ./
-# RUN npm install tslib
-RUN npm ci --only=production
-# RUN rm .npmrc
-COPY --from=builder /usr/src/app/dist/ ./dist/
-CMD ["npm", "run", "start:prod"]
-
-
+COPY --from=builder /usr/src/app/dist/apps/simplefeed ./
+RUN npm ci --omit=dev && npm cache clean --force
+USER node
+CMD ["node", "main.js"]
