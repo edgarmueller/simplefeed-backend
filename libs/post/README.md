@@ -1,19 +1,5 @@
 # post
 
-This library was generated with [Nx](https://nx.dev).
+Posts, likes and threaded comments. Comment threads are stored as materialized paths in a Postgres `ltree` column.
 
-
-
-## Building
-
-Run `nx build post` to build the library.
-
-
-
-
-
-## Running unit tests
-
-Run `nx test post` to execute the unit tests via [Jest](https://jestjs.io).
-
-
+Run `nx test post` to execute its unit tests.

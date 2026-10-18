@@ -1,19 +1,5 @@
 # auth
 
-This library was generated with [Nx](https://nx.dev).
+Registration, login and JWT access and refresh tokens, including the Passport strategies and guards the app uses.
 
-
-
-## Building
-
-Run `nx build auth` to build the library.
-
-
-
-
-
-## Running unit tests
-
-Run `nx test auth` to execute the unit tests via [Jest](https://jestjs.io).
-
-
+Run `nx test auth` to execute its unit tests.

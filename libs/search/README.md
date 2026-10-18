@@ -1,5 +1,5 @@
 # search
 
-User search, backed by a case-insensitive match on username, first name and last name in Postgres.
+User search: a case-insensitive match on username, first name and last name in Postgres.
 
-Run `nx test search` to execute the unit tests.
+Run `nx test search` to execute its unit tests.
