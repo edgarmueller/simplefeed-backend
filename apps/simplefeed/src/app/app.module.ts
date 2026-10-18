@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthConfigSchema, authConfig } from '@simplefeed/auth';
-import { SearchSchema, searchConfig } from '@simplefeed/search';
 import Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
@@ -21,11 +20,11 @@ import { EntityNotFoundFilter } from './infra/not-found.exception-filter';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}}`],
-      load: [authConfig, s3Config, searchConfig, databaseConfig, redisConfig],
+      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}`],
+      load: [authConfig, s3Config, databaseConfig, redisConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
-      ).keys(AuthConfigSchema).keys(S3Schema).keys(SearchSchema)
+      ).keys(AuthConfigSchema).keys(S3Schema)
     }),
     DatabaseModule,
     ScheduleModule.forRoot(),

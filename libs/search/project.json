@@ -1,20 +1,20 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/elastic/src",
+  "sourceRoot": "libs/search/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/elastic/**/*.ts"]
+        "lintFilePatterns": ["libs/search/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/elastic"],
+      "outputs": ["coverage/libs/search"],
       "options": {
-        "jestConfig": "libs/elastic/jest.config.ts",
+        "jestConfig": "libs/search/jest.config.ts",
         "passWithNoTests": true
       }
     }

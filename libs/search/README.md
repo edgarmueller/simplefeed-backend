@@ -1,16 +1,5 @@
-# elastic
+# search
 
-This library was generated with [Nx](https://nx.dev).
+User search, backed by a case-insensitive match on username, first name and last name in Postgres.
 
-## Running unit tests
-
-Run `nx test elastic` to execute the unit tests via [Jest](https://jestjs.io).
-
-## FAQ
-
-### How can I list the index?
-`curl -X GET http://localhost:9200/users/_search\?q\=$SEARCHTERM | jq .`
-
-### How can I delete users from the index?
-
-`curl -X DELETE http://localhost:9200/users/_doc/$USER_ID`
+Run `nx test search` to execute the unit tests.

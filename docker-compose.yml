@@ -29,26 +29,6 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: simplefeed_testing
       POSTGRES_PORT: 5433
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
-    container_name: es01
-    environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - data01:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    networks:
-      - elastic
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
     image: localstack/localstack
@@ -74,16 +54,8 @@ services:
 volumes:
   cache:
   pgdata:
-  data01:
-    driver: local
-    driver_opts:
-      o: "size=100m"
-      device: "tmpfs"
-      type: "tmpfs"
  
 networks:
   postgres:
-    driver: bridge
-  elastic:
     driver: bridge
  

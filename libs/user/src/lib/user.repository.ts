@@ -136,6 +136,20 @@ export class UsersRepository {
     throw new UserNotFoundError()
   }
 
+  searchByName(text: string, limit: number): Promise<User[]> {
+    const pattern = `%${text.replace(/[\\%_]/g, (char) => `\\${char}`)}%`
+    return this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where(
+        '(profile.username ILIKE :pattern OR profile.firstName ILIKE :pattern OR profile.lastName ILIKE :pattern)',
+        { pattern }
+      )
+      .orderBy('profile.username', 'ASC')
+      .take(limit)
+      .getMany()
+  }
+
   findMany(userIds: string[]) {
     return this.userRepository.find({
       where: { id: In(userIds) },
