@@ -40,7 +40,7 @@ export class ChatUsecases {
       conversationId,
     })
     conversation.addMessage(message)
-    const savedMessage = await this.conversationsRepo.saveMessage(message)
+    const savedMessage = await this.conversationsRepo.saveMessage(conversation, message)
     return savedMessage
   }
 
@@ -82,7 +82,7 @@ export class ChatUsecases {
     this.logger.log(`Marking messages as read for user ${user.id} in conversation ${conversationId}`)
     const conversation = await this.conversationsRepo.findOneByIdWithUnreadMessagesOrFail(conversationId);
     const unreadMessages = conversation.markMessagesAsRead(user.id);
-    await this.conversationsRepo.saveMessages(unreadMessages);
+    await this.conversationsRepo.saveMessages(conversation, unreadMessages);
   }
 
   async handleUserClosed(userId: string) {

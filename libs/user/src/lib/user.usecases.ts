@@ -87,7 +87,7 @@ export class UserUsecases {
 
   async closeAccount(user: User) {
     user.close()
-    await this.userRepository.softDeleteByEmail(user.email)
+    await this.userRepository.softDelete(user)
   }
 
   async reactivateAccount(email: string) {

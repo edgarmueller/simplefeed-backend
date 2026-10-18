@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
-import { Transactional, runOnTransactionCommit } from 'typeorm-transactional'
+import { Transactional } from 'typeorm-transactional'
 import { DomainEvents } from '@simplefeed/shared-ddd'
 import { Notification } from './notification'
 
@@ -16,10 +16,8 @@ export class NotificationsRepository {
 
   @Transactional()
   async save(notification: Notification) {
-    this.notificationsRepository.save(notification)
-    runOnTransactionCommit(() => {
-      DomainEvents.dispatchEventsForAggregate(notification.id, this.publisher)
-    });
+    await this.notificationsRepository.save(notification)
+    DomainEvents.publishOnCommit(notification, this.publisher)
   }
 
   findManyUnviewedByRecipientAndResourceIds(resourceIds: string[], userId: string): Promise<Notification[]> {

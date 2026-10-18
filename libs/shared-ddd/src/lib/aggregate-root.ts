@@ -1,6 +1,5 @@
 import { AggregateRoot as NestJsAggregateRoot } from '@nestjs/cqrs'
 import { uuid } from 'short-uuid'
-import { DomainEvents } from './events/domain-events'
 import { IDomainEvent } from './events/domain-event.interface'
 
 export abstract class AggregateRoot<
@@ -19,7 +18,6 @@ export abstract class AggregateRoot<
     isFromHistory?: boolean
   ): void {
     super.apply<T>(event, isFromHistory)
-    DomainEvents.markAggregateForDispatch(this)
   }
 
   public equals(object?: AggregateRoot): boolean {

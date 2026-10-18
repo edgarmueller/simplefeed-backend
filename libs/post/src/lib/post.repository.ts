@@ -36,17 +36,14 @@ export class PostsRepository {
     if (post.likes) {
       await this.likeRepository.save(post.likes)
     }
-    DomainEvents.dispatchEventsForAggregate(post.id, this.publisher)
+    DomainEvents.publishOnCommit(post, this.publisher)
     return savedPost
   }
 
   @Transactional()
   async saveComment(comment: Comment): Promise<Comment> {
     const savedComment = await this.commentRepository.save(comment)
-    DomainEvents.dispatchEventsForAggregate(
-      savedComment.post.id,
-      this.publisher
-    )
+    DomainEvents.publishOnCommit(comment.post, this.publisher)
     return savedComment
   }
 

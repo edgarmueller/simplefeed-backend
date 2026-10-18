@@ -3,7 +3,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common'
 import { EventPublisher } from '@nestjs/cqrs'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
-import { Transactional, runOnTransactionCommit } from 'typeorm-transactional'
+import { Transactional } from 'typeorm-transactional'
 import { Conversation } from './conversation'
 import { Message } from './message'
 
@@ -22,35 +22,25 @@ export class ConversationRepository {
   @Transactional()
   async saveConversation(conversation: Conversation): Promise<Conversation> {
     conversation.userIds.sort()
-    const savedPost = await this.conversationRepository.save(conversation)
-    DomainEvents.dispatchEventsForAggregate(conversation.id, this.publisher)
-    return savedPost
+    const savedConversation = await this.conversationRepository.save(conversation)
+    DomainEvents.publishOnCommit(conversation, this.publisher)
+    return savedConversation
   }
 
   @Transactional()
-  async saveMessage(message: Message): Promise<Message> {
+  async saveMessage(conversation: Conversation, message: Message): Promise<Message> {
     const savedMessage = await this.messageRepository.save(message)
-    runOnTransactionCommit(() => {
-      DomainEvents.dispatchEventsForAggregate(
-        savedMessage.conversation.id,
-        this.publisher
-      )
-    })
+    DomainEvents.publishOnCommit(conversation, this.publisher)
     return savedMessage
   }
 
   @Transactional()
-  async saveMessages(messages: Message[]): Promise<Message[]> {
+  async saveMessages(conversation: Conversation, messages: Message[]): Promise<Message[]> {
     if (messages.length === 0) {
       return []
     }
     const savedMessages = await this.messageRepository.save(messages)
-    runOnTransactionCommit(() => {
-      DomainEvents.dispatchEventsForAggregate(
-        savedMessages[0].conversationId,
-        this.publisher
-      )
-    })
+    DomainEvents.publishOnCommit(conversation, this.publisher)
     return savedMessages
   }
 

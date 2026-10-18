@@ -19,7 +19,7 @@ export class FriendRequestRepository {
   async save(friendRequest: FriendRequest): Promise<FriendRequest> {
     try {
       const savedFriendRequest = await this.friendRequestsRepository.save(friendRequest)
-      DomainEvents.dispatchEventsForAggregate(savedFriendRequest.id, this.publisher)
+      DomainEvents.publishOnCommit(friendRequest, this.publisher)
       return savedFriendRequest;
     } catch (error) {
       if (error instanceof QueryFailedError) {
@@ -74,8 +74,9 @@ export class FriendRequestRepository {
     })
   }
 
+  @Transactional()
   async delete(friendRequest: FriendRequest) {
     await this.friendRequestsRepository.softDelete(friendRequest.id);
-    DomainEvents.dispatchEventsForAggregate(friendRequest.id, this.publisher)
+    DomainEvents.publishOnCommit(friendRequest, this.publisher)
   }
 }
