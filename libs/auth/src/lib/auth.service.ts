@@ -49,7 +49,7 @@ export class AuthService {
     try {
       await this.verifyPassword(plainTextPassword, user.password)
       return user
-    } catch (error) {
+    } catch {
       throw new InvalidCredentialsError()
     }
   }

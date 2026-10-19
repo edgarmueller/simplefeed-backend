@@ -1,163 +1,90 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common'
-import { Test } from '@nestjs/testing'
+import { INestApplication } from '@nestjs/common'
 import { Notification, NotificationCreatedEvent } from '@simplefeed/notification'
-import { PostsRepository } from '@simplefeed/post'
-import { UsersRepository } from '@simplefeed/user'
-import * as io from 'socket.io-client'
-import request from 'supertest'
-import { initializeTransactionalContext } from 'typeorm-transactional'
-import { AppModule } from '../../app.module'
-import { createDbSchema } from '../../test/helpers'
+import { io, Socket } from 'socket.io-client'
+import { ApiClient, bart, clearDatabase, createTestApp, homer, listen } from '../../test/helpers'
 import { Outgoing } from './notification.constants'
 import { NotificationsGateway } from './notifications.gateway'
 
-describe('Notifications gateway', () => {
+describe('notifications gateway', () => {
   let app: INestApplication
-  let userRepo: UsersRepository
-  let postRepo: PostsRepository
-  let notificationsGateway: NotificationsGateway
+  let api: ApiClient
+  let baseAddress: string
+  let clientSocket: Socket
 
   beforeAll(async () => {
-    await createDbSchema()
-    initializeTransactionalContext()
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
-    // TODO unify app config
-    app = moduleRef.createNestApplication()
-    app.setGlobalPrefix('api')
-    app.useGlobalPipes(
-      new ValidationPipe({
-        forbidNonWhitelisted: true,
-        whitelist: true,
-      })
-    )
-    userRepo = app.get(UsersRepository)
-    postRepo = app.get(PostsRepository)
-    notificationsGateway = app.get(NotificationsGateway)
-    await app.init()
+    app = await createTestApp()
+    api = new ApiClient(app)
+    baseAddress = listen(app)
   })
-
-  async function registerUser(payload, expectedStatus = 201) {
-    return request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send(payload)
-      .expect(expectedStatus)
-  }
-
-  async function registerBart() {
-    return registerUser(
-      user('bart', 'Bart', 'Simpson', 'bart@example.com', 'secret'),
-      201
-    )
-  }
-
-  async function registerHomer() {
-    await registerUser(
-      user('homer', 'Homer', 'Simpson', 'homer@example.com', 'secret'),
-      201
-    )
-  }
-
-  function user(
-    username: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    password
-  ) {
-    return {
-      user: {
-        username,
-        firstName,
-        lastName,
-        email,
-        password,
-      },
-    }
-  }
-
-  async function login(email: string, password: string, expectedStatus = 200) {
-    const { body } = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({
-        user: {
-          email,
-          password,
-        },
-      })
-      .expect(expectedStatus)
-    return body.accessToken;
-  }
 
   beforeEach(async () => {
-    await postRepo.deleteAll()
-    await userRepo.deleteAll()
+    await clearDatabase(app)
   })
 
-  describe("notification usecases", () => {
-
-    let clientSocket;
-    let baseAddress;
-
-    beforeAll(() => {
-      const address = app.getHttpServer().listen().address()
-      baseAddress = `http://[${address.address}]:${address.port}`
-    });
-
-    afterEach(() => {
-      clientSocket.disconnect();
-    });
-
-    it("should receive messages when connecting", (done) => {
-      registerBart()
-        .then(() => login('bart@example.com', 'secret'))
-        .then((bartToken) => {
-          clientSocket = io.connect(`${baseAddress}/notifications`, {
-            query: {
-              Authorization: bartToken
-            }
-          });
-          clientSocket.on("send_all_notifications", (arg) => {
-            // no messages
-            expect(arg).toEqual([]);
-            done();
-          });
-        })
-    });
-
-    it("should receive notification", (done) => {
-      registerBart()
-        .then(bart => {
-          login('bart@example.com', 'secret')
-            .then(token => {
-              clientSocket = io.connect(`${baseAddress}/notifications`, {
-                query: {
-                  Authorization: token
-                }
-              });
-              clientSocket.on("send_all_notifications", (arg) => {
-                notificationsGateway.handle(new NotificationCreatedEvent(Notification.create({
-                  recipientId: bart.body.user.id,
-                  senderId: 'sender-id',
-                  content: 'content',
-                  opened: false,
-                  viewed: false,
-                  type: 'type',
-                  resourceId: 'resource-id'
-                })))
-              });
-              clientSocket.on(Outgoing.ReceiveNotification, (arg) => {
-                // no messages
-                expect(arg.recipientId).toEqual(bart.body.user.id);
-                done();
-              });
-            })
-        });
-    });
-  });
+  afterEach(() => {
+    clientSocket?.disconnect()
+  })
 
   afterAll(async () => {
     await app.close()
+  })
+
+  function connect(token: string): Socket {
+    return io(`${baseAddress}/notifications`, {
+      query: { Authorization: token },
+    })
+  }
+
+  it('should send all unviewed notifications when connecting', async () => {
+    const token = await api.signUp(bart)
+
+    clientSocket = connect(token)
+    const notifications = await new Promise((resolve) =>
+      clientSocket.on(Outgoing.SendAllNotifications, resolve)
+    )
+
+    expect(notifications).toEqual([])
+  })
+
+  it('should push new notifications to the recipient', async () => {
+    const bartId = await api.register(bart)
+    const token = await api.login(bart)
+
+    clientSocket = connect(token)
+    await new Promise((resolve) => clientSocket.on(Outgoing.SendAllNotifications, resolve))
+    const received = new Promise<{ recipientId: string }>((resolve) =>
+      clientSocket.on(Outgoing.ReceiveNotification, resolve)
+    )
+    app.get(NotificationsGateway).handle(
+      new NotificationCreatedEvent(
+        Notification.create({
+          recipientId: bartId,
+          senderId: 'sender-id',
+          content: 'content',
+          opened: false,
+          viewed: false,
+          type: 'type',
+          resourceId: 'resource-id',
+        })
+      )
+    )
+
+    expect((await received).recipientId).toEqual(bartId)
+  })
+
+  it('should notify the author when someone comments their post', async () => {
+    const bartId = await api.register(bart)
+    const bartToken = await api.login(bart)
+    const homerToken = await api.signUp(homer)
+    const post = await api.createPost(bartToken, 'Ay caramba')
+
+    clientSocket = connect(bartToken)
+    await new Promise((resolve) => clientSocket.on(Outgoing.SendAllNotifications, resolve))
+    const received = new Promise<{ recipientId: string; type: string }>((resolve) =>
+      clientSocket.on(Outgoing.ReceiveNotification, resolve)
+    )
+    await api.commentPost(homerToken, post.id, "Why you little...")
+
+    expect(await received).toMatchObject({ recipientId: bartId, type: 'comment-posted' })
   })
 })

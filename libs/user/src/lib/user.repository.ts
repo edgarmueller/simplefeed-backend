@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@simplefeed/shared-ddd'
-import { Propagation, Transactional } from 'typeorm-transactional'
+import { Transactional } from 'typeorm-transactional'
 import { In } from 'typeorm'
 import { QueryFailedError, Repository } from 'typeorm'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
@@ -20,13 +20,11 @@ export class UsersRepository {
     private readonly publisher: EventPublisher
   ) { }
 
-  @Transactional({
-    propagation: Propagation.NESTED,
-  })
+  @Transactional()
   async save(user: User): Promise<User> {
     try {
       const savedUser = await this.userRepository.save(user)
-      DomainEvents.dispatchEventsForAggregate(user.id, this.publisher)
+      DomainEvents.publishOnCommit(user, this.publisher)
       return savedUser
     } catch (error) {
       if (error instanceof QueryFailedError) {
@@ -136,6 +134,20 @@ export class UsersRepository {
     throw new UserNotFoundError()
   }
 
+  searchByName(text: string, limit: number): Promise<User[]> {
+    const pattern = `%${text.replace(/[\\%_]/g, (char) => `\\${char}`)}%`
+    return this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where(
+        '(profile.username ILIKE :pattern OR profile.firstName ILIKE :pattern OR profile.lastName ILIKE :pattern)',
+        { pattern }
+      )
+      .orderBy('profile.username', 'ASC')
+      .take(limit)
+      .getMany()
+  }
+
   findMany(userIds: string[]) {
     return this.userRepository.find({
       where: { id: In(userIds) },
@@ -144,8 +156,8 @@ export class UsersRepository {
   }
 
   async deleteAll() {
-    await this.friendRequestsRepository.delete({})
-    await this.userRepository.delete({})
+    await this.friendRequestsRepository.createQueryBuilder().delete().execute()
+    await this.userRepository.createQueryBuilder().delete().execute()
   }
 
   async deleteByEmail(email: string) {
@@ -156,13 +168,13 @@ export class UsersRepository {
     await this.userRepository.delete(user.id)
   }
 
-  async softDeleteByEmail(email: string) {
-    const user = await this.findOneByEmailOrFail(email)
+  @Transactional()
+  async softDelete(user: User) {
     await this.friendRequestsRepository.softDelete({
       from: { id: user.id },
     })
     await this.userRepository.softDelete(user.id)
-    DomainEvents.dispatchEventsForAggregate(user.id, this.publisher)
+    DomainEvents.publishOnCommit(user, this.publisher)
   }
 
   @Transactional()
@@ -173,7 +185,7 @@ export class UsersRepository {
     await this.friendRequestsRepository.restore({
       from: { id: user.id },
     })
-    DomainEvents.dispatchEventsForAggregate(user.id, this.publisher)
+    DomainEvents.publishOnCommit(user, this.publisher)
     return user;
   }
 }

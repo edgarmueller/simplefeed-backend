@@ -55,7 +55,7 @@ export class Post extends AggregateRoot {
     super(props, id || createPostId());
   }
 
-  like(likedBy: User) {[]
+  like(likedBy: User) {
     let like;
     const existingLike = this.findExistingLike(likedBy);
     likedBy.profile.incrementLikeCount();

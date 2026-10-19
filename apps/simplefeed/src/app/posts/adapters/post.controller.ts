@@ -17,7 +17,7 @@ import {
   Attachment,
   PostUsecases,
 } from '@simplefeed/post'
-import { Pagination } from 'nestjs-typeorm-paginate'
+import { Page, mapPage } from '@simplefeed/shared-ddd'
 import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
 import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
 import { PaginatedPostQueryDto } from '../dto/paginated-post-query.dto'
@@ -59,25 +59,19 @@ export class PostController {
   async getFeed(
     @Req() req: RequestWithUser,
     @Query() paginationQueryDto: PaginatedPostQueryDto
-  ): Promise<Pagination<GetPostDto>> {
+  ): Promise<Page<GetPostDto>> {
     if (paginationQueryDto.userId) {
       const page =  await this.usecases.getUserActivityFeed(paginationQueryDto.userId, {
         page: paginationQueryDto.page,
         limit: paginationQueryDto.limit,
       })
-      return {
-        ...page,
-        items: page.items.map(GetPostDto.fromDomain)
-      }
+      return mapPage(page, GetPostDto.fromDomain)
     }
     const page = await this.usecases.getPersonalFeed(req.user.id, {
       page: paginationQueryDto.page,
       limit: paginationQueryDto.limit,
     })
-    return {
-      ...page,
-      items: page.items.map(GetPostDto.fromDomain)
-    }
+    return mapPage(page, GetPostDto.fromDomain)
   }
 
   @Get(':postId')
@@ -101,23 +95,20 @@ export class PostController {
     return GetCommentDto.fromDomain(comment)
   }
 
-  @Get(':postId/comments/:commentId?')
+  @Get(':postId/comments{/:commentId}')
   @UseGuards(JwtAuthGuard)
   async fetchComments(
     @Req() req: RequestWithUser,
     @Param('postId') postId: string,
     @Param('commentId') commentId?: string,
     @Query(new PaginatedQueryPipe()) paginationOpts?: PaginatedQueryDto
-  ): Promise<Pagination<GetCommentDto>> {
+  ): Promise<Page<GetCommentDto>> {
     const page = await this.usecases.fetchComments(
       postId,
       commentId || postId,
       paginationOpts
     )
-    return {
-      ...page,
-      items: page.items.map(GetCommentDto.fromDomain)
-    }
+    return mapPage(page, GetCommentDto.fromDomain)
   }
 
   @Post(':postId/like')

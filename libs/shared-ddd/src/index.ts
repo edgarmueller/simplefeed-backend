@@ -6,3 +6,11 @@ export { DomainEvents } from './lib/events/domain-events'
 export { Entity } from './lib/entity.interface'
 export { nullify } from './lib/nullify'
 export { createId } from './lib/id'
+export {
+  paginate,
+  mapPage,
+  Page,
+  PageMeta,
+  PageOptions,
+  DEFAULT_PAGE_SIZE,
+} from './lib/pagination'

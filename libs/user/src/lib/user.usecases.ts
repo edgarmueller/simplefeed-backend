@@ -77,17 +77,14 @@ export class UserUsecases {
     if (!imageBuffer) {
       return user;
     }
-    const uploadResult = await this.s3Service.uploadPublicFile(
-      imageBuffer,
-      filename
-    )
-    user.profile.updateAvatar(uploadResult.Location)
+    const imageUrl = await this.s3Service.uploadPublicFile(imageBuffer, filename)
+    user.profile.updateAvatar(imageUrl)
     return user
   }
 
   async closeAccount(user: User) {
     user.close()
-    await this.userRepository.softDeleteByEmail(user.email)
+    await this.userRepository.softDelete(user)
   }
 
   async reactivateAccount(email: string) {

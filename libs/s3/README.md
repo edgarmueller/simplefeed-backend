@@ -1,7 +1,5 @@
 # s3
 
-This library was generated with [Nx](https://nx.dev).
+Uploads public files to S3-compatible storage. When `S3_ENABLED` is not `true`, uploads are skipped.
 
-## Running unit tests
-
-Run `nx test s3` to execute the unit tests via [Jest](https://jestjs.io).
+Run `nx test s3` to execute its unit tests.

@@ -1,7 +1,5 @@
 # shared-ddd
 
-This library was generated with [Nx](https://nx.dev).
+Building blocks shared by the domain libraries: the aggregate root base class, publishing domain events after commit, id generation and pagination.
 
-## Running unit tests
-
-Run `nx test shared-ddd` to execute the unit tests via [Jest](https://jestjs.io).
+Run `nx test shared-ddd` to execute its unit tests.

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { User, UsersRepository } from '@simplefeed/user'
-import { AuthService } from '@simplefeed/auth'
+import { AuthService } from './auth.service'
 
 @Injectable()
 export class AuthUsecases {

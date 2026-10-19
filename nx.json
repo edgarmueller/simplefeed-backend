@@ -1,35 +1,41 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "simplefeed",
-  "affected": {
-    "defaultBase": "simplefeed"
+  "analytics": false,
+  "defaultBase": "main",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/eslint.config.mjs",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/vitest.config.[cm]?[jt]s"
+    ],
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
   },
-  "implicitDependencies": {
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
-    },
-    ".eslintrc.json": "*"
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
+  "plugins": [
+    {
+      "plugin": "@nx/webpack/plugin",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ]
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test"
       }
     }
-  },
-  "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ]
-    }
-  },
-  "defaultProject": "simplefeed"
+  ]
 }

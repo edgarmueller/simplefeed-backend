@@ -1,4 +1,3 @@
-import { TokenPayload } from './interfaces/token-payload.interface'
 
 export class AuthCookie {
   public static cookieForLogOut() {

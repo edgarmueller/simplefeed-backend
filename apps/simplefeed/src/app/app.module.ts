@@ -1,9 +1,7 @@
-import { S3Module, S3Schema, s3Config } from '@simplefeed/s3';
+import { S3Schema, s3Config } from '@simplefeed/s3';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ScheduleModule } from '@nestjs/schedule';
+import { ConfigModule } from '@nestjs/config';
 import { AuthConfigSchema, authConfig } from '@simplefeed/auth';
-import { SearchSchema, searchConfig } from '@simplefeed/search';
 import Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
@@ -21,30 +19,19 @@ import { EntityNotFoundFilter } from './infra/not-found.exception-filter';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.development.local', `.env.${process.env.PROFILE}}`],
-      load: [authConfig, s3Config, searchConfig, databaseConfig, redisConfig],
+      // Nx loads the .env files in development and tests; deployments set real env vars
+      ignoreEnvFile: true,
+      load: [authConfig, s3Config, databaseConfig, redisConfig],
       validationSchema: Joi.object().keys(
         DatabaseConfigSchema
-      ).keys(AuthConfigSchema).keys(S3Schema).keys(SearchSchema)
+      ).keys(AuthConfigSchema).keys(S3Schema)
     }),
     DatabaseModule,
-    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     FriendsModule,
     PostModule,
     ChatModule,
-    S3Module.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return {
-          enabled: configService.get('s3.enabled'),
-          bucketName: configService.get('s3.bucketName'),
-          endpoint: configService.get('s3.endpoint'),
-        }
-      },
-    }),
     SearchModule,
     NotificationsModule
   ],

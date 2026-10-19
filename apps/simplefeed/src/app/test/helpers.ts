@@ -1,14 +1,181 @@
-import { createConnection } from "typeorm"
+import { INestApplication } from '@nestjs/common'
+import { Test } from '@nestjs/testing'
+import { PostsRepository } from '@simplefeed/post'
+import { UsersRepository } from '@simplefeed/user'
+import { AddressInfo } from 'net'
+import request from 'supertest'
+import { initializeTransactionalContext } from 'typeorm-transactional'
+import { AppModule } from '../app.module'
+import { configureApp } from '../app.setup'
 
-export async function createDbSchema(): Promise<void> {
-  const connection = await createConnection({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5433,
-    username: 'admin',
-    password: 'admin',
-    database: 'simplefeed_testing',
-  })
-  await connection.createQueryRunner().createSchema('simplefeed', true)
-  await connection.close()
+/** Boots the full application against the test database, applying pending migrations. */
+export async function createTestApp(): Promise<INestApplication> {
+  initializeTransactionalContext()
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule],
+  }).compile()
+  const app = configureApp(moduleRef.createNestApplication())
+  await app.init()
+  return app
+}
+
+export async function clearDatabase(app: INestApplication): Promise<void> {
+  await app.get(PostsRepository).deleteAll()
+  await app.get(UsersRepository).deleteAll()
+}
+
+/** Starts listening on a random port and returns its base url, for socket clients. */
+export function listen(app: INestApplication): string {
+  const address = app.getHttpServer().listen().address() as AddressInfo
+  return `http://[${address.address}]:${address.port}`
+}
+
+export interface TestUser {
+  username: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+}
+
+export const bart: TestUser = {
+  username: 'bart',
+  firstName: 'Bart',
+  lastName: 'Simpson',
+  email: 'bart@example.com',
+  password: 'secret',
+}
+
+export const homer: TestUser = {
+  username: 'homer',
+  firstName: 'Homer',
+  lastName: 'Simpson',
+  email: 'homer@example.com',
+  password: 'secret',
+}
+
+export const lisa: TestUser = {
+  username: 'lisa',
+  firstName: 'Lisa',
+  lastName: 'Simpson',
+  email: 'lisa@example.com',
+  password: 'secret',
+}
+
+export const fry: TestUser = {
+  username: 'fry',
+  firstName: 'Philip J.',
+  lastName: 'Fry',
+  email: 'fry@example.com',
+  password: 'secret',
+}
+
+/** Thin wrapper around the HTTP API, so specs read as user stories. */
+export class ApiClient {
+  constructor(private readonly app: INestApplication) {}
+
+  private get http() {
+    return request(this.app.getHttpServer())
+  }
+
+  /** Registers the user and returns the created user's id. */
+  async register(user: TestUser): Promise<string> {
+    const { body } = await this.http
+      .post('/api/auth/register')
+      .send({ user })
+      .expect(201)
+    return body.user.id
+  }
+
+  /** Logs the user in and returns a bearer token. */
+  async login(user: TestUser): Promise<string> {
+    const { body } = await this.http
+      .post('/api/auth/login')
+      .send({ user: { email: user.email, password: user.password } })
+      .expect(200)
+    return `Bearer ${body.accessToken}`
+  }
+
+  /** Registers and logs in the user and returns a bearer token. */
+  async signUp(user: TestUser): Promise<string> {
+    await this.register(user)
+    return this.login(user)
+  }
+
+  async sendFriendRequest(token: string, toUsername: string): Promise<{ id: string }> {
+    const { body } = await this.http
+      .post(`/api/friend-requests/${toUsername}`)
+      .set('Authorization', token)
+      .expect(201)
+    return body
+  }
+
+  async acceptFriendRequest(token: string, friendRequestId: string): Promise<void> {
+    await this.http
+      .patch(`/api/friend-requests/${friendRequestId}`)
+      .set('Authorization', token)
+      .expect(200)
+  }
+
+  async declineFriendRequest(token: string, friendRequestId: string): Promise<void> {
+    await this.http
+      .delete(`/api/friend-requests/${friendRequestId}`)
+      .set('Authorization', token)
+      .expect(200)
+  }
+
+  async befriend(senderToken: string, receiverToken: string, receiverUsername: string): Promise<void> {
+    const friendRequest = await this.sendFriendRequest(senderToken, receiverUsername)
+    await this.acceptFriendRequest(receiverToken, friendRequest.id)
+  }
+
+  async getPendingFriendRequests(token: string) {
+    const { body } = await this.http
+      .get('/api/friend-requests/pending')
+      .set('Authorization', token)
+      .expect(200)
+    return body
+  }
+
+  async getFriendsOf(token: string, username: string) {
+    const { body } = await this.http
+      .get(`/api/users/${username}`)
+      .set('Authorization', token)
+      .expect(200)
+    return body.friends
+  }
+
+  async createPost(token: string, content: string): Promise<{ id: string }> {
+    const { body } = await this.http
+      .post('/api/posts')
+      .set('Authorization', token)
+      .field('body', content)
+      .expect(201)
+    return body
+  }
+
+  async commentPost(token: string, postId: string, content: string): Promise<void> {
+    await this.http
+      .post(`/api/posts/${postId}/comments`)
+      .set('Authorization', token)
+      .send({ content })
+      .expect(201)
+  }
+
+  async getCommentsOfPost(token: string, postId: string) {
+    const { body } = await this.http
+      .get(`/api/posts/${postId}/comments`)
+      .set('Authorization', token)
+      .expect(200)
+    return body
+  }
+
+  async searchUsers(token: string, text: string) {
+    const { body } = await this.http
+      .get('/api/search')
+      .query({ users: text })
+      .set('Authorization', token)
+      .expect(200)
+    return body
+  }
 }

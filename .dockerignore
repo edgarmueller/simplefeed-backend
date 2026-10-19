@@ -63,3 +63,8 @@ libs/schematics/**/yarn-error.log*
 libs/schematics/**/**/.DS_Store
 libs/schematics/**/.DS_Store
 fly.toml
+
+# local env files
+.env.local
+.env.*.local
+.nx

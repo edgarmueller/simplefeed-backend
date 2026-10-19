@@ -2,14 +2,12 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('refresh_token')
 export class RefreshToken {
-  @PrimaryGeneratedColumn()
-  public id?: string
+  @PrimaryGeneratedColumn('increment')
+  public id?: number
 
-  @Column()
+  @Column({ type: 'varchar' })
   userId: string
 
-  @Column({
-    nullable: true,
-  })
+  @Column({ type: 'varchar', nullable: true })
   token: string
 }

@@ -1,89 +1,48 @@
-version: "3"
+# Local infrastructure for development and the API tests: `npm run infra:up`
 services:
-  cache:
-    image: redis:6.2-alpine
-    restart: always
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
     ports:
       - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning --requirepass password
-    volumes: 
-      - cache:/data
-  simplefeed_db:
-    image: postgres:latest
-    ports:
-      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - redis-data:/data
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: simplefeed
-  simplefeed_db_testing:
-    image: postgres:latest
     ports:
-      - "5433:5432"
-    expose:
-      - 5433
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  # Throwaway database for the API tests
+  postgres-test:
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: simplefeed_testing
-      POSTGRES_PORT: 5433
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
-    container_name: es01
-    environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - data01:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
-    networks:
-      - elastic
+      - '5433:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  # S3 for image uploads (only needed with S3_ENABLED=true)
   localstack:
-    container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
-    image: localstack/localstack
-    ports:
-      - "4566:4566"
-    volumes:
-      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-  aws-cli:
-    image: amazon/aws-cli
-    depends_on:
-      - localstack
-    volumes:
-      - ./testbucket:/aws
+    image: localstack/localstack:4
     environment:
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-1
-    entrypoint: /bin/sh -c
-    command: >
-      "aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket simplefeed-avatar --region us-east-1"
+      SERVICES: s3
+    ports:
+      - '4566:4566'
+    volumes:
+      - ./infra/localstack/create-bucket.sh:/etc/localstack/init/ready.d/create-bucket.sh
 
 volumes:
-  cache:
-  pgdata:
-  data01:
-    driver: local
-    driver_opts:
-      o: "size=100m"
-      device: "tmpfs"
-      type: "tmpfs"
- 
-networks:
-  postgres:
-    driver: bridge
-  elastic:
-    driver: bridge
- 
+  redis-data:
+  postgres-data:

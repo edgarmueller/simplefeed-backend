@@ -1,4 +1,3 @@
-export { SearchUsecases } from './lib/search.usecases';
-export * from './lib/search.module'
-export { searchConfig, SearchSchema } from './lib/search.config'
-export { SearchService } from './lib/search.service'
+export { SearchUsecases } from './lib/search.usecases'
+export { SearchModule } from './lib/search.module'
+export { UserSearchDto } from './lib/dto/user-search.dto'

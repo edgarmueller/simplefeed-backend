@@ -1,19 +1,5 @@
 # user
 
-This library was generated with [Nx](https://nx.dev).
+Users, their profiles, friendships and friend requests.
 
-
-
-## Building
-
-Run `nx build user` to build the library.
-
-
-
-
-
-## Running unit tests
-
-Run `nx test user` to execute the unit tests via [Jest](https://jestjs.io).
-
-
+Run `nx test user` to execute its unit tests.

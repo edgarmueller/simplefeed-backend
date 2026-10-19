@@ -1,6 +1,5 @@
 import { AggregateRoot as NestJsAggregateRoot } from '@nestjs/cqrs'
-import { uuid } from 'short-uuid'
-import { DomainEvents } from './events/domain-events'
+import { randomUUID } from 'crypto'
 import { IDomainEvent } from './events/domain-event.interface'
 
 export abstract class AggregateRoot<
@@ -11,7 +10,7 @@ export abstract class AggregateRoot<
   constructor(props: any, id?: string) {
     super()
     Object.assign(this, props)
-    this.id = id ? id : uuid()
+    this.id = id ? id : randomUUID()
   }
 
   public emitDomainEvent<T extends EventBase = EventBase>(
@@ -19,7 +18,6 @@ export abstract class AggregateRoot<
     isFromHistory?: boolean
   ): void {
     super.apply<T>(event, isFromHistory)
-    DomainEvents.markAggregateForDispatch(this)
   }
 
   public equals(object?: AggregateRoot): boolean {

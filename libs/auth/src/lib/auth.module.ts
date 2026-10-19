@@ -13,7 +13,6 @@ import { RefreshToken } from './refresh-token.entity'
 import { JwtRefreshTokenStrategy as JwtRefreshStrategy } from './strategies/jwt-refresh.strategy'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { LocalStrategy } from './strategies/local.strategy'
-import { PublicStrategy } from './strategies/public.strategy'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthConfigKeys } from './auth.config'
 import { AuthUsecases } from './auth.usecases'
@@ -43,7 +42,6 @@ export class AuthModule {
         LocalStrategy,
         JwtStrategy,
         JwtRefreshStrategy,
-        PublicStrategy,
         AuthUsecases
       ],
       exports: [AuthService, AuthUsecases],

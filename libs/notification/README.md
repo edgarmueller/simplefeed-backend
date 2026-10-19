@@ -1,7 +1,5 @@
 # notification
 
-This library was generated with [Nx](https://nx.dev).
+Notifications for things like new comments, likes and friend requests, plus their viewed and opened state.
 
-## Running unit tests
-
-Run `nx test notification` to execute the unit tests via [Jest](https://jestjs.io).
+Run `nx test notification` to execute its unit tests.

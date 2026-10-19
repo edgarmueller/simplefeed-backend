@@ -1,8 +1,7 @@
 import { S3Service } from '@simplefeed/s3'
-import { last } from 'lodash'
 import { User, UsersRepository } from '@simplefeed/user'
 import { Injectable } from '@nestjs/common'
-import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate'
+import { Page, PageOptions } from '@simplefeed/shared-ddd'
 import 'multer'
 import { Comment } from '../comment'
 import { Attachment, AttachmentType, Post } from '../post'
@@ -31,8 +30,7 @@ export class PostUsecases {
     if (toUserId) {
       postedTo = await this.usersRepository.findOneByIdOrFail(toUserId)
     }
-    // TODO: error handling & do we wanna use event?
-    const uploads = await Promise.all(
+    const imageUrls = await Promise.all(
       files.map((file) =>
         this.s3Service.uploadPublicFile(file.buffer, file.originalname)
       )
@@ -43,9 +41,9 @@ export class PostUsecases {
       author: author,
       attachments: [
         ...attachments.filter(({ type }) => type !== AttachmentType.IMAGE),
-        ...uploads.map(({ Location }) => ({
+        ...imageUrls.filter(Boolean).map((url) => ({
           type: AttachmentType.IMAGE,
-          url: Location,
+          url,
         })),
       ],
     })
@@ -58,33 +56,22 @@ export class PostUsecases {
 
   async getUserActivityFeed(
     userId: string,
-    paginationOpts: IPaginationOptions
-  ): Promise<Pagination<Post>> {
-    const posts = await this.postsRepository.findUserActivityFeed(
-      userId,
-      paginationOpts
-    )
-    return {
-      ...posts,
-      items: posts.items,
-    }
+    paginationOpts: PageOptions
+  ): Promise<Page<Post>> {
+    return this.postsRepository.findUserActivityFeed(userId, paginationOpts)
   }
 
   async getPersonalFeed(
     userId: string,
-    paginationOpts: IPaginationOptions
-  ): Promise<Pagination<Post>> {
+    paginationOpts: PageOptions
+  ): Promise<Page<Post>> {
     const { friends: friends } =
       await this.usersRepository.findOneByIdWithFriendsOrFail(userId)
-    const posts = await this.postsRepository.findPostsByUsers(
+    return this.postsRepository.findPostsByUsers(
       userId,
       [userId, ...friends.map((friend) => friend.id)],
       paginationOpts
     )
-    return {
-      ...posts,
-      items: posts.items,
-    }
   }
 
   async getPost(postId: string, userId: string): Promise<Post> {
@@ -115,7 +102,7 @@ export class PostUsecases {
   ): Promise<Comment> {
     const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
     const path = Comment.escapePath(stringifiedPath || postId)
-    const parentId = last(path?.split('.'))
+    const parentId = path?.split('.').pop()
     let parentComment: Comment | undefined
     if (parentId !== postId) {
       parentComment = await this.postsRepository.findOneCommentByIdWithAuthor(
@@ -135,20 +122,12 @@ export class PostUsecases {
   async fetchComments(
     postId: string,
     commentId?: string,
-    paginationOpts: IPaginationOptions = {
+    paginationOpts: PageOptions = {
       page: 1,
       limit: DEFAULT_COMMENTS_LIMIT,
     }
-  ): Promise<Pagination<Comment>> {
-    const res = await this.postsRepository.findComments(
-      postId,
-      commentId,
-      paginationOpts
-    )
-    return {
-      ...res,
-      items: res.items,
-    }
+  ): Promise<Page<Comment>> {
+    return this.postsRepository.findComments(postId, commentId, paginationOpts)
   }
 
   async likePost(postId: string, likedBy: User) {
