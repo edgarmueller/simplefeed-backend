@@ -38,7 +38,7 @@ function toStory(item: HackerNewsItem | null): Story | undefined {
   }
   // a malformed submission URL falls back to the discussion page
   const domain = item.url ? hostname(item.url) : undefined
-  const url = domain ? item.url! : discussionUrl(item.id)
+  const url = domain && item.url ? item.url : discussionUrl(item.id)
   return {
     id: item.id,
     title: item.title,

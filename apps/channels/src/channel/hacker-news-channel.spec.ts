@@ -11,16 +11,11 @@ const NOW = new Date('2026-10-25T12:00:00Z')
 
 function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: [] as ChatMessage[] }] } = {}) {
   const posts: string[] = []
-  const accepted: string[] = []
   const client = {
     username: 'hackernews',
     post: async (body: string) => {
       if (failPosts) throw new Error('backend down')
       posts.push(body)
-    },
-    pendingFriendRequests: async () => [{ id: 'frq-1', from: { id: 'use-1', username: 'bart' } }],
-    acceptFriendRequest: async (id: string) => {
-      accepted.push(id)
     },
     id: async () => 'use-channel',
     conversations: async () => conversations,
@@ -48,7 +43,7 @@ function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'co
     markAsRead: async () => undefined,
     close: () => undefined,
   }
-  return { channel, store, posts, accepted, sent, joined, chat }
+  return { channel, store, posts, sent, joined, chat }
 }
 
 describe('HackerNewsChannel', () => {
@@ -96,12 +91,11 @@ describe('HackerNewsChannel', () => {
     expect(await failing.store.notPosted('hackernews', [String(pending.id)])).toEqual([String(pending.id)])
   })
 
-  it('accepts subscribers and joins their chats', async () => {
-    const { channel, accepted, joined, chat } = setup([])
+  it("joins its subscribers' chats", async () => {
+    const { channel, joined, chat } = setup([])
 
-    await channel.syncSubscribers(chat)
+    await channel.syncChats(chat)
 
-    expect(accepted).toEqual(['frq-1'])
     expect(joined).toEqual(['conv-1'])
   })
 
@@ -120,7 +114,7 @@ describe('HackerNewsChannel', () => {
     })
 
     await channel.handleMessage(missed[0], chat)
-    await channel.syncSubscribers(chat)
+    await channel.syncChats(chat)
 
     expect(sent).toHaveLength(2)
     expect(sent[1]).toContain('Leaving out: crypto')

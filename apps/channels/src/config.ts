@@ -8,8 +8,8 @@ export interface ChannelsConfig {
   hackerNewsApiUrl: string
   /** how often channels collect and post new items */
   postIntervalMinutes: number
-  /** how often channels accept new subscribers */
-  subscriptionIntervalSeconds: number
+  /** how often channels join new subscribers' chats and catch up on messages */
+  chatIntervalSeconds: number
   groq?: {
     apiKey: string
     model: string
@@ -39,7 +39,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ChannelsConfig
     channelPassword: required(env, 'CHANNEL_PASSWORD'),
     hackerNewsApiUrl: env.HACKER_NEWS_API_URL || 'https://hacker-news.firebaseio.com/v0',
     postIntervalMinutes: positiveNumber(env.CHANNELS_POST_INTERVAL_MINUTES, 60),
-    subscriptionIntervalSeconds: positiveNumber(env.CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS, 30),
+    chatIntervalSeconds: positiveNumber(env.CHANNELS_CHAT_INTERVAL_SECONDS, 30),
     groq: env.GROQ_API_KEY
       ? {
           apiKey: env.GROQ_API_KEY,

@@ -10,11 +10,6 @@ export interface Account {
   imageUrl?: string
 }
 
-export interface FriendRequest {
-  id: string
-  from: { id: string; username: string }
-}
-
 export interface ChatMessage {
   id: string
   conversationId: string
@@ -127,14 +122,6 @@ export class SimplefeedClient {
     return this.userId
   }
 
-  pendingFriendRequests(): Promise<FriendRequest[]> {
-    return this.request('/friend-requests/pending')
-  }
-
-  async acceptFriendRequest(friendRequestId: string): Promise<void> {
-    await this.request(`/friend-requests/${friendRequestId}`, { method: 'PATCH' })
-  }
-
   async post(body: string): Promise<void> {
     const form = new FormData()
     form.append('body', body)
@@ -143,6 +130,31 @@ export class SimplefeedClient {
 
   conversations(): Promise<Conversation[]> {
     return this.request('/chat')
+  }
+}
+
+const API_RETRY_DELAY_MS = 5_000
+
+/**
+ * Runs `task`, retrying while the API is unreachable or failing, e.g. when
+ * the worker starts before the API. Client errors such as a wrong
+ * registration key are rethrown, since retrying won't fix them.
+ */
+export async function whenApiIsUp<T>(
+  task: () => Promise<T>,
+  logger: Logger = console,
+  delayMs = API_RETRY_DELAY_MS
+): Promise<T> {
+  for (;;) {
+    try {
+      return await task()
+    } catch (error) {
+      if (error instanceof ApiError && error.status < 500) {
+        throw error
+      }
+      logger.log(`waiting for the API (${error instanceof Error ? error.message : error}), retrying in ${delayMs / 1000}s`)
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
   }
 }
 

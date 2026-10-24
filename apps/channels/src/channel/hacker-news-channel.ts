@@ -107,17 +107,11 @@ export class HackerNewsChannel {
   }
 
   /**
-   * Accepts pending subscriptions, joins their chats and answers messages
-   * that arrived while the channel wasn't listening, e.g. before it had
-   * joined a new conversation.
+   * Joins the chats of new subscribers and answers messages that arrived
+   * while the channel wasn't listening, e.g. before it had joined a new
+   * subscriber's conversation.
    */
-  async syncSubscribers(chat: ChatConnection): Promise<void> {
-    const requests = await this.deps.client.pendingFriendRequests()
-    for (const request of requests) {
-      await this.deps.client.acceptFriendRequest(request.id)
-      this.logger.log(`${this.name} accepted ${request.from.username} as a subscriber`)
-    }
-    // accepting creates the conversation asynchronously, so join whatever exists by now
+  async syncChats(chat: ChatConnection): Promise<void> {
     const conversations = await this.deps.client.conversations()
     const ownId = await this.deps.client.id()
     for (const conversation of conversations) {

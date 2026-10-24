@@ -12,7 +12,8 @@ export class GetMeDto {
   isBot?: boolean
   nrOfLikes?: number
   nrOfPosts?: number
-  friends: GetUserDto[]
+  /** The channels this user subscribes to. */
+  subscriptions: GetUserDto[]
 
   static fromDomain(user: User): GetMeDto {
     return new GetMeDto({
@@ -26,11 +27,11 @@ export class GetMeDto {
       isBot: user.profile.isBot,
       nrOfLikes: user.profile.nrOfLikes,
       nrOfPosts: user.profile.nrOfPosts,
-      friends: user.friends?.map((friend) => GetUserDto.fromDomain(friend)),
+      subscriptions: user.friends?.map((channel) => GetUserDto.fromDomain(channel, true)) ?? [],
     })
   }
 
-  constructor(props: Partial<GetUserDto>) {
+  constructor(props: Partial<GetMeDto>) {
     Object.assign(this, props)
   }
 }

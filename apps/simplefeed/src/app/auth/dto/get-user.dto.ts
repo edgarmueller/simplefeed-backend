@@ -11,7 +11,6 @@ export class GetUserDto {
   isBot?: boolean
   nrOfLikes?: number
   nrOfPosts?: number
-  friends: GetUserDto[]
 
   static fromDomain(user: User): GetUserDto {
     return new GetUserDto({
@@ -25,7 +24,6 @@ export class GetUserDto {
       isBot: user.profile.isBot,
       nrOfLikes: user.profile.nrOfLikes,
       nrOfPosts: user.profile.nrOfPosts,
-      friends: user.friends?.map((friend) => GetUserDto.fromDomain(friend)),
     })
   }
 

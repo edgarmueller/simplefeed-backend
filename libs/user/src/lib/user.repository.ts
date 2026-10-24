@@ -9,14 +9,11 @@ import { EventPublisher } from '@nestjs/cqrs'
 import { UserNotFoundError } from './errors/user-not-found.error'
 import { User, UserId } from './user'
 import { UserAlreadyExistsError } from './errors/user-already-exists.error'
-import { FriendRequest } from './friend-request'
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(FriendRequest)
-    private readonly friendRequestsRepository: Repository<FriendRequest>,
     private readonly publisher: EventPublisher
   ) { }
 
@@ -91,22 +88,6 @@ export class UsersRepository {
       throw error
     }
   }
-  async findOneByUsernameWithFriendRequestsOrFail(username: string): Promise<User> {
-    try {
-      const foundUser = await this.userRepository.findOneOrFail({
-        where: { profile: { username } },
-        // the duplicate check in `sendFriendRequestTo` compares senders
-        relations: { friendRequests: { from: true } },
-      })
-      return foundUser
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new UserNotFoundError(username)
-      }
-      throw error
-    }
-  }
-
   async findOneByUsernameWithFriendsOrFail(username: string): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
@@ -165,23 +146,16 @@ export class UsersRepository {
   }
 
   async deleteAll() {
-    await this.friendRequestsRepository.createQueryBuilder().delete().execute()
     await this.userRepository.createQueryBuilder().delete().execute()
   }
 
   async deleteByEmail(email: string) {
     const user = await this.findOneByEmailOrFail(email)
-    await this.friendRequestsRepository.delete({
-      from: { id: user.id },
-    })
     await this.userRepository.delete(user.id)
   }
 
   @Transactional()
   async softDelete(user: User) {
-    await this.friendRequestsRepository.softDelete({
-      from: { id: user.id },
-    })
     await this.userRepository.softDelete(user.id)
     DomainEvents.publishOnCommit(user, this.publisher)
   }
@@ -191,9 +165,6 @@ export class UsersRepository {
     await this.userRepository.restore({ email })
     const user = await this.findOneByEmailOrFail(email);
     user.restore();
-    await this.friendRequestsRepository.restore({
-      from: { id: user.id },
-    })
     DomainEvents.publishOnCommit(user, this.publisher)
     return user;
   }

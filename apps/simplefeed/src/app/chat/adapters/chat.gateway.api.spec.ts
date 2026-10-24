@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { io, Socket } from 'socket.io-client'
-import { ApiClient, bart, clearDatabase, createTestApp, homer, listen } from '../../test/helpers'
+import { ApiClient, bart, clearDatabase, createTestApp, hackerNews, listen } from '../../test/helpers'
 
 describe('chat gateway', () => {
   let app: INestApplication
@@ -28,8 +28,8 @@ describe('chat gateway', () => {
 
   it('should join conversations when connecting', async () => {
     const bartToken = await api.signUp(bart)
-    const homerToken = await api.signUp(homer)
-    await api.befriend(bartToken, homerToken, 'homer')
+    await api.registerBot(hackerNews, 'test-bot-registration-key')
+    await api.subscribe(bartToken, 'hackernews')
 
     clientSocket = io(`${baseAddress}/chat`, {
       query: { Authorization: bartToken },
