@@ -138,11 +138,11 @@ export class ApiClient {
     return body
   }
 
-  async acceptFriendRequest(token: string, friendRequestId: string): Promise<void> {
+  async acceptFriendRequest(token: string, friendRequestId: string, expectedStatus = 200): Promise<void> {
     await this.http
       .patch(`/api/friend-requests/${friendRequestId}`)
       .set('Authorization', token)
-      .expect(200)
+      .expect(expectedStatus)
   }
 
   async declineFriendRequest(token: string, friendRequestId: string): Promise<void> {

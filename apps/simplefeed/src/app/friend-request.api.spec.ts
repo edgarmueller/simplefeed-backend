@@ -64,4 +64,22 @@ describe('friend request api', () => {
 
     expect(pendingRequests).toHaveLength(1)
   })
+
+  it('should only let the recipient accept a friend request', async () => {
+    const fryToken = await api.signUp(fry)
+    const lisaToken = await api.signUp(lisa)
+    const bartToken = await api.signUp(bart)
+    const friendRequest = await api.sendFriendRequest(fryToken, 'lisa')
+
+    await api.acceptFriendRequest(bartToken, friendRequest.id, 403)
+    await api.acceptFriendRequest(fryToken, friendRequest.id, 403)
+
+    expect(await api.getPendingFriendRequests(lisaToken)).toHaveLength(1)
+  })
+
+  it('should answer 404 for unknown friend requests', async () => {
+    const fryToken = await api.signUp(fry)
+
+    await api.acceptFriendRequest(fryToken, 'frq-does-not-exist', 404)
+  })
 })
