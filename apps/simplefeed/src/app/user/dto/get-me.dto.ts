@@ -9,6 +9,7 @@ export class GetMeDto {
   lastName: string
   bio?: string
   imageUrl?: string
+  isBot?: boolean
   nrOfLikes?: number
   nrOfPosts?: number
   friends: GetUserDto[]
@@ -22,6 +23,7 @@ export class GetMeDto {
       lastName: user.profile.lastName,
       bio: user.profile.bio,
       imageUrl: user.profile.imageUrl,
+      isBot: user.profile.isBot,
       nrOfLikes: user.profile.nrOfLikes,
       nrOfPosts: user.profile.nrOfPosts,
       friends: user.friends?.map((friend) => GetUserDto.fromDomain(friend)),

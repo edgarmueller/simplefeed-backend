@@ -24,6 +24,11 @@ export class UserUsecases {
     return user;
   }
 
+  /** The automated accounts users can subscribe to. */
+  getChannels(): Promise<User[]> {
+    return this.userRepository.findBots()
+  }
+
   async getFriendsOfUser(username: string): Promise<User[]> {
     const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(
       username

@@ -4,4 +4,5 @@ export interface UserSearchDto {
 	firstName: string
 	lastName: string
 	imageUrl: string
+	isBot: boolean
 }

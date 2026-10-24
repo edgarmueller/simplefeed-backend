@@ -9,7 +9,8 @@ export class GetPostDto {
 				firstName: post.author.profile.firstName,
 				lastName: post.author.profile.lastName,
 				username: post.author.profile.username,
-				imageUrl: post.author.profile.imageUrl
+				imageUrl: post.author.profile.imageUrl,
+				isBot: post.author.profile.isBot
 			},
 			postedTo: {
 				id: post.postedTo?.id,

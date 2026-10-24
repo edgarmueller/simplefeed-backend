@@ -26,10 +26,11 @@ export class PostUsecases {
     files: File[] = [],
     toUserId?: string
   ): Promise<Post> {
-    let postedTo: User | undefined
-    if (toUserId) {
-      postedTo = await this.usersRepository.findOneByIdOrFail(toUserId)
-    }
+    // without a target, a post goes to the author's own feed; the feed
+    // queries only show posts that have one
+    const postedTo = toUserId
+      ? await this.usersRepository.findOneByIdOrFail(toUserId)
+      : author
     const imageUrls = await Promise.all(
       files.map((file) =>
         this.s3Service.uploadPublicFile(file.buffer, file.originalname)

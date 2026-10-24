@@ -149,6 +149,14 @@ export class UsersRepository {
       .getMany()
   }
 
+  findBots(): Promise<User[]> {
+    return this.userRepository.find({
+      where: { profile: { isBot: true } },
+      relations: { profile: true },
+      order: { profile: { username: 'ASC' } },
+    })
+  }
+
   findMany(userIds: string[]) {
     return this.userRepository.find({
       where: { id: In(userIds) },
