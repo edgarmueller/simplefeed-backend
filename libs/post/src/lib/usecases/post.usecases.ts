@@ -3,10 +3,8 @@ import { User, UsersRepository } from '@simplefeed/user'
 import { Injectable } from '@nestjs/common'
 import { Page, PageOptions } from '@simplefeed/shared-ddd'
 import 'multer'
-import { Comment } from '../comment'
 import { Attachment, AttachmentType, Post } from '../post'
 import { PostsRepository } from '../post.repository'
-import { DEFAULT_COMMENTS_LIMIT } from './../post.repository'
 import { PostNotFoundError } from '../errors/post-not-found.error'
 
 type File = Express.Multer.File
@@ -93,42 +91,6 @@ export class PostUsecases {
 
   async findLikedPostsByUser(user: User) {
     return this.postsRepository.findLikedPostsByUser(user.id)
-  }
-
-  async postComment(
-    user: User,
-    postId: string,
-    content: string,
-    stringifiedPath?: string
-  ): Promise<Comment> {
-    const post = await this.postsRepository.findOneByIdWithAuthorOrFail(postId)
-    const path = Comment.escapePath(stringifiedPath || postId)
-    const parentId = path?.split('.').pop()
-    let parentComment: Comment | undefined
-    if (parentId !== postId) {
-      parentComment = await this.postsRepository.findOneCommentByIdWithAuthor(
-        parentId
-      )
-    }
-    const comment = Comment.create({
-      content,
-      author: user,
-      post,
-      path,
-      parentComment,
-    })
-    return await this.postsRepository.saveComment(comment)
-  }
-
-  async fetchComments(
-    postId: string,
-    commentId?: string,
-    paginationOpts: PageOptions = {
-      page: 1,
-      limit: DEFAULT_COMMENTS_LIMIT,
-    }
-  ): Promise<Page<Comment>> {
-    return this.postsRepository.findComments(postId, commentId, paginationOpts)
   }
 
   async likePost(postId: string, likedBy: User) {

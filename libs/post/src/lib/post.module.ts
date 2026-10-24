@@ -2,7 +2,6 @@ import { UserModule } from '@simplefeed/user';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CommentSchema } from './comment.schema';
 import { PostLikedEventHandler } from './event-handlers/post-liked.event-handler';
 import { LikeSchema } from './like.schema';
 import { PostsRepository } from './post.repository';
@@ -14,7 +13,7 @@ import { PostUnlikedEventHandler } from './event-handlers/post-unliked.event-han
 @Module({
   imports: [
 		UserModule,
-		TypeOrmModule.forFeature([PostSchema, CommentSchema, LikeSchema]),
+		TypeOrmModule.forFeature([PostSchema, LikeSchema]),
 		CqrsModule
 	],
 	controllers: [],

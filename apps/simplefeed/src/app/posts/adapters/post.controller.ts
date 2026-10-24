@@ -18,11 +18,7 @@ import {
   PostUsecases,
 } from '@simplefeed/post'
 import { Page, mapPage } from '@simplefeed/shared-ddd'
-import { PaginatedQueryDto } from '../../infra/paginated-query.dto'
-import { PaginatedQueryPipe } from '../../infra/paginated-query.pipe'
 import { PaginatedPostQueryDto } from '../dto/paginated-post-query.dto'
-import { CommentPostDto } from '../dto/comment-post.dto'
-import { GetCommentDto } from '../dto/get-comment.dto'
 import { GetPostDto } from '../dto/get-post.dto'
 import { SubmitPostDto } from '../dto/submit-post.dto'
 
@@ -82,33 +78,6 @@ export class PostController {
   ): Promise<GetPostDto> {
     const post = await this.usecases.getPost(postId, req.user.id)
     return GetPostDto.fromDomain(post)
-  }
-
-  @Post(':postId/comments')
-  @UseGuards(JwtAuthGuard)
-  async postComment(
-    @Req() req: RequestWithUser,
-    @Param('postId') postId: string,
-    @Body() dto: CommentPostDto
-  ): Promise<GetCommentDto> {
-    const comment = await this.usecases.postComment(req.user, postId, dto.content, dto.path)
-    return GetCommentDto.fromDomain(comment)
-  }
-
-  @Get(':postId/comments{/:commentId}')
-  @UseGuards(JwtAuthGuard)
-  async fetchComments(
-    @Req() req: RequestWithUser,
-    @Param('postId') postId: string,
-    @Param('commentId') commentId?: string,
-    @Query(new PaginatedQueryPipe()) paginationOpts?: PaginatedQueryDto
-  ): Promise<Page<GetCommentDto>> {
-    const page = await this.usecases.fetchComments(
-      postId,
-      commentId || postId,
-      paginationOpts
-    )
-    return mapPage(page, GetCommentDto.fromDomain)
   }
 
   @Post(':postId/like')

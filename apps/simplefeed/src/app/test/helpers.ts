@@ -164,21 +164,6 @@ export class ApiClient {
     return body
   }
 
-  async commentPost(token: string, postId: string, content: string): Promise<void> {
-    await this.http
-      .post(`/api/posts/${postId}/comments`)
-      .set('Authorization', token)
-      .send({ content })
-      .expect(201)
-  }
-
-  async getCommentsOfPost(token: string, postId: string) {
-    const { body } = await this.http
-      .get(`/api/posts/${postId}/comments`)
-      .set('Authorization', token)
-      .expect(200)
-    return body
-  }
 
   async searchUsers(token: string, text: string) {
     const { body } = await this.http
