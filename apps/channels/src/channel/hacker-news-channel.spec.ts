@@ -1,4 +1,4 @@
-import { ChatConnection, SimplefeedClient } from '../api/simplefeed-client'
+import { ChatConnection, ChatMessage, SimplefeedClient } from '../api/simplefeed-client'
 import { HackerNewsSource, Story } from '../sources/hacker-news'
 import { InMemoryChannelStore } from '../state/store'
 import { silentLogger, story } from '../test/fixtures'
@@ -9,7 +9,7 @@ import { CommandTuner } from './tuning'
 
 const NOW = new Date('2026-10-25T12:00:00Z')
 
-function setup(stories: Story[], { failPosts = false } = {}) {
+function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: [] as ChatMessage[] }] } = {}) {
   const posts: string[] = []
   const accepted: string[] = []
   const client = {
@@ -22,7 +22,8 @@ function setup(stories: Story[], { failPosts = false } = {}) {
     acceptFriendRequest: async (id: string) => {
       accepted.push(id)
     },
-    conversations: async () => [{ id: 'conv-1', userIds: ['use-1', 'use-2'] }],
+    id: async () => 'use-channel',
+    conversations: async () => conversations,
   } as unknown as SimplefeedClient
   const source = { topStories: async () => stories } as unknown as HackerNewsSource
   const store = new InMemoryChannelStore()
@@ -98,10 +99,32 @@ describe('HackerNewsChannel', () => {
   it('accepts subscribers and joins their chats', async () => {
     const { channel, accepted, joined, chat } = setup([])
 
-    await channel.acceptSubscribers(chat)
+    await channel.syncSubscribers(chat)
 
     expect(accepted).toEqual(['frq-1'])
     expect(joined).toEqual(['conv-1'])
+  })
+
+  it('answers messages it missed, oldest first, and each message only once', async () => {
+    const message = (id: string, content: string, createdAt: string, extra: Partial<ChatMessage> = {}): ChatMessage => ({
+      id, conversationId: 'conv-1', authorId: 'use-1', content, isRead: false, createdAt, ...extra,
+    })
+    const missed = [
+      message('msg-2', 'more rust', '2026-10-25T10:01:00Z'),
+      message('msg-1', 'mute crypto', '2026-10-25T10:00:00Z'),
+      message('msg-0', 'an old reply', '2026-10-25T09:00:00Z', { authorId: 'use-channel' }),
+      message('msg-old', 'already answered', '2026-10-25T08:00:00Z', { isRead: true }),
+    ]
+    const { channel, store, sent, chat } = setup([], {
+      conversations: [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: missed }],
+    })
+
+    await channel.handleMessage(missed[0], chat)
+    await channel.syncSubscribers(chat)
+
+    expect(sent).toHaveLength(2)
+    expect(sent[1]).toContain('Leaving out: crypto')
+    expect((await store.getPreferences('hackernews'))?.interests).toEqual(['rust'])
   })
 
   it('applies chat requests to later posts', async () => {

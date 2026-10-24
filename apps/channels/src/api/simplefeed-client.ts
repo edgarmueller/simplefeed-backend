@@ -15,16 +15,20 @@ export interface FriendRequest {
   from: { id: string; username: string }
 }
 
-export interface Conversation {
-  id: string
-  userIds: string[]
-}
-
 export interface ChatMessage {
   id: string
   conversationId: string
   authorId: string
   content: string
+  isRead?: boolean
+  createdAt?: string
+}
+
+export interface Conversation {
+  id: string
+  userIds: string[]
+  /** the most recent message plus all unread ones */
+  messages: ChatMessage[]
 }
 
 /** Thrown for unsuccessful responses, with the status code. */

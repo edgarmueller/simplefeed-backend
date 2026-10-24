@@ -45,6 +45,8 @@ export interface HackerNewsChannelDependencies {
 export class HackerNewsChannel {
   private readonly logger: Logger
   private readonly now: () => Date
+  /** messages answered already, as they can arrive both live and when catching up */
+  private readonly answered = new Set<string>()
 
   constructor(private readonly deps: HackerNewsChannelDependencies) {
     this.logger = deps.logger ?? console
@@ -104,8 +106,12 @@ export class HackerNewsChannel {
     return posted
   }
 
-  /** Accepts pending subscriptions and joins their chats. */
-  async acceptSubscribers(chat: ChatConnection): Promise<void> {
+  /**
+   * Accepts pending subscriptions, joins their chats and answers messages
+   * that arrived while the channel wasn't listening, e.g. before it had
+   * joined a new conversation.
+   */
+  async syncSubscribers(chat: ChatConnection): Promise<void> {
     const requests = await this.deps.client.pendingFriendRequests()
     for (const request of requests) {
       await this.deps.client.acceptFriendRequest(request.id)
@@ -113,11 +119,24 @@ export class HackerNewsChannel {
     }
     // accepting creates the conversation asynchronously, so join whatever exists by now
     const conversations = await this.deps.client.conversations()
-    await Promise.all(conversations.map((conversation) => chat.join(conversation.id)))
+    const ownId = await this.deps.client.id()
+    for (const conversation of conversations) {
+      await chat.join(conversation.id)
+      const unread = conversation.messages
+        .filter((message) => message.authorId !== ownId && !message.isRead)
+        .sort((a, b) => (a.createdAt ?? '').localeCompare(b.createdAt ?? ''))
+      for (const message of unread) {
+        await this.handleMessage(message, chat)
+      }
+    }
   }
 
   /** Answers a subscriber's message and applies what they asked for. */
   async handleMessage(message: ChatMessage, chat: ChatConnection): Promise<void> {
+    if (this.answered.has(message.id)) {
+      return
+    }
+    this.answered.add(message.id)
     const current = await this.preferences()
     const { preferences, reply } = await this.deps.tuner.tune(message.content, current)
     if (JSON.stringify(preferences) !== JSON.stringify(current)) {
