@@ -95,7 +95,8 @@ export class UsersRepository {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
         where: { profile: { username } },
-        relations: { friendRequests: true },
+        // the duplicate check in `sendFriendRequestTo` compares senders
+        relations: { friendRequests: { from: true } },
       })
       return foundUser
     } catch (error) {

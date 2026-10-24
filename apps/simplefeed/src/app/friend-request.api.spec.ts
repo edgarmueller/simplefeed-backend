@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import { ApiClient, clearDatabase, createTestApp, fry, lisa } from './test/helpers'
+import { ApiClient, bart, clearDatabase, createTestApp, fry, lisa } from './test/helpers'
 
 describe('friend request api', () => {
   let app: INestApplication
@@ -51,5 +51,17 @@ describe('friend request api', () => {
     const pendingRequests = await api.getPendingFriendRequests(lisaToken)
 
     expect(pendingRequests).toHaveLength(0)
+  })
+
+  it('should send a friend request to a user who has sent one themselves', async () => {
+    const fryToken = await api.signUp(fry)
+    await api.signUp(lisa)
+    const bartToken = await api.signUp(bart)
+    await api.sendFriendRequest(fryToken, 'lisa')
+
+    await api.sendFriendRequest(bartToken, 'fry')
+    const pendingRequests = await api.getPendingFriendRequests(fryToken)
+
+    expect(pendingRequests).toHaveLength(1)
   })
 })
