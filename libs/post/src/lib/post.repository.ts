@@ -6,20 +6,14 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Transactional } from 'typeorm-transactional'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
-import { Comment } from './comment'
-import { CommentNotFoundError } from './errors/comment-not-found.error'
 import { PostNotFoundError } from './errors/post-not-found.error'
 import { Like } from './like'
 import { Post, PostId } from './post'
-
-export const DEFAULT_COMMENTS_LIMIT = 10
 
 @Injectable()
 export class PostsRepository {
   constructor(
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
-    @InjectRepository(Comment)
-    private readonly commentRepository: Repository<Comment>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     private readonly publisher: EventPublisher
@@ -33,13 +27,6 @@ export class PostsRepository {
     }
     DomainEvents.publishOnCommit(post, this.publisher)
     return savedPost
-  }
-
-  @Transactional()
-  async saveComment(comment: Comment): Promise<Comment> {
-    const savedComment = await this.commentRepository.save(comment)
-    DomainEvents.publishOnCommit(comment.post, this.publisher)
-    return savedComment
   }
 
   async findAll(): Promise<Post[]> {
@@ -99,73 +86,6 @@ export class PostsRepository {
     }
   }
 
-  async findOneCommentByIdOrFail(commentId: string): Promise<Comment> {
-    try {
-      const foundComment = await this.commentRepository.findOneOrFail({
-        where: { id: commentId },
-      })
-      return foundComment
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new CommentNotFoundError()
-      }
-      throw error
-    }
-  }
-
-  async findOneCommentByIdWithAuthor(commentId: string): Promise<Comment | null> {
-    try {
-      const foundComment = await this.commentRepository.findOne({
-        where: { id: commentId },
-        relations: { author: true },
-      })
-      return foundComment
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new CommentNotFoundError()
-      }
-      throw error
-    }
-  }
-
-  async findComments(
-    postId: string,
-    commentId?: string,
-    paginationOpts: PageOptions = {
-      page: 1,
-      limit: DEFAULT_COMMENTS_LIMIT,
-    }
-  ): Promise<Page<Comment>> {
-    try {
-      const query = this.commentRepository
-        .createQueryBuilder('comment')
-        .select('comment')
-        .innerJoinAndSelect(
-          'comment.post',
-          'post',
-          'comment.post_id = :postId',
-          { postId }
-        )
-        .innerJoinAndSelect(
-          'comment.author',
-          'user',
-          'comment.author_id = user.id'
-        )
-        .leftJoinAndSelect(
-          'user.profile',
-          'profile',
-          'profile.user_id = user.id'
-        )
-      query.where('comment.path ~ :inputPath', { inputPath: `*.${commentId.replace(/-/g, '_').replace(/\//g, '.')}` })
-      query.orderBy('comment.path')
-      return await paginate(query, paginationOpts)
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new CommentNotFoundError()
-      }
-      throw error
-    }
-  }
   async findUserActivityFeed(
     userId: string,
     paginationOpts: PageOptions
@@ -230,12 +150,6 @@ export class PostsRepository {
     })
   }
 
-  findCommentsByPost(postId: string): Promise<Comment[]> {
-    return this.commentRepository.find({
-      where: { post: { id: postId } },
-    })
-  }
-
   @Transactional()
   async delete(postId: string, user: User) {
     const post = await this.postRepository.findOneOrFail({
@@ -247,10 +161,6 @@ export class PostsRepository {
     if (post.author.id !== user.id) {
       throw new ForbiddenException('User is not allowed to delete this post')
     }
-    const comments = await this.commentRepository.find({
-      where: { post: { id: postId } },
-    })
-    await this.commentRepository.softRemove(comments)
     // we don't decrease total number of likes for users
     await this.postRepository.softRemove(post)
   }
@@ -258,7 +168,6 @@ export class PostsRepository {
   @Transactional()
   async deleteAll() {
     await this.likeRepository.createQueryBuilder().delete().execute()
-    await this.commentRepository.createQueryBuilder().delete().execute()
     await this.postRepository.createQueryBuilder().delete().execute()
   }
 }
