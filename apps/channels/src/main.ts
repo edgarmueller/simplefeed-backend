@@ -1,4 +1,4 @@
-import { SimplefeedClient, connectChat } from './api/simplefeed-client'
+import { ApiError, SimplefeedClient, connectChat, whenApiIsUp } from './api/simplefeed-client'
 import { HACKER_NEWS_ACCOUNT, HackerNewsChannel } from './channel/hacker-news-channel'
 import { Curator, ModelCurator, RuleBasedCurator } from './channel/curator'
 import { CommandTuner, ModelTuner, Tuner } from './channel/tuning'
@@ -35,7 +35,14 @@ async function main() {
   console.log(model ? `curating with ${model.name}` : 'no GROQ_API_KEY set, curating with rules')
 
   const client = new SimplefeedClient(config.apiUrl, HACKER_NEWS_ACCOUNT, config.channelPassword)
-  await client.ensureAccount(config.botRegistrationKey)
+  try {
+    await whenApiIsUp(() => client.ensureAccount(config.botRegistrationKey))
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      throw new Error('the API refused to create the channel account: BOT_REGISTRATION_KEY must be set to the same value for the API and the worker')
+    }
+    throw error
+  }
   const channel = new HackerNewsChannel({
     client,
     source: new HackerNewsSource(config.hackerNewsApiUrl),

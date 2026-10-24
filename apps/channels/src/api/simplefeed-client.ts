@@ -146,6 +146,31 @@ export class SimplefeedClient {
   }
 }
 
+const API_RETRY_DELAY_MS = 5_000
+
+/**
+ * Runs `task`, retrying while the API is unreachable or failing, e.g. when
+ * the worker starts before the API. Client errors such as a wrong
+ * registration key are rethrown, since retrying won't fix them.
+ */
+export async function whenApiIsUp<T>(
+  task: () => Promise<T>,
+  logger: Logger = console,
+  delayMs = API_RETRY_DELAY_MS
+): Promise<T> {
+  for (;;) {
+    try {
+      return await task()
+    } catch (error) {
+      if (error instanceof ApiError && error.status < 500) {
+        throw error
+      }
+      logger.log(`waiting for the API (${error instanceof Error ? error.message : error}), retrying in ${delayMs / 1000}s`)
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
+}
+
 export interface ChatConnection {
   join(conversationId: string): Promise<void>
   send(conversationId: string, content: string): Promise<void>
