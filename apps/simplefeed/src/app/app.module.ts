@@ -5,7 +5,6 @@ import { AuthConfigSchema, authConfig } from '@simplefeed/auth';
 import Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
-import { FriendsModule } from './friends/friends.module';
 import { DatabaseConfigSchema, databaseConfig } from './infra/database/database.config';
 import { DatabaseModule } from './infra/database/database.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -31,7 +30,6 @@ import { EntityNotFoundFilter } from './infra/not-found.exception-filter';
     DatabaseModule,
     AuthModule,
     UserModule,
-    FriendsModule,
     PostModule,
     ChatModule,
     SearchModule,

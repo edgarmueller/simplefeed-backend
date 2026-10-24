@@ -55,7 +55,7 @@ async function main() {
   })
 
   const timers = [
-    every(config.subscriptionIntervalSeconds * 1000, 'syncing subscribers', () => channel.syncSubscribers(chat)),
+    every(config.chatIntervalSeconds * 1000, 'syncing chats', () => channel.syncChats(chat)),
     every(config.postIntervalMinutes * 60 * 1000, 'posting stories', () => channel.postNewStories()),
   ]
   console.log(`${HACKER_NEWS_ACCOUNT.username} is running`)

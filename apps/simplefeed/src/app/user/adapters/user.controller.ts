@@ -40,8 +40,8 @@ export class UserController {
     if (req.user.profile.username === username) {
       return GetMeDto.fromDomain(user)
     }
-    const mutualFriends = await this.usecases.getMutualFriends(req.user, user)
-    return GetUserDto.fromDomain(user).withMutualFriends(mutualFriends.length)
+    const subscribed = user.profile.isBot ? user.isFriend(req.user) : undefined
+    return GetUserDto.fromDomain(user, subscribed)
   }
 
   @UseGuards(JwtAuthGuard)

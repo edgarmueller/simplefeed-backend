@@ -1,6 +1,6 @@
 # simplefeed-backend
 
-The backend of a small social network: profiles, friend requests, a feed with likes and threaded comments, 1:1 chat, and real-time notifications. News **channels** post into the same feed, and you tune each one by chatting with it.
+The backend of a news reader built on a small social network. You subscribe to **channels**, bots that post news into your feed, and tune each one by chatting with it. Underneath are profiles, a feed with likes and threaded comments, 1:1 chat, and real-time notifications.
 
 It started as a playground for domain-driven design with NestJS. Each bounded context lives in its own library, and the contexts talk to each other through domain events instead of calling each other directly.
 
@@ -48,7 +48,7 @@ The application in `apps/simplefeed` is a thin adapter layer: HTTP controllers, 
 
 | Library        | Responsibility                                                         |
 | -------------- | ---------------------------------------------------------------------- |
-| `user`         | Users, profiles, friendships and friend requests                       |
+| `user`         | Users, profiles and channel subscriptions                              |
 | `post`         | Posts, likes and comment threads (materialized paths via `ltree`)      |
 | `chat`         | Conversations and messages                                             |
 | `notification` | Notifications and their read state                                     |
@@ -65,8 +65,7 @@ Aggregates record events when their state changes. For example, `post.like(user)
 
 | Event                   | Handled by                                                          |
 | ----------------------- | ------------------------------------------------------------------- |
-| `FriendRequestSent`     | notification for the recipient                                      |
-| `FriendRequestAccepted` | notification for the sender, and a new conversation between both    |
+| `SubscribedToChannel`   | a new conversation between the subscriber and the channel           |
 | `PostCreatedEvent`      | notification when posting to someone else's feed                    |
 | `PostLikedEvent`        | notification for the author, and an updated like count              |
 | `CommentAddedEvent`     | notification for the post author or for the parent comment's author |
@@ -78,7 +77,7 @@ Aggregates record events when their state changes. For example, `post.like(user)
 
 Channels are bot accounts that post news. `apps/channels` is a separate worker that runs them. It uses only the public API and the chat socket, the same way the web app does, so the backend just sees users:
 
-- **Subscribing** is a friend request, which the channel accepts automatically. Its posts then show up in your feed.
+- **Subscribing** takes effect immediately. The channel's posts then show up in your feed, and a chat with the channel opens. Only channels can be subscribed to; there are no friendships between people.
 - **Tuning** happens in the chat with the channel: "mute crypto", "more rust", "max 5 per day", or with a model configured, plain requests such as "fewer AI stories and nothing paywalled". The channel answers with its updated settings.
 
 The first channel is **Hacker News**. Every hour it reads the front page from the [official API](https://github.com/HackerNews/API), skips stories that are too old, below your minimum score or already posted, and posts up to three new ones within your daily limit.
@@ -144,7 +143,7 @@ The channels worker reads:
 | `CHANNEL_PASSWORD`                                                         | Password for the channel accounts                                         |
 | `CHANNELS_API_URL`, `CHANNELS_SOCKET_URL`                                  | Where the API runs (defaults `http://localhost:5001/api` and `…:5001`)    |
 | `GROQ_API_KEY`, `GROQ_MODEL`                                               | Optional model for curating and chat (default model `openai/gpt-oss-20b`) |
-| `CHANNELS_POST_INTERVAL_MINUTES`, `CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS` | How often channels post (60) and check for subscribers and messages (30)  |
+| `CHANNELS_POST_INTERVAL_MINUTES`, `CHANNELS_CHAT_INTERVAL_SECONDS`         | How often channels post (60) and catch up on new chats and messages (30)  |
 | `HACKER_NEWS_API_URL`                                                      | Defaults to the official API                                              |
 
 ## Database migrations

@@ -130,47 +130,29 @@ export class ApiClient {
     return body
   }
 
-  async sendFriendRequest(token: string, toUsername: string): Promise<{ id: string }> {
+  async subscribe(token: string, channelUsername: string, expectedStatus = 200) {
     const { body } = await this.http
-      .post(`/api/friend-requests/${toUsername}`)
-      .set('Authorization', token)
-      .expect(201)
-    return body
-  }
-
-  async acceptFriendRequest(token: string, friendRequestId: string, expectedStatus = 200): Promise<void> {
-    await this.http
-      .patch(`/api/friend-requests/${friendRequestId}`)
+      .put(`/api/channels/${channelUsername}/subscription`)
       .set('Authorization', token)
       .expect(expectedStatus)
-  }
-
-  async declineFriendRequest(token: string, friendRequestId: string): Promise<void> {
-    await this.http
-      .delete(`/api/friend-requests/${friendRequestId}`)
-      .set('Authorization', token)
-      .expect(200)
-  }
-
-  async befriend(senderToken: string, receiverToken: string, receiverUsername: string): Promise<void> {
-    const friendRequest = await this.sendFriendRequest(senderToken, receiverUsername)
-    await this.acceptFriendRequest(receiverToken, friendRequest.id)
-  }
-
-  async getPendingFriendRequests(token: string) {
-    const { body } = await this.http
-      .get('/api/friend-requests/pending')
-      .set('Authorization', token)
-      .expect(200)
     return body
   }
 
-  async getFriendsOf(token: string, username: string) {
-    const { body } = await this.http
-      .get(`/api/users/${username}`)
+  async unsubscribe(token: string, channelUsername: string): Promise<void> {
+    await this.http
+      .delete(`/api/channels/${channelUsername}/subscription`)
       .set('Authorization', token)
-      .expect(200)
-    return body.friends
+      .expect(204)
+  }
+
+  async getConversations(token: string) {
+    const { body } = await this.http.get('/api/chat').set('Authorization', token).expect(200)
+    return body
+  }
+
+  async getMe(token: string) {
+    const { body } = await this.http.get('/api/users/me').set('Authorization', token).expect(200)
+    return body
   }
 
   async createPost(token: string, content: string): Promise<{ id: string }> {

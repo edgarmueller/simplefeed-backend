@@ -1,12 +1,11 @@
 import { AggregateRoot, Props, createId } from '@simplefeed/shared-ddd';
 import bcrypt from 'bcrypt';
-import { FriendRequestSent } from './events/friend-request-sent.event';
+import { SubscribedToChannel } from './events/subscribed-to-channel.event';
 import { UserCreatedEvent } from './events/user-created.event';
-import { FriendRequest } from './friend-request';
 import { Profile } from './profile';
 import { UserClosedEvent } from './events/user-closed.event';
 import { UserReactivatedEvent } from './events/user-reactivated.event';
-import { FriendRequestAlreadyExistsError } from './errors/friend-request-already-exists.error';
+import { NotAChannelError } from './errors/not-a-channel.error';
 
 const PREFIX = 'use'
 export type UserId = string
@@ -20,14 +19,17 @@ export class User extends AggregateRoot {
   deletedAt?: Date
 
   profile: Profile
+  /**
+   * Subscriptions, stored both ways: a user's are the channels they
+   * subscribed to, a channel's are its subscribers.
+   */
   friends?: User[]
-  friendRequests?: FriendRequest[]
   closed?: boolean;
 
   public static create(
     props: Omit<
       Props<User>,
-      'sentFriendRequests' | 'receivedFriendRequests' | 'friends'
+      'friends'
     >,
     id?: string
   ): User {
@@ -44,31 +46,34 @@ export class User extends AggregateRoot {
   private constructor(
     props: Omit<
       Props<User>,
-      'sentFriendRequests' | 'receivedFriendRequests' | 'friends'
+      'friends'
     >,
     id?: string
   ) {
     super(props, id || createUserId())
   }
 
-  sendFriendRequestTo(otherUser: User): FriendRequest {
-    const friendRequest = FriendRequest.create({ from: this, to: otherUser })
-    if (!this.friendRequests) {
-      this.friendRequests = []
+  /** Puts the channel's posts into this user's feed and opens a chat with it. */
+  subscribeTo(channel: User) {
+    if (!channel.profile.isBot) {
+      throw new NotAChannelError(channel.profile.username)
     }
-    if (otherUser.friendRequests?.find((fr) => fr.from.id === this.id)) {
-      throw new FriendRequestAlreadyExistsError(this.id, otherUser.id)
+    if (this.isFriend(channel)) {
+      return
     }
-    this.friendRequests.push(friendRequest);
-    this.emitDomainEvent(new FriendRequestSent(friendRequest))
-    return friendRequest
+    this.addFriend(channel)
+    this.emitDomainEvent(new SubscribedToChannel(this, channel))
+  }
+
+  unsubscribeFrom(channel: User) {
+    this.unfriend(channel)
   }
 
   isFriend(user: User) {
     return this.friends?.find((friend) => friend.id === user.id) !== undefined
   }
 
-  addFriend(user: User) {
+  private addFriend(user: User) {
     if (!this.friends) {
       this.friends = []
     }
@@ -79,7 +84,7 @@ export class User extends AggregateRoot {
     user.friends?.push(this)
   }
 
-  unfriend(friend: User) {
+  private unfriend(friend: User) {
     this.friends = this.friends?.filter((f) => f.id !== friend.id)
     friend.friends = friend.friends?.filter((f) => f.id !== this.id)
   }

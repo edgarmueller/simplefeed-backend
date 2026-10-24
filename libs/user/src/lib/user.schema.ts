@@ -57,23 +57,6 @@ export const UserSchema = new EntitySchema<User>({
         },
       },
     },
-    friendRequests: {
-      type: 'many-to-many',
-      target: 'FriendRequest',
-      inverseSide: 'to',
-      cascade: true,
-      onDelete: 'CASCADE',
-      joinTable: {
-        joinColumn: {
-          name: 'from_user_id',
-          referencedColumnName: 'id',
-        },
-        inverseJoinColumn: {
-          name: 'to_user_id',
-          referencedColumnName: 'id',
-        },
-      },
-    },
     profile: {
       type: 'one-to-one',
       target: 'Profile',

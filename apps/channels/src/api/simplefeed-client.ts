@@ -10,11 +10,6 @@ export interface Account {
   imageUrl?: string
 }
 
-export interface FriendRequest {
-  id: string
-  from: { id: string; username: string }
-}
-
 export interface ChatMessage {
   id: string
   conversationId: string
@@ -125,14 +120,6 @@ export class SimplefeedClient {
       this.userId = (await this.request<{ id: string }>('/users/me')).id
     }
     return this.userId
-  }
-
-  pendingFriendRequests(): Promise<FriendRequest[]> {
-    return this.request('/friend-requests/pending')
-  }
-
-  async acceptFriendRequest(friendRequestId: string): Promise<void> {
-    await this.request(`/friend-requests/${friendRequestId}`, { method: 'PATCH' })
   }
 
   async post(body: string): Promise<void> {

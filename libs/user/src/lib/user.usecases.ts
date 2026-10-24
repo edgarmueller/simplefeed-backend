@@ -14,7 +14,7 @@ export class UserUsecases {
   async getUserByUserName(
     requestingUser: User,
     username: string,
-  ): Promise<User & { mutualFriends?: string[] }> {
+  ): Promise<User> {
     if (requestingUser.profile.username === username) {
       return await this.getMe(requestingUser)
     }
@@ -29,30 +29,11 @@ export class UserUsecases {
     return this.userRepository.findBots()
   }
 
-  async getFriendsOfUser(username: string): Promise<User[]> {
-    const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(
-      username
-    )
-    const friends = await this.userRepository.findMany(
-      user.friends.map((friend) => friend.id)
-    )
-    return friends;
-  }
-
   async getMe(requestingUser: User): Promise<User> {
     const user = await this.userRepository.findOneByIdWithFriendsOrFail(
       requestingUser.id
     )
     return user;
-  }
-
-  async getMutualFriends(user: User, otherUser: User): Promise<string[]> {
-    const userWithFriends =
-      await this.userRepository.findOneByIdWithFriendsOrFail(user.id)
-    const mutualFriends = userWithFriends.friends.filter((friend) =>
-      otherUser.friends.some((otherFriend) => otherFriend.id === friend.id)
-    )
-    return mutualFriends.map((friend) => friend.id)
   }
 
   async updateUserInfo(

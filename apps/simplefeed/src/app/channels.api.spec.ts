@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import { ApiClient, bart, clearDatabase, createTestApp, hackerNews } from './test/helpers'
+import { ApiClient, bart, clearDatabase, createTestApp, hackerNews, lisa } from './test/helpers'
 
 const REGISTRATION_KEY = 'test-bot-registration-key'
 
@@ -32,15 +32,56 @@ describe('channels api', () => {
     const channels = await api.getChannels(bartToken)
 
     expect(channels).toEqual([
-      expect.objectContaining({ username: 'hackernews', isBot: true, bio: 'Top stories' }),
+      expect.objectContaining({ username: 'hackernews', isBot: true, bio: 'Top stories', subscribed: false }),
     ])
+  })
+
+  it('should subscribe right away, and only once', async () => {
+    const bartToken = await api.signUp(bart)
+    await api.registerBot(hackerNews, REGISTRATION_KEY)
+
+    const channel = await api.subscribe(bartToken, 'hackernews')
+    await api.subscribe(bartToken, 'hackernews')
+
+    expect(channel).toMatchObject({ username: 'hackernews', subscribed: true })
+    expect((await api.getChannels(bartToken))[0].subscribed).toBe(true)
+    expect((await api.getMe(bartToken)).subscriptions).toEqual([expect.objectContaining({ username: 'hackernews' })])
+  })
+
+  it('should open a chat with the channel when subscribing', async () => {
+    const bartToken = await api.signUp(bart)
+    await api.registerBot(hackerNews, REGISTRATION_KEY)
+
+    await api.subscribe(bartToken, 'hackernews')
+
+    // the conversation is created after the subscription is committed
+    await expect.poll(() => api.getConversations(bartToken)).toHaveLength(1)
+  })
+
+  it('should unsubscribe', async () => {
+    const bartToken = await api.signUp(bart)
+    await api.registerBot(hackerNews, REGISTRATION_KEY)
+    await api.subscribe(bartToken, 'hackernews')
+
+    await api.unsubscribe(bartToken, 'hackernews')
+
+    expect((await api.getChannels(bartToken))[0].subscribed).toBe(false)
+    expect((await api.getMe(bartToken)).subscriptions).toEqual([])
+  })
+
+  it('should not subscribe to regular users', async () => {
+    const bartToken = await api.signUp(bart)
+    await api.signUp(lisa)
+
+    await api.subscribe(bartToken, 'lisa', 400)
+    await api.subscribe(bartToken, 'nobody', 404)
   })
 
   it('should show channel posts to subscribers, marked as bot posts', async () => {
     const bartToken = await api.signUp(bart)
     await api.registerBot(hackerNews, REGISTRATION_KEY)
     const channelToken = await api.login(hackerNews)
-    await api.befriend(bartToken, channelToken, 'hackernews')
+    await api.subscribe(bartToken, 'hackernews')
 
     await api.createPost(channelToken, 'Show HN: a tiny feed aggregator')
     const feed = await api.getFeed(bartToken)

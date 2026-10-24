@@ -11,11 +11,10 @@ export class GetUserDto {
   isBot?: boolean
   nrOfLikes?: number
   nrOfPosts?: number
-  friends: GetUserDto[]
+  /** Whether the requesting user subscribes to this channel, when known. */
+  subscribed?: boolean
 
-  mutualFriendsCount?: number
-
-  static fromDomain(user: User): GetUserDto {
+  static fromDomain(user: User, subscribed?: boolean): GetUserDto {
     return new GetUserDto({
       id: user.id,
       email: user.email,
@@ -27,16 +26,11 @@ export class GetUserDto {
       isBot: user.profile.isBot,
       nrOfLikes: user.profile.nrOfLikes,
       nrOfPosts: user.profile.nrOfPosts,
-      friends: user.friends?.map((friend) => GetUserDto.fromDomain(friend)),
+      subscribed,
     })
   }
 
   constructor(props: Partial<GetUserDto>) {
     Object.assign(this, props)
-  }
-
-  withMutualFriends(mutualFriendsCount: number) {
-    this.mutualFriendsCount = mutualFriendsCount;
-    return this;
   }
 }

@@ -11,21 +11,21 @@ describe('loadConfig', () => {
     const config = loadConfig({
       ...required,
       CHANNELS_POST_INTERVAL_MINUTES: '15',
-      CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS: '5',
+      CHANNELS_CHAT_INTERVAL_SECONDS: '5',
     })
 
     expect(config.postIntervalMinutes).toBe(15)
-    expect(config.subscriptionIntervalSeconds).toBe(5)
+    expect(config.chatIntervalSeconds).toBe(5)
   })
 
   it.each(['abc', '0', '-5', ''])('falls back to the default interval for %j', (value) => {
     const config = loadConfig({
       ...required,
       CHANNELS_POST_INTERVAL_MINUTES: value,
-      CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS: value,
+      CHANNELS_CHAT_INTERVAL_SECONDS: value,
     })
 
     expect(config.postIntervalMinutes).toBe(60)
-    expect(config.subscriptionIntervalSeconds).toBe(30)
+    expect(config.chatIntervalSeconds).toBe(30)
   })
 })
