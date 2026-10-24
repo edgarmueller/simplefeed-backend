@@ -127,6 +127,17 @@ describe('HackerNewsChannel', () => {
     expect((await store.getPreferences('hackernews'))?.interests).toEqual(['rust'])
   })
 
+  it('answers a message again when the reply could not be sent', async () => {
+    const { channel, sent, chat } = setup([])
+    const message = { id: 'msg-1', conversationId: 'conv-1', authorId: 'use-1', content: 'more rust' }
+    const disconnected = { ...chat, send: async () => Promise.reject(new Error('not connected')) }
+
+    await expect(channel.handleMessage(message, disconnected)).rejects.toThrow('not connected')
+    await channel.handleMessage(message, chat)
+
+    expect(sent).toHaveLength(1)
+  })
+
   it('applies chat requests to later posts', async () => {
     const crypto = story('Crypto is back', { score: 900 })
     const rust = story('Rust in production', { score: 300 })

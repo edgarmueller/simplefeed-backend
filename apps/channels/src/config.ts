@@ -25,6 +25,11 @@ function required(env: NodeJS.ProcessEnv, name: string): string {
   return value
 }
 
+function positiveNumber(value: string | undefined, fallback: number): number {
+  const parsed = Number(value)
+  return value && Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ChannelsConfig {
   return {
     apiUrl: env.CHANNELS_API_URL || 'http://localhost:5001/api',
@@ -33,8 +38,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ChannelsConfig
     botRegistrationKey: required(env, 'BOT_REGISTRATION_KEY'),
     channelPassword: required(env, 'CHANNEL_PASSWORD'),
     hackerNewsApiUrl: env.HACKER_NEWS_API_URL || 'https://hacker-news.firebaseio.com/v0',
-    postIntervalMinutes: Number(env.CHANNELS_POST_INTERVAL_MINUTES || 60),
-    subscriptionIntervalSeconds: Number(env.CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS || 30),
+    postIntervalMinutes: positiveNumber(env.CHANNELS_POST_INTERVAL_MINUTES, 60),
+    subscriptionIntervalSeconds: positiveNumber(env.CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS, 30),
     groq: env.GROQ_API_KEY
       ? {
           apiKey: env.GROQ_API_KEY,

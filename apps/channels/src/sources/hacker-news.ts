@@ -24,16 +24,26 @@ interface HackerNewsItem {
 
 const discussionUrl = (id: number) => `https://news.ycombinator.com/item?id=${id}`
 
+const hostname = (url: string) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return undefined
+  }
+}
+
 function toStory(item: HackerNewsItem | null): Story | undefined {
   if (!item || item.type !== 'story' || item.dead || item.deleted || !item.title) {
     return undefined
   }
-  const url = item.url || discussionUrl(item.id)
+  // a malformed submission URL falls back to the discussion page
+  const domain = item.url ? hostname(item.url) : undefined
+  const url = domain ? item.url! : discussionUrl(item.id)
   return {
     id: item.id,
     title: item.title,
     url,
-    domain: new URL(url).hostname.replace(/^www\./, ''),
+    domain: domain ?? 'news.ycombinator.com',
     score: item.score ?? 0,
     comments: item.descendants ?? 0,
     postedAt: new Date((item.time ?? 0) * 1000),

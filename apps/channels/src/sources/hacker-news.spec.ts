@@ -2,7 +2,7 @@ import { HackerNewsSource } from './hacker-news'
 
 // responses in the shape of the official API, see https://github.com/HackerNews/API
 const responses: Record<string, unknown> = {
-  'https://hn.test/v0/topstories.json': [8863, 121003, 192327, 4242],
+  'https://hn.test/v0/topstories.json': [8863, 121003, 192327, 4242, 5150],
   'https://hn.test/v0/item/8863.json': {
     by: 'dhouston',
     descendants: 71,
@@ -24,6 +24,7 @@ const responses: Record<string, unknown> = {
   },
   'https://hn.test/v0/item/192327.json': { id: 192327, type: 'job', title: 'Justin.tv is hiring' },
   'https://hn.test/v0/item/4242.json': null,
+  'https://hn.test/v0/item/5150.json': { id: 5150, type: 'story', title: 'Broken link', url: 'not a url' },
 }
 
 const fakeFetch = (async (url: string) => {
@@ -52,6 +53,12 @@ describe('HackerNewsSource', () => {
         id: 121003,
         // Ask HN posts link to their discussion
         url: 'https://news.ycombinator.com/item?id=121003',
+        domain: 'news.ycombinator.com',
+      }),
+      expect.objectContaining({
+        id: 5150,
+        // malformed links fall back to the discussion
+        url: 'https://news.ycombinator.com/item?id=5150',
         domain: 'news.ycombinator.com',
       }),
     ])

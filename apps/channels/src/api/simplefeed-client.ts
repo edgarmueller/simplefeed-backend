@@ -193,8 +193,14 @@ export function connectChat(
     })
   }
 
+  // fails instead of dropping the event while (re)connecting, so callers
+  // don't record a join or a reply that never reached the server
   const emit = async (event: string, payload: object) => {
-    socket?.emit(event, { ...payload, auth: await client.token() })
+    const auth = await client.token()
+    if (!socket?.connected) {
+      throw new Error(`chat socket is not connected, cannot ${event}`)
+    }
+    socket.emit(event, { ...payload, auth })
   }
 
   connect().catch((error) => logger.error(`chat connection failed: ${error}`))

@@ -137,12 +137,18 @@ export class HackerNewsChannel {
       return
     }
     this.answered.add(message.id)
-    const current = await this.preferences()
-    const { preferences, reply } = await this.deps.tuner.tune(message.content, current)
-    if (JSON.stringify(preferences) !== JSON.stringify(current)) {
-      await this.deps.store.savePreferences(this.name, preferences)
+    try {
+      const current = await this.preferences()
+      const { preferences, reply } = await this.deps.tuner.tune(message.content, current)
+      if (JSON.stringify(preferences) !== JSON.stringify(current)) {
+        await this.deps.store.savePreferences(this.name, preferences)
+      }
+      await chat.markAsRead(message.conversationId)
+      await chat.send(message.conversationId, reply)
+    } catch (error) {
+      // the message stays unread, so the next sync answers it
+      this.answered.delete(message.id)
+      throw error
     }
-    await chat.markAsRead(message.conversationId)
-    await chat.send(message.conversationId, reply)
   }
 }
