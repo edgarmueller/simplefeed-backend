@@ -22,9 +22,11 @@ import { EntityNotFoundFilter } from './infra/not-found.exception-filter';
       // Nx loads the .env files in development and tests; deployments set real env vars
       ignoreEnvFile: true,
       load: [authConfig, s3Config, databaseConfig, redisConfig],
-      validationSchema: Joi.object().keys(
-        DatabaseConfigSchema
-      ).keys(AuthConfigSchema).keys(S3Schema)
+      validationSchema: Joi.object()
+        .keys(DatabaseConfigSchema)
+        .keys(AuthConfigSchema)
+        .keys(S3Schema)
+        .keys({ BOT_REGISTRATION_KEY: Joi.string().min(16).optional() })
     }),
     DatabaseModule,
     AuthModule,

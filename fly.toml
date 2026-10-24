@@ -8,6 +8,13 @@ primary_region = "ams"
 
 [build]
 
+# Both run from the same image: the API, and the worker that posts as the
+# news channels. Set its secrets with
+#   fly secrets set BOT_REGISTRATION_KEY=... CHANNEL_PASSWORD=... GROQ_API_KEY=...
+[processes]
+  app = "node simplefeed/main.js"
+  channels = "node channels/main.js"
+
 [http_service]
   internal_port = 8080
   force_https = true
@@ -23,3 +30,6 @@ primary_region = "ams"
   S3_ENABLED="true"
   S3_ENDPOINT="https://s3.tebi.io"
   S3_BUCKET_NAME="simplefeed"
+  # the worker goes through the public URL, which wakes stopped API machines
+  CHANNELS_API_URL = "https://simplefeed.fly.dev/api"
+  CHANNELS_SOCKET_URL = "https://simplefeed.fly.dev"

@@ -95,7 +95,8 @@ export class UsersRepository {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
         where: { profile: { username } },
-        relations: { friendRequests: true },
+        // the duplicate check in `sendFriendRequestTo` compares senders
+        relations: { friendRequests: { from: true } },
       })
       return foundUser
     } catch (error) {
@@ -146,6 +147,14 @@ export class UsersRepository {
       .orderBy('profile.username', 'ASC')
       .take(limit)
       .getMany()
+  }
+
+  findBots(): Promise<User[]> {
+    return this.userRepository.find({
+      where: { profile: { isBot: true } },
+      relations: { profile: true },
+      order: { profile: { username: 'ASC' } },
+    })
   }
 
   findMany(userIds: string[]) {

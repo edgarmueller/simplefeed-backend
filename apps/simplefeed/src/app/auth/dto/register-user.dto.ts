@@ -34,6 +34,19 @@ export class UserDto {
   password: string
 }
 
+export class BotDto extends UserDto {
+  @IsString()
+  @IsOptional()
+  bio?: string
+}
+
+export class RegisterBotDto {
+  @ValidateNested()
+  @IsObject()
+  @Type(() => BotDto)
+  user: BotDto
+}
+
 export class RegisterUserDto {
   @ValidateNested()
   @IsObject()

@@ -12,6 +12,8 @@ export class Profile implements Entity {
   firstName?: string 
   lastName?: string 
   imageUrl?: string 
+  /** automated accounts, such as news channels */
+  isBot?: boolean
   nrOfPosts?: number 
   nrOfLikes?: number 
   createdAt?: Date 

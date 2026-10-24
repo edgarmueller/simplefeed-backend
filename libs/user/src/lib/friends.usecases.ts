@@ -3,7 +3,6 @@ import { UsersRepository } from './user.repository';
 import { FriendRequestRepository } from './friend-request.repository';
 import { User } from './user';
 import { FriendRequest } from './friend-request';
-import { FriendRequestAlreadyExistsError } from './errors/friend-request-already-exists.error';
 
 @Injectable()
 export class FriendUsecases {
@@ -43,10 +42,11 @@ export class FriendUsecases {
     await this.friendRequestRepository.delete(friendRequest);
   }
 
-  async confirmRequest(friendRequestId: string): Promise<FriendRequest> {
+  async confirmRequest(actor: User, friendRequestId: string): Promise<FriendRequest> {
+    // throws EntityNotFoundError (404) for unknown ids
     const foundRequest = await this.friendRequestRepository.findOneByIdWithFriends(friendRequestId);
-    if (!foundRequest) {
-      throw new FriendRequestAlreadyExistsError(foundRequest.from.id, foundRequest.to.id);
+    if (foundRequest.to.id !== actor.id) {
+      throw new ForbiddenException('Only the recipient can accept a friend request');
     }
     foundRequest.accept();
     await this.userRepository.saveMany([foundRequest.from, foundRequest.to]);

@@ -14,5 +14,6 @@ export default new DataSource({
   url: process.env.DATABASE_URL,
   schema: DATABASE_SCHEMA,
   entities,
-  migrations: ['apps/simplefeed/src/migrations/*.ts'],
+  // migration files start with their timestamp; index.ts only re-exports them
+  migrations: ['apps/simplefeed/src/migrations/[0-9]*.ts'],
 })

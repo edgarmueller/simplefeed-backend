@@ -38,8 +38,11 @@ export class FriendRequestsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':friendRequestId')
-  async confirmFriendRequest(@Param('friendRequestId') friendRequestId: string) {
-    const friendRequest = await this.usecases.confirmRequest(friendRequestId);
+  async confirmFriendRequest(
+    @Req() req: RequestWithUser,
+    @Param('friendRequestId') friendRequestId: string
+  ) {
+    const friendRequest = await this.usecases.confirmRequest(req.user, friendRequestId);
     return GetFriendRequestDto.fromDomain(friendRequest);
   }
 

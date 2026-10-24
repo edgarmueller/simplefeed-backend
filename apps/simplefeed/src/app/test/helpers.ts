@@ -62,6 +62,14 @@ export const lisa: TestUser = {
   password: 'secret',
 }
 
+export const hackerNews: TestUser = {
+  username: 'hackernews',
+  firstName: 'Hacker',
+  lastName: 'News',
+  email: 'hackernews@channels.example.com',
+  password: 'channel-secret',
+}
+
 export const fry: TestUser = {
   username: 'fry',
   firstName: 'Philip J.',
@@ -102,6 +110,26 @@ export class ApiClient {
     return this.login(user)
   }
 
+  /** Registers a bot account with the given registration key and returns its id. */
+  async registerBot(user: TestUser, registrationKey: string | undefined, expectedStatus = 201) {
+    const req = this.http.post('/api/auth/register-bot')
+    if (registrationKey) {
+      req.set('x-bot-registration-key', registrationKey)
+    }
+    const { body } = await req.send({ user: { ...user, bio: 'Top stories' } }).expect(expectedStatus)
+    return body.user?.id
+  }
+
+  async getChannels(token: string) {
+    const { body } = await this.http.get('/api/channels').set('Authorization', token).expect(200)
+    return body
+  }
+
+  async getFeed(token: string) {
+    const { body } = await this.http.get('/api/posts').set('Authorization', token).expect(200)
+    return body
+  }
+
   async sendFriendRequest(token: string, toUsername: string): Promise<{ id: string }> {
     const { body } = await this.http
       .post(`/api/friend-requests/${toUsername}`)
@@ -110,11 +138,11 @@ export class ApiClient {
     return body
   }
 
-  async acceptFriendRequest(token: string, friendRequestId: string): Promise<void> {
+  async acceptFriendRequest(token: string, friendRequestId: string, expectedStatus = 200): Promise<void> {
     await this.http
       .patch(`/api/friend-requests/${friendRequestId}`)
       .set('Authorization', token)
-      .expect(200)
+      .expect(expectedStatus)
   }
 
   async declineFriendRequest(token: string, friendRequestId: string): Promise<void> {

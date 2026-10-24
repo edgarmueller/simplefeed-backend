@@ -1,6 +1,6 @@
 # simplefeed-backend
 
-The backend of a small social network: profiles, friend requests, a feed with likes and threaded comments, 1:1 chat, and real-time notifications.
+The backend of a small social network: profiles, friend requests, a feed with likes and threaded comments, 1:1 chat, and real-time notifications. News **channels** post into the same feed, and you tune each one by chatting with it.
 
 It started as a playground for domain-driven design with NestJS. Each bounded context lives in its own library, and the contexts talk to each other through domain events instead of calling each other directly.
 
@@ -74,6 +74,19 @@ Aggregates record events when their state changes. For example, `post.like(user)
 | `UserReactivatedEvent`  | conversations of the user are restored                              |
 | `NotificationCreated`   | pushed to the recipient over the `/notifications` socket            |
 
+## Channels
+
+Channels are bot accounts that post news. `apps/channels` is a separate worker that runs them. It uses only the public API and the chat socket, the same way the web app does, so the backend just sees users:
+
+- **Subscribing** is a friend request, which the channel accepts automatically. Its posts then show up in your feed.
+- **Tuning** happens in the chat with the channel: "mute crypto", "more rust", "max 5 per day", or with a model configured, plain requests such as "fewer AI stories and nothing paywalled". The channel answers with its updated settings.
+
+The first channel is **Hacker News**. Every hour it reads the front page from the [official API](https://github.com/HackerNews/API), skips stories that are too old, below your minimum score or already posted, and posts up to three new ones within your daily limit.
+
+With `GROQ_API_KEY` set, a model on [Groq](https://groq.com) picks and summarizes the stories and interprets chat requests. Without a key, or when the model fails, the channel uses rules instead: muted topics are left out, your interests come first, and then stories are ranked by score. Chat then understands a fixed set of commands. The model sits behind a small interface (`JsonModel`), so another provider takes one adapter.
+
+Bot accounts can only be created with `BOT_REGISTRATION_KEY`. Channel state (preferences, posted items) lives in its own `channels` schema.
+
 ## Getting started
 
 You need Node 22 and Docker.
@@ -85,6 +98,14 @@ npm run dev        # http://localhost:5001/api
 ```
 
 Pending migrations run automatically when the server starts.
+
+To run the channels as well, start the worker in a second terminal:
+
+```sh
+npm run dev:channels
+```
+
+It creates its accounts on first start. To curate with a model, put a free [Groq API key](https://console.groq.com/keys) in `.env.local` as `GROQ_API_KEY`.
 
 Default settings for local development live in `.env`. Put personal overrides in a `.env.local` file, which git ignores. Nx loads both automatically.
 
@@ -112,6 +133,19 @@ The API tests in `apps/simplefeed` boot the whole application and talk to it ove
 | `USE_COOKIES`                                                                               | Experimental: read tokens from cookies instead of the `Authorization` header. Login doesn't set the cookies yet |
 | `S3_ENABLED`                                                                                | `true` to store uploads in S3. When it's off, uploads are ignored                                               |
 | `S3_ENDPOINT`, `S3_BUCKET_NAME`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | S3 settings, required only when S3 is enabled                                                                   |
+| `BOT_REGISTRATION_KEY`                                                                      | Shared secret that lets the channels worker create bot accounts. Bot registration is off without it             |
+
+The channels worker reads:
+
+| Variable                                                                   | Description                                                               |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                             | Postgres for the worker's own state, in the `channels` schema             |
+| `BOT_REGISTRATION_KEY`                                                     | Same value as the API's                                                   |
+| `CHANNEL_PASSWORD`                                                         | Password for the channel accounts                                         |
+| `CHANNELS_API_URL`, `CHANNELS_SOCKET_URL`                                  | Where the API runs (defaults `http://localhost:5001/api` and `…:5001`)    |
+| `GROQ_API_KEY`, `GROQ_MODEL`                                               | Optional model for curating and chat (default model `openai/gpt-oss-20b`) |
+| `CHANNELS_POST_INTERVAL_MINUTES`, `CHANNELS_SUBSCRIPTION_INTERVAL_SECONDS` | How often channels post (60) and check for subscribers and messages (30)  |
+| `HACKER_NEWS_API_URL`                                                      | Defaults to the official API                                              |
 
 ## Database migrations
 
@@ -125,7 +159,7 @@ Then add the new class to `apps/simplefeed/src/migrations/index.ts`. Migrations 
 
 ## Deployment
 
-`fly.toml` deploys the Docker image to [fly.io](https://fly.io) with `fly deploy`. Set secrets with `fly secrets set KEY=value`. The image installs only the runtime dependencies that the build emits next to the bundle.
+`fly.toml` deploys the Docker image to [fly.io](https://fly.io) with `fly deploy`. The image contains the API and the channels worker, which run as two process groups. Set secrets with `fly secrets set KEY=value`, including `BOT_REGISTRATION_KEY`, `CHANNEL_PASSWORD` and optionally `GROQ_API_KEY`. The image installs only the runtime dependencies that each build emits next to its bundle.
 
 ## Status
 

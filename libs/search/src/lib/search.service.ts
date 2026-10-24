@@ -20,6 +20,7 @@ export class SearchService {
       firstName: user.profile.firstName,
       lastName: user.profile.lastName,
       imageUrl: user.profile.imageUrl,
+      isBot: user.profile.isBot ?? false,
     }))
   }
 }

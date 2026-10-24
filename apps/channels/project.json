@@ -1,0 +1,27 @@
+{
+  "name": "channels",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/channels/src",
+  "projectType": "application",
+  "tags": ["type:app"],
+  "targets": {
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "channels:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "channels:build:development"
+        },
+        "production": {
+          "buildTarget": "channels:build:production"
+        }
+      }
+    }
+  }
+}
