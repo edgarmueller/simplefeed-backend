@@ -171,6 +171,8 @@ export async function whenApiIsUp<T>(
 }
 
 export interface ChatConnection {
+  /** settles once the socket has connected for the first time */
+  ready: Promise<void>
   join(conversationId: string): Promise<void>
   send(conversationId: string, content: string): Promise<void>
   markAsRead(conversationId: string): Promise<void>
@@ -193,6 +195,8 @@ export function connectChat(
   let socket: Socket | undefined
   let closed = false
   const joined = new Set<string>()
+  let markReady: () => void = () => undefined
+  const ready = new Promise<void>((resolve) => (markReady = resolve))
 
   async function connect() {
     const [token, ownId] = await Promise.all([client.token(), client.id()])
@@ -201,6 +205,7 @@ export function connectChat(
       transports: ['websocket'],
       reconnection: false,
     })
+    socket.on('connect', () => markReady())
     socket.on('conversations_joined', ({ conversationIds }: { conversationIds: string[] }) => {
       conversationIds.forEach((id) => joined.add(id))
     })
@@ -230,6 +235,7 @@ export function connectChat(
   connect().catch((error) => logger.error(`chat connection failed: ${error}`))
 
   return {
+    ready,
     async join(conversationId) {
       if (!joined.has(conversationId)) {
         await emit('join_conversation', { conversationId })

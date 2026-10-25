@@ -54,13 +54,18 @@ async function main() {
     channel.handleMessage(message, chat).catch((error) => console.error(`could not answer a message: ${error}`))
   })
 
-  const timers = [
-    every(config.chatIntervalSeconds * 1000, 'syncing chats', () => channel.syncChats(chat)),
-    every(config.postIntervalMinutes * 60 * 1000, 'posting stories', () => channel.postNewStories()),
-  ]
+  let stopping = false
+  const timers = [every(config.postIntervalMinutes * 60 * 1000, 'posting stories', () => channel.postNewStories())]
+  // joining chats needs the socket, which connects in the background
+  void chat.ready.then(() => {
+    if (!stopping) {
+      timers.push(every(config.chatIntervalSeconds * 1000, 'syncing chats', () => channel.syncChats(chat)))
+    }
+  })
   console.log(`${HACKER_NEWS_ACCOUNT.username} is running`)
 
   const shutdown = async () => {
+    stopping = true
     timers.forEach(clearInterval)
     chat.close()
     await store.close()

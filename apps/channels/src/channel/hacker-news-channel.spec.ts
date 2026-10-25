@@ -36,6 +36,7 @@ function setup(stories: Story[], { failPosts = false, likes = [] as string[], co
   const sent: string[] = []
   const joined: string[] = []
   const chat: ChatConnection = {
+    ready: Promise.resolve(),
     join: async (id) => {
       joined.push(id)
     },
