@@ -20,6 +20,8 @@ const CANDIDATE_COUNT = 60
 const MAX_AGE_MS = 48 * 60 * 60 * 1000
 /** spreads a day's posts over several runs */
 const MAX_POSTS_PER_RUN = 3
+/** how many liked stories to learn from */
+const MAX_LIKED = 20
 
 const escapeMarkdown = (text: string) => text.replace(/([[\]*_`\\])/g, '\\$1')
 
@@ -85,16 +87,18 @@ export class HackerNewsChannel {
     const picks = await this.deps.curator.pick(
       candidates,
       preferences,
-      Math.min(remainingToday, MAX_POSTS_PER_RUN)
+      Math.min(remainingToday, MAX_POSTS_PER_RUN),
+      await this.likedTitles()
     )
 
     const posted: Story[] = []
     // the feed shows the newest post first, so post the best pick last
     for (const pick of [...picks].reverse()) {
       try {
-        await this.deps.client.post(formatPost(pick))
+        const postId = await this.deps.client.post(formatPost(pick))
         // remember each post right away, so a crash can't post it twice
         await this.deps.store.markPosted(this.name, [String(pick.story.id)], this.now())
+        await this.deps.store.rememberPost(this.name, postId, pick.story.title)
         posted.push(pick.story)
       } catch (error) {
         this.logger.error(`could not post story ${pick.story.id}: ${error}`)
@@ -104,6 +108,20 @@ export class HackerNewsChannel {
       this.logger.log(`${this.name} posted ${posted.length} of ${candidates.length} new stories`)
     }
     return posted
+  }
+
+  /** Titles of the channel's posts that readers liked, most recent first. */
+  async likedTitles(): Promise<string[]> {
+    try {
+      const likes = await this.deps.client.likesOnMyPosts()
+      const postIds = [...new Set(likes.map((like) => like.postId))]
+      const titles = await this.deps.store.postTitles(this.name, postIds)
+      return postIds.flatMap((id) => titles.get(id) ?? []).slice(0, MAX_LIKED)
+    } catch (error) {
+      // likes refine the picks; posting works without them
+      this.logger.warn(`could not read likes: ${error}`)
+      return []
+    }
   }
 
   /**

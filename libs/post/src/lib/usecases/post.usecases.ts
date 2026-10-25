@@ -102,6 +102,11 @@ export class PostUsecases {
     await this.postsRepository.savePost(post)
   }
 
+  /** What readers liked of the user's posts; channels learn from it. */
+  getLikesOnPostsOf(author: User, limit = 50) {
+    return this.postsRepository.findLikesOnPostsOf(author.id, limit)
+  }
+
   async unlikePost(postId: string, unlikedBy: User) {
     const post = await this.postsRepository.findOneWithAuthorByIdAndLikedById(
       postId,

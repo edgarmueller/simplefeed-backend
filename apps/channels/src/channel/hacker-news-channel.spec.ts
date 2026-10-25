@@ -9,14 +9,16 @@ import { CommandTuner } from './tuning'
 
 const NOW = new Date('2026-10-25T12:00:00Z')
 
-function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: [] as ChatMessage[] }] } = {}) {
+function setup(stories: Story[], { failPosts = false, likes = [] as string[], conversations = [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: [] as ChatMessage[] }] } = {}) {
   const posts: string[] = []
   const client = {
     username: 'hackernews',
     post: async (body: string) => {
       if (failPosts) throw new Error('backend down')
       posts.push(body)
+      return `pos-${posts.length}`
     },
+    likesOnMyPosts: async () => likes.map((postId) => ({ postId, likedAt: NOW.toISOString() })),
     id: async () => 'use-channel',
     conversations: async () => conversations,
   } as unknown as SimplefeedClient
@@ -80,6 +82,27 @@ describe('HackerNewsChannel', () => {
     await channel.postNewStories()
     await channel.postNewStories()
     expect(posts).toHaveLength(4)
+  })
+
+  it('favors stories like the ones readers liked', async () => {
+    const liked = story('Twelve years of distributed SQLite', { score: 300 })
+    const popular = story('A popular essay', { score: 900 })
+    const similar = story('SQLite is all you need', { score: 150 })
+    // a reader liked an earlier post, which the channel remembers
+    const { channel, store, posts } = setup([popular, similar], { likes: ['pos-1'] })
+    await store.rememberPost('hackernews', 'pos-1', liked.title)
+    await channel.postNewStories()
+
+    // the best pick is posted last, so it shows on top
+    expect(posts[posts.length - 1]).toContain('SQLite is all you need')
+  })
+
+  it('remembers what it posted, to learn from likes', async () => {
+    const { channel, store } = setup([story('Rust 2.0 is out')])
+
+    await channel.postNewStories()
+
+    expect(await store.postTitles('hackernews', ['pos-1'])).toEqual(new Map([['pos-1', 'Rust 2.0 is out']]))
   })
 
   it('retries stories it failed to post', async () => {

@@ -155,6 +155,19 @@ export class ApiClient {
     return body
   }
 
+  async likePost(token: string, postId: string): Promise<void> {
+    await this.http.post(`/api/posts/${postId}/like`).set('Authorization', token).expect(201)
+  }
+
+  async unlikePost(token: string, postId: string): Promise<void> {
+    await this.http.delete(`/api/posts/${postId}/like`).set('Authorization', token).expect(200)
+  }
+
+  async getLikesOnMyPosts(token: string) {
+    const { body } = await this.http.get('/api/posts/likes').set('Authorization', token).expect(200)
+    return body
+  }
+
   async createPost(token: string, content: string): Promise<{ id: string }> {
     const { body } = await this.http
       .post('/api/posts')

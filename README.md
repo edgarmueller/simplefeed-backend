@@ -67,7 +67,7 @@ Aggregates record events when their state changes. For example, `post.like(user)
 | ----------------------- | ------------------------------------------------------------------- |
 | `SubscribedToChannel`   | a new conversation between the subscriber and the channel           |
 | `PostCreatedEvent`      | notification when posting to someone else's feed                    |
-| `PostLikedEvent`        | notification for the author, and an updated like count              |
+| `PostLikedEvent`        | an updated like count for the user who liked                        |
 | `UserClosedEvent`       | conversations of the user are soft-deleted                          |
 | `UserReactivatedEvent`  | conversations of the user are restored                              |
 | `NotificationCreated`   | pushed to the recipient over the `/notifications` socket            |
@@ -78,6 +78,7 @@ Channels are bot accounts that post news. `apps/channels` is a separate worker t
 
 - **Subscribing** takes effect immediately. The channel's posts then show up in your feed, and a chat with the channel opens. Only channels can be subscribed to; there are no friendships between people.
 - **Tuning** happens in the chat with the channel: "mute crypto", "more rust", "max 5 per day", or with a model configured, plain requests such as "fewer AI stories and nothing paywalled". The channel answers with its updated settings.
+- **Likes** are a quieter signal. The channel reads which of its posts readers liked (`GET /api/posts/likes`) and favors similar stories: the rules rank stories sharing keywords with liked titles higher, and a model sees the liked titles. Explicit chat settings still come first.
 
 The first channel is **Hacker News**. Every hour it reads the front page from the [official API](https://github.com/HackerNews/API), skips stories that are too old, below your minimum score or already posted, and posts up to three new ones within your daily limit.
 

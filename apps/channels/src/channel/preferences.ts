@@ -76,3 +76,23 @@ const containsTopic = (text: string, topic: string) =>
 export function matchingTopics(text: string, topics: string[]): string[] {
   return topics.filter((topic) => containsTopic(text, topic))
 }
+
+// common words that say nothing about what a story is about
+const STOPWORDS = new Set(
+  'about after again also among another back been before being best can did how its new not now our out the and for are but has why who you all any one two use using via between both could does down each even every from have here into just like made make many more most much must need never news only other over really same says should show since some still such than that their them then there these they this those through today under until very want were what when where which while will with without would year years your'.split(' ')
+)
+
+/** The words of a title that say what it is about, e.g. "rust" and "release" for "Rust 2.0 release". */
+export function keywords(title: string): Set<string> {
+  return new Set(
+    title
+      .toLowerCase()
+      .split(/[^a-z0-9+#]+/)
+      .filter((word) => word.length >= 3 && !STOPWORDS.has(word) && !/^\d+$/.test(word))
+  )
+}
+
+/** How many of the title's keywords also appear in stories the reader liked. */
+export function likeAffinity(title: string, likedKeywords: Set<string>): number {
+  return [...keywords(title)].filter((word) => likedKeywords.has(word)).length
+}

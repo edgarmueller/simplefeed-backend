@@ -27,6 +27,11 @@ export interface Conversation {
 }
 
 /** Thrown for unsuccessful responses, with the status code. */
+export interface ReceivedLike {
+  postId: string
+  likedAt: string
+}
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -122,10 +127,17 @@ export class SimplefeedClient {
     return this.userId
   }
 
-  async post(body: string): Promise<void> {
+  /** Posts to the channel's feed and returns the new post's id. */
+  async post(body: string): Promise<string> {
     const form = new FormData()
     form.append('body', body)
-    await this.request('/posts', { method: 'POST', body: form })
+    const { id } = await this.request<{ id: string }>('/posts', { method: 'POST', body: form })
+    return id
+  }
+
+  /** Readers' likes on the channel's posts, most recent first. */
+  likesOnMyPosts(): Promise<ReceivedLike[]> {
+    return this.request('/posts/likes')
   }
 
   conversations(): Promise<Conversation[]> {

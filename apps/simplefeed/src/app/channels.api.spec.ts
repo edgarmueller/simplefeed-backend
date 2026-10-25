@@ -89,4 +89,24 @@ describe('channels api', () => {
     expect(feed.items).toHaveLength(1)
     expect(feed.items[0].author).toMatchObject({ username: 'hackernews', isBot: true })
   })
+
+  it("should tell a channel which of its posts readers liked", async () => {
+    const bartToken = await api.signUp(bart)
+    await api.registerBot(hackerNews, REGISTRATION_KEY)
+    const channelToken = await api.login(hackerNews)
+    await api.subscribe(bartToken, 'hackernews')
+    const liked = await api.createPost(channelToken, 'Rust 2.0 is out')
+    const unliked = await api.createPost(channelToken, 'Bitcoin hits a new high')
+    await api.createPost(channelToken, 'Show HN: a job queue')
+
+    await api.likePost(bartToken, liked.id)
+    await api.likePost(bartToken, unliked.id)
+    await api.unlikePost(bartToken, unliked.id)
+
+    expect(await api.getLikesOnMyPosts(channelToken)).toEqual([
+      { postId: liked.id, likedAt: expect.any(String) },
+    ])
+    // only the author learns about likes on their posts
+    expect(await api.getLikesOnMyPosts(bartToken)).toEqual([])
+  })
 })

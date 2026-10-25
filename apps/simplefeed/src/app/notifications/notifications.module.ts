@@ -4,11 +4,9 @@ import { AuthConfigFactory, AuthModule as AuthCoreModule } from "@simplefeed/aut
 import { ChatModule } from '@simplefeed/chat';
 import { NotificationModule as NotificationCoreModule } from '@simplefeed/notification';
 import { PostCreatedEventHandler } from './adapters/event-handlers/post-created.event-handler';
-import { PostLikedEventHandler } from './adapters/event-handlers/post-liked.event-handler';
 import { NotificationsGateway } from './adapters/notifications.gateway';
 
 const EVENT_HANDLERS = [
-	PostLikedEventHandler,
 	PostCreatedEventHandler
 ]
 

@@ -9,11 +9,16 @@ export interface ChannelStore {
   notPosted(channel: string, itemIds: string[]): Promise<string[]>
   markPosted(channel: string, itemIds: string[], postedAt: Date): Promise<void>
   countPostedSince(channel: string, since: Date): Promise<number>
+  /** remembers what a post was about, to learn from readers' likes */
+  rememberPost(channel: string, postId: string, title: string): Promise<void>
+  /** the titles of the given posts, for the ones the channel remembers */
+  postTitles(channel: string, postIds: string[]): Promise<Map<string, string>>
 }
 
 export class InMemoryChannelStore implements ChannelStore {
   private readonly preferences = new Map<string, Preferences>()
   private readonly posted = new Map<string, Date>()
+  private readonly titles = new Map<string, string>()
 
   private key = (channel: string, itemId: string) => `${channel}:${itemId}`
 
@@ -37,5 +42,20 @@ export class InMemoryChannelStore implements ChannelStore {
 
   async countPostedSince(channel: string, since: Date) {
     return [...this.posted.entries()].filter(([key, at]) => key.startsWith(`${channel}:`) && at >= since).length
+  }
+
+  async rememberPost(channel: string, postId: string, title: string) {
+    this.titles.set(this.key(channel, postId), title)
+  }
+
+  async postTitles(channel: string, postIds: string[]) {
+    const titles = new Map<string, string>()
+    for (const id of postIds) {
+      const title = this.titles.get(this.key(channel, id))
+      if (title !== undefined) {
+        titles.set(id, title)
+      }
+    }
+    return titles
   }
 }

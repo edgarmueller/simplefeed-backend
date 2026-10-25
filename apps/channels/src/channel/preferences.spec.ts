@@ -1,4 +1,4 @@
-import { DEFAULT_PREFERENCES, matchingTopics, normalizePreferences } from './preferences'
+import { DEFAULT_PREFERENCES, keywords, likeAffinity, matchingTopics, normalizePreferences } from './preferences'
 
 describe('normalizePreferences', () => {
   it('cleans topics and clamps numbers from untrusted input', () => {
@@ -34,5 +34,18 @@ describe('matchingTopics', () => {
     expect(matchingTopics('Rust 2.0 released', ['rust', 'go'])).toEqual(['rust'])
     expect(matchingTopics('Trusting trust', ['rust'])).toEqual([])
     expect(matchingTopics('A new C++ compiler', ['c++'])).toEqual(['c++'])
+  })
+})
+
+describe('keywords', () => {
+  it('keeps the words that say what a title is about', () => {
+    expect(keywords('Show HN: Why we moved from Postgres to SQLite in 2026')).toEqual(
+      new Set(['moved', 'postgres', 'sqlite'])
+    )
+  })
+
+  it('counts the keywords a title shares with liked stories', () => {
+    expect(likeAffinity('SQLite is all you need', keywords('Twelve years of distributed SQLite'))).toBe(1)
+    expect(likeAffinity('A new JavaScript runtime', keywords('Twelve years of distributed SQLite'))).toBe(0)
   })
 })

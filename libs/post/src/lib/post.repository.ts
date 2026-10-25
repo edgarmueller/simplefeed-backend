@@ -150,6 +150,16 @@ export class PostsRepository {
     })
   }
 
+  /** Active likes on the author's posts, most recent first. */
+  findLikesOnPostsOf(authorId: string, limit: number): Promise<Like[]> {
+    return this.likeRepository.find({
+      where: { post: { author: { id: authorId } }, unliked: false },
+      relations: { post: true },
+      order: { createdAt: 'DESC' },
+      take: limit,
+    })
+  }
+
   @Transactional()
   async delete(postId: string, user: User) {
     const post = await this.postRepository.findOneOrFail({

@@ -14,6 +14,17 @@ describe('RuleBasedCurator', () => {
 
     expect(picks.map((pick) => pick.story)).toEqual([rust, popular])
   })
+
+  it('ranks stories like the ones readers liked before others of the same interest', async () => {
+    const popular = story('A popular essay', { score: 900 })
+    const postgres = story('Postgres 19 adds vector indexes', { score: 120 })
+
+    const picks = await new RuleBasedCurator().pick([popular, postgres], DEFAULT_PREFERENCES, 2, [
+      'Scaling Postgres to a billion rows',
+    ])
+
+    expect(picks.map((pick) => pick.story)).toEqual([postgres, popular])
+  })
 })
 
 describe('ModelCurator', () => {
@@ -34,6 +45,14 @@ describe('ModelCurator', () => {
       { story: stories[0], summary: 'The first one.' },
     ])
     expect(JSON.parse(model.inputs[0]).candidates).toHaveLength(3)
+  })
+
+  it('shows the model what readers liked', async () => {
+    const model = fakeModel({ picks: [] })
+
+    await new ModelCurator(model, undefined, silentLogger).pick(stories, preferences, 3, ['Rust in production'])
+
+    expect(JSON.parse(model.inputs[0]).likedRecently).toEqual(['Rust in production'])
   })
 
   it('ignores made-up and repeated ids and respects the limit', async () => {
