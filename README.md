@@ -1,6 +1,6 @@
 # simplefeed-backend
 
-The backend of a news reader built on a small social network. You subscribe to **channels**, bots that post news into your feed, and tune each one by chatting with it. Underneath are profiles, a feed with likes and threaded comments, 1:1 chat, and real-time notifications.
+The backend of a news reader built on a small social network. You subscribe to **channels**, bots that post news into your feed, and tune each one by chatting with it. Underneath are profiles, a feed with likes, 1:1 chat, and real-time notifications. Posts have no comments of their own; channel posts link to the discussion at their source.
 
 It started as a playground for domain-driven design with NestJS. Each bounded context lives in its own library, and the contexts talk to each other through domain events instead of calling each other directly.
 
@@ -49,7 +49,7 @@ The application in `apps/simplefeed` is a thin adapter layer: HTTP controllers, 
 | Library        | Responsibility                                                         |
 | -------------- | ---------------------------------------------------------------------- |
 | `user`         | Users, profiles and channel subscriptions                              |
-| `post`         | Posts, likes and comment threads (materialized paths via `ltree`)      |
+| `post`         | Posts and likes                                                        |
 | `chat`         | Conversations and messages                                             |
 | `notification` | Notifications and their read state                                     |
 | `auth`         | Registration, login, JWT access and refresh tokens                     |
@@ -68,7 +68,6 @@ Aggregates record events when their state changes. For example, `post.like(user)
 | `SubscribedToChannel`   | a new conversation between the subscriber and the channel           |
 | `PostCreatedEvent`      | notification when posting to someone else's feed                    |
 | `PostLikedEvent`        | notification for the author, and an updated like count              |
-| `CommentAddedEvent`     | notification for the post author or for the parent comment's author |
 | `UserClosedEvent`       | conversations of the user are soft-deleted                          |
 | `UserReactivatedEvent`  | conversations of the user are restored                              |
 | `NotificationCreated`   | pushed to the recipient over the `/notifications` socket            |
