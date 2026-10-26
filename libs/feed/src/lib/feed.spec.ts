@@ -10,9 +10,10 @@ describe('normalizeFeedUrl', () => {
   it('adds a missing scheme and drops fragments', () => {
     expect(normalizeFeedUrl(' sz.de/muenchen ')).toBe('https://sz.de/muenchen')
     expect(normalizeFeedUrl('http://example.com/feed.xml#top')).toBe('http://example.com/feed.xml')
+    expect(normalizeFeedUrl('localhost:5098/feed')).toBe('https://localhost:5098/feed')
   })
 
-  it.each(['', 'not a url', 'ftp://example.com/feed', 'javascript:alert(1)', 'localhost'])(
+  it.each(['', 'not a url', 'ftp://example.com/feed', 'javascript:alert(1)', 'intranet'])(
     'rejects %j',
     (input) => {
       expect(() => normalizeFeedUrl(input)).toThrow(InvalidFeedUrlError)

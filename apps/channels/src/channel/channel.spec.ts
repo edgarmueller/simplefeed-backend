@@ -217,4 +217,15 @@ describe('formatPost', () => {
       ['**[Neue U-Bahn-Linie](https://www.sueddeutsche.de/muenchen/u9)**', '', 'SZ München · sueddeutsche.de'].join('\n')
     )
   })
+
+  it("uses the source's excerpt, shortened, when there is no summary", () => {
+    const excerpt = `Die Stadt hat den Bau der U9 beschlossen. ${'Mehr dazu im Artikel. '.repeat(20)}`
+    const body = formatPost({ story: story('Neue U-Bahn-Linie', { excerpt }) })
+    const text = body.split('\n')[2]
+
+    expect(text.startsWith('Die Stadt hat den Bau der U9 beschlossen.')).toBe(true)
+    expect(text.length).toBeLessThanOrEqual(240)
+    expect(text.endsWith('…')).toBe(true)
+    expect(formatPost({ story: story('x', { excerpt }), summary: 'A summary.' }).split('\n')[2]).toBe('A summary.')
+  })
 })

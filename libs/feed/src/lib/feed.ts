@@ -24,7 +24,10 @@ export function normalizeFeedUrl(input: string): string {
   } catch {
     throw new InvalidFeedUrlError(input)
   }
-  if (!['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.')) {
+  // a host without a dot is most likely a typo; localhost and IPv6 literals are fine,
+  // and the worker refuses private addresses unless configured for development
+  const plausibleHost = url.hostname.includes('.') || url.hostname === 'localhost' || url.hostname.startsWith('[')
+  if (!['http:', 'https:'].includes(url.protocol) || !plausibleHost) {
     throw new InvalidFeedUrlError(input)
   }
   url.hash = ''

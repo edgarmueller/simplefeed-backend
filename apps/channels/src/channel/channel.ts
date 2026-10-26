@@ -25,11 +25,24 @@ const MAX_LIKED = 20
 
 const escapeMarkdown = (text: string) => text.replace(/([[\]*_`\\])/g, '\\$1')
 
-/** A linked title, the summary if there is one, and a line about the source. */
+/** the longest excerpt from the source posted in place of a summary */
+const MAX_EXCERPT_IN_POST = 240
+
+const shorten = (text: string, max: number) => {
+  if (text.length <= max) return text
+  const cut = text.slice(0, max - 1)
+  return `${cut.slice(0, cut.lastIndexOf(' ') > max / 2 ? cut.lastIndexOf(' ') : cut.length)}…`
+}
+
+/**
+ * A linked title, a summary, and a line about the source. Without a
+ * summary from the curator, the source's own excerpt stands in.
+ */
 export function formatPost({ story, summary }: Pick): string {
   const lines = [`**[${escapeMarkdown(story.title)}](${story.url})**`]
-  if (summary) {
-    lines.push('', escapeMarkdown(summary))
+  const text = summary ?? (story.excerpt ? shorten(story.excerpt, MAX_EXCERPT_IN_POST) : undefined)
+  if (text) {
+    lines.push('', escapeMarkdown(text))
   }
   const about: string[] = []
   if (story.score !== undefined) {
