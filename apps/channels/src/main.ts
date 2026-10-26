@@ -81,7 +81,7 @@ async function main() {
     createClient,
     start: (client, source) => start(client, source, FEED_MAX_AGE_MS),
   })
-  timers.push(every(config.chatIntervalSeconds * 1000, 'syncing feeds', () => feeds.sync()))
+  timers.push(every(config.feedIntervalSeconds * 1000, 'syncing feeds', () => feeds.sync()))
 
   const shutdown = async () => {
     stopping = true

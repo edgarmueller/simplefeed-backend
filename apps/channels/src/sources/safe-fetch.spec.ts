@@ -55,6 +55,22 @@ describe('createSafeFetch', () => {
     await expect(safeFetch('https://example.com/huge')).rejects.toThrow('larger than 1000 bytes')
   })
 
+  it('says who is asking', async () => {
+    const fetchFn = vi.fn(async (_url: URL, _init: RequestInit) => new Response('<rss/>'))
+    await createSafeFetch({ fetchFn: fetchFn as unknown as typeof fetch, resolve: publicHost })('https://example.com/feed')
+
+    expect(new Headers(fetchFn.mock.calls[0][1].headers).get('user-agent')).toMatch(/^simplefeed\//)
+  })
+
+  it('names the site that did not answer in time', async () => {
+    const fetchFn = async () => {
+      throw new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+    }
+    const safeFetch = createSafeFetch({ fetchFn: fetchFn as unknown as typeof fetch, resolve: publicHost, timeoutMs: 10_000 })
+
+    await expect(safeFetch('https://slow.example.com/feed')).rejects.toThrow("slow.example.com didn't answer within 10 s")
+  })
+
   it('only fetches http and https', async () => {
     await expect(createSafeFetch()('file:///etc/passwd')).rejects.toThrow('only http and https')
   })

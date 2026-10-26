@@ -38,7 +38,7 @@ describe('feeds api', () => {
     const added = await api.addFeed(bartToken, 'sz.de/muenchen')
     await api.addFeed(lisaToken, 'https://sz.de/muenchen')
 
-    expect(added).toMatchObject({ url: 'https://sz.de/muenchen', status: 'pending' })
+    expect(added).toMatchObject({ url: 'https://sz.de/muenchen', status: 'pending', createdAt: expect.any(String) })
     expect(await api.getMyFeeds(bartToken)).toEqual([expect.objectContaining({ id: added.id, status: 'pending' })])
     expect(await api.getWorkerFeeds(KEY)).toEqual([expect.objectContaining({ id: added.id })])
 

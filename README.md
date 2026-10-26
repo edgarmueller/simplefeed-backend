@@ -155,6 +155,7 @@ The channels worker reads:
 | `CHANNELS_API_URL`, `CHANNELS_SOCKET_URL`                                  | Where the API runs (defaults `http://localhost:5001/api` and `…:5001`)    |
 | `GROQ_API_KEY`, `GROQ_MODEL`                                               | Optional model for curating and chat (default model `openai/gpt-oss-20b`) |
 | `CHANNELS_POST_INTERVAL_MINUTES`, `CHANNELS_CHAT_INTERVAL_SECONDS`         | How often channels post (60) and catch up on new chats and messages (30)  |
+| `CHANNELS_FEED_INTERVAL_SECONDS`                                           | How often the worker looks for feeds users added (10)                     |
 | `HACKER_NEWS_API_URL`                                                      | Defaults to the official API                                              |
 | `CHANNELS_ALLOW_PRIVATE_FEED_HOSTS`                                        | `true` lets users add feeds on private networks, e.g. localhost; only for development |
 

@@ -36,6 +36,8 @@ export class GetFeedDto {
   title?: string
   status: string
   error?: string
+  /** when the feed was added */
+  createdAt: Date
   /** the channel posting the feed, once it is active */
   channel?: { id: string; username: string; firstName: string; lastName: string }
 
@@ -48,6 +50,7 @@ export class GetFeedDto {
       title: feed.title ?? undefined,
       status: feed.status,
       error: feed.error ?? undefined,
+      createdAt: feed.createdAt,
       channel: channel
         ? {
             id: channel.id,

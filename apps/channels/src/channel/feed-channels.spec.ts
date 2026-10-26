@@ -28,7 +28,7 @@ describe('feedAccount', () => {
 })
 
 describe('FeedChannels', () => {
-  function setup(feeds: FeedRequest[]) {
+  function setup(feeds: FeedRequest[], { failAccountFor = '' } = {}) {
     const failed: Record<string, string> = {}
     const activated: Record<string, unknown> = {}
     const registered: Account[] = []
@@ -46,6 +46,7 @@ describe('FeedChannels', () => {
       'https://sz.example.com/': '<html><link rel="alternate" type="application/rss+xml" href="/rss"></html>',
       'https://sz.example.com/rss': RSS,
       'https://nofeed.example.com/': '<html></html>',
+      'https://other.example.com/feed': RSS.replace('SZ München', 'Other News'),
     }
     const fetchPage: PageFetcher = async (url) => {
       if (!(url in pages)) throw new Error(`${url} responded with 404`)
@@ -55,6 +56,7 @@ describe('FeedChannels', () => {
       ({
         username: account.username,
         ensureAccount: async () => {
+          if (failAccountFor && account.firstName === failAccountFor) throw new Error('API down')
           registered.push(account)
         },
       }) as unknown as SimplefeedClient
@@ -91,6 +93,20 @@ describe('FeedChannels', () => {
 
     expect(failed).toEqual({ 'fee-1': 'no feed found at https://nofeed.example.com/' })
     expect(registered).toEqual([])
+  })
+
+  it("keeps going when one feed's channel can't be created", async () => {
+    const { channels, activated } = setup(
+      [
+        { id: 'fee-1', url: 'https://sz.example.com/', status: 'pending' },
+        { id: 'fee-2', url: 'https://other.example.com/feed', status: 'pending' },
+      ],
+      { failAccountFor: 'SZ München' }
+    )
+
+    await channels.activatePending()
+
+    expect(Object.keys(activated)).toEqual(['fee-2'])
   })
 
   it('starts each active feed once', async () => {

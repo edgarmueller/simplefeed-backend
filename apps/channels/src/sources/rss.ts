@@ -176,8 +176,16 @@ export interface DiscoveredFeed {
   feed: ParsedFeed
 }
 
+/** how long finding a site's feed may take in all, as it can mean several requests */
+const DISCOVERY_DEADLINE_MS = 30_000
+
 /** Finds the feed at `url`, which may be the feed itself or a website that has one. */
-export async function discoverFeed(url: string, fetchPage: PageFetcher): Promise<DiscoveredFeed> {
+export async function discoverFeed(
+  url: string,
+  fetchPage: PageFetcher,
+  { deadlineMs = DISCOVERY_DEADLINE_MS, now = () => Date.now() } = {}
+): Promise<DiscoveredFeed> {
+  const deadline = now() + deadlineMs
   const page = await fetchPage(url)
   if (looksLikeFeed(page.body)) {
     return { feedUrl: page.url, feed: parseFeed(page.body) }
@@ -185,6 +193,9 @@ export async function discoverFeed(url: string, fetchPage: PageFetcher): Promise
   const origin = new URL(page.url).origin
   const candidates = [...feedLinks(page.body, page.url), ...COMMON_FEED_PATHS.map((path) => origin + path)]
   for (const candidate of candidates) {
+    if (now() >= deadline) {
+      throw new Error(`no feed found at ${url} in time; try the feed's own address`)
+    }
     try {
       const response = await fetchPage(candidate)
       if (looksLikeFeed(response.body)) {
