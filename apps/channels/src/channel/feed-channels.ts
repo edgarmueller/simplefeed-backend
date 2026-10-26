@@ -61,26 +61,40 @@ export class FeedChannels {
     await this.startActive()
   }
 
-  /** Reads each new feed, creates its channel account and activates it. */
+  /**
+   * Reads each new feed, creates its channel account and activates it. Feeds
+   * are read side by side, so a slow site doesn't hold up the others, and
+   * one feed's failure doesn't stop the rest.
+   */
   async activatePending(): Promise<void> {
-    for (const feed of await this.deps.api.feeds(['pending'])) {
-      let discovered
-      try {
-        discovered = await discoverFeed(feed.url, this.deps.fetchPage)
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error)
-        this.logger.warn(`could not read ${feed.url}: ${reason}`)
-        await this.deps.api.failFeed(feed.id, reason)
-        continue
-      }
-      const { feedUrl, feed: parsed } = discovered
-      const title = parsed.title || hostname(feedUrl) || feedUrl
-      const account = feedAccount(feedUrl, title, parsed.description)
-      // API errors are retried on the next sync, as the feed stays pending
-      await this.deps.createClient(account).ensureAccount(this.deps.registrationKey)
-      await this.deps.api.activateFeed(feed.id, { feedUrl, title, channelUsername: account.username })
-      this.logger.log(`${account.username} posts ${feedUrl}`)
+    const pending = await this.deps.api.feeds(['pending'])
+    await Promise.all(
+      pending.map((feed) =>
+        this.activate(feed).catch((error) =>
+          // API errors are retried on the next sync, as the feed stays pending
+          this.logger.error(`could not activate ${feed.url}: ${error}`)
+        )
+      )
+    )
+  }
+
+  private async activate(feed: FeedRequest): Promise<void> {
+    this.logger.log(`reading ${feed.url}`)
+    let discovered
+    try {
+      discovered = await discoverFeed(feed.url, this.deps.fetchPage)
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error)
+      this.logger.warn(`could not read ${feed.url}: ${reason}`)
+      await this.deps.api.failFeed(feed.id, reason)
+      return
     }
+    const { feedUrl, feed: parsed } = discovered
+    const title = parsed.title || hostname(feedUrl) || feedUrl
+    const account = feedAccount(feedUrl, title, parsed.description)
+    await this.deps.createClient(account).ensureAccount(this.deps.registrationKey)
+    await this.deps.api.activateFeed(feed.id, { feedUrl, title, channelUsername: account.username })
+    this.logger.log(`${account.username} posts ${feedUrl}`)
   }
 
   /** Starts the channels of active feeds that aren't running yet. */

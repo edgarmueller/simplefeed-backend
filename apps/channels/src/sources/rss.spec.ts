@@ -119,6 +119,19 @@ describe('feed discovery', () => {
     )
   })
 
+  it('gives up on a site that takes too long', async () => {
+    let clock = 0
+    const slow: PageFetcher = async (url) => {
+      clock += 20_000
+      if (url === 'https://slow.example.com/') return { url, contentType: 'text/html', body: '<html></html>' }
+      throw new Error(`${url} responded with 404`)
+    }
+
+    await expect(
+      discoverFeed('https://slow.example.com/', slow, { deadlineMs: 30_000, now: () => clock })
+    ).rejects.toThrow("no feed found at https://slow.example.com/ in time; try the feed's own address")
+  })
+
   it('resolves relative feed links', () => {
     expect(
       feedLinks('<link href="rss?x=1&amp;y=2" type="application/rss+xml" rel="alternate">', 'https://a.example.com/b/')

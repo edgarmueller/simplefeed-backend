@@ -12,6 +12,8 @@ export interface ChannelsConfig {
   postIntervalMinutes: number
   /** how often channels join new subscribers' chats and catch up on messages */
   chatIntervalSeconds: number
+  /** how often the worker looks for feeds users added */
+  feedIntervalSeconds: number
   groq?: {
     apiKey: string
     model: string
@@ -43,6 +45,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ChannelsConfig
     allowPrivateFeedHosts: env.CHANNELS_ALLOW_PRIVATE_FEED_HOSTS === 'true',
     postIntervalMinutes: positiveNumber(env.CHANNELS_POST_INTERVAL_MINUTES, 60),
     chatIntervalSeconds: positiveNumber(env.CHANNELS_CHAT_INTERVAL_SECONDS, 30),
+    feedIntervalSeconds: positiveNumber(env.CHANNELS_FEED_INTERVAL_SECONDS, 10),
     groq: env.GROQ_API_KEY
       ? {
           apiKey: env.GROQ_API_KEY,
