@@ -1,28 +1,30 @@
 import { ChatConnection, ChatMessage, SimplefeedClient } from '../api/simplefeed-client'
-import { HackerNewsSource, Story } from '../sources/hacker-news'
+import { Source, Story } from '../sources/story'
 import { InMemoryChannelStore } from '../state/store'
 import { silentLogger, story } from '../test/fixtures'
 import { RuleBasedCurator } from './curator'
-import { HackerNewsChannel, formatPost } from './hacker-news-channel'
+import { Channel, formatPost } from './channel'
 import { DEFAULT_PREFERENCES } from './preferences'
 import { CommandTuner } from './tuning'
 
 const NOW = new Date('2026-10-25T12:00:00Z')
 
-function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: [] as ChatMessage[] }] } = {}) {
+function setup(stories: Story[], { failPosts = false, likes = [] as string[], conversations = [{ id: 'conv-1', userIds: ['use-1', 'use-channel'], messages: [] as ChatMessage[] }] } = {}) {
   const posts: string[] = []
   const client = {
     username: 'hackernews',
     post: async (body: string) => {
       if (failPosts) throw new Error('backend down')
       posts.push(body)
+      return `pos-${posts.length}`
     },
+    likesOnMyPosts: async () => likes.map((postId) => ({ postId, likedAt: NOW.toISOString() })),
     id: async () => 'use-channel',
     conversations: async () => conversations,
   } as unknown as SimplefeedClient
-  const source = { topStories: async () => stories } as unknown as HackerNewsSource
+  const source: Source = { latest: async () => stories }
   const store = new InMemoryChannelStore()
-  const channel = new HackerNewsChannel({
+  const channel = new Channel({
     client,
     source,
     curator: new RuleBasedCurator(),
@@ -34,6 +36,7 @@ function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'co
   const sent: string[] = []
   const joined: string[] = []
   const chat: ChatConnection = {
+    ready: Promise.resolve(),
     join: async (id) => {
       joined.push(id)
     },
@@ -46,7 +49,7 @@ function setup(stories: Story[], { failPosts = false, conversations = [{ id: 'co
   return { channel, store, posts, sent, joined, chat }
 }
 
-describe('HackerNewsChannel', () => {
+describe('Channel', () => {
   it('posts the best stories once, best last so it shows on top', async () => {
     const top = story('Top story', { score: 900 })
     const second = story('Second story', { score: 500 })
@@ -82,13 +85,34 @@ describe('HackerNewsChannel', () => {
     expect(posts).toHaveLength(4)
   })
 
+  it('favors stories like the ones readers liked', async () => {
+    const liked = story('Twelve years of distributed SQLite', { score: 300 })
+    const popular = story('A popular essay', { score: 900 })
+    const similar = story('SQLite is all you need', { score: 150 })
+    // a reader liked an earlier post, which the channel remembers
+    const { channel, store, posts } = setup([popular, similar], { likes: ['pos-1'] })
+    await store.rememberPost('hackernews', 'pos-1', liked.title)
+    await channel.postNewStories()
+
+    // the best pick is posted last, so it shows on top
+    expect(posts[posts.length - 1]).toContain('SQLite is all you need')
+  })
+
+  it('remembers what it posted, to learn from likes', async () => {
+    const { channel, store } = setup([story('Rust 2.0 is out')])
+
+    await channel.postNewStories()
+
+    expect(await store.postTitles('hackernews', ['pos-1'])).toEqual(new Map([['pos-1', 'Rust 2.0 is out']]))
+  })
+
   it('retries stories it failed to post', async () => {
     const pending = story('Try again')
     const failing = setup([pending], { failPosts: true })
 
     await failing.channel.postNewStories()
 
-    expect(await failing.store.notPosted('hackernews', [String(pending.id)])).toEqual([String(pending.id)])
+    expect(await failing.store.notPosted('hackernews', [pending.id])).toEqual([pending.id])
   })
 
   it("joins its subscribers' chats", async () => {
@@ -147,12 +171,22 @@ describe('HackerNewsChannel', () => {
     expect(posts.join()).not.toContain('Crypto is back')
     expect(posts.join()).toContain('Rust in production')
   })
+
+
+  it('posts feed items without points regardless of the minimum score', async () => {
+    const item = story('Neue U-Bahn-Linie', { score: undefined, comments: undefined, discussionUrl: undefined })
+    const { channel, posts } = setup([item])
+
+    await channel.postNewStories()
+
+    expect(posts).toHaveLength(1)
+  })
 })
 
 describe('formatPost', () => {
   it('links the story and its discussion and escapes markdown in titles', () => {
     const body = formatPost({
-      story: story('Show HN: [beta] *fast* parser', { id: 7, score: 321, comments: 45 }),
+      story: story('Show HN: [beta] *fast* parser', { id: '7', score: 321, comments: 45 }),
       summary: 'A parser.',
     })
 
@@ -165,5 +199,33 @@ describe('formatPost', () => {
         '▲ 321 points · [45 comments](https://news.ycombinator.com/item?id=7) · example.com',
       ].join('\n')
     )
+  })
+
+  it('names the publication for feed items, which have no points or discussion', () => {
+    const body = formatPost({
+      story: {
+        id: 'https://sz.de/1',
+        title: 'Neue U-Bahn-Linie',
+        url: 'https://www.sueddeutsche.de/muenchen/u9',
+        domain: 'sueddeutsche.de',
+        postedAt: new Date(),
+        sourceName: 'SZ München',
+      },
+    })
+
+    expect(body).toBe(
+      ['**[Neue U-Bahn-Linie](https://www.sueddeutsche.de/muenchen/u9)**', '', 'SZ München · sueddeutsche.de'].join('\n')
+    )
+  })
+
+  it("uses the source's excerpt, shortened, when there is no summary", () => {
+    const excerpt = `Die Stadt hat den Bau der U9 beschlossen. ${'Mehr dazu im Artikel. '.repeat(20)}`
+    const body = formatPost({ story: story('Neue U-Bahn-Linie', { excerpt }) })
+    const text = body.split('\n')[2]
+
+    expect(text.startsWith('Die Stadt hat den Bau der U9 beschlossen.')).toBe(true)
+    expect(text.length).toBeLessThanOrEqual(240)
+    expect(text.endsWith('…')).toBe(true)
+    expect(formatPost({ story: story('x', { excerpt }), summary: 'A summary.' }).split('\n')[2]).toBe('A summary.')
   })
 })

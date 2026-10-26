@@ -20,6 +20,7 @@ import {
 import { Page, mapPage } from '@simplefeed/shared-ddd'
 import { PaginatedPostQueryDto } from '../dto/paginated-post-query.dto'
 import { GetPostDto } from '../dto/get-post.dto'
+import { GetReceivedLikeDto } from '../dto/get-received-like.dto'
 import { SubmitPostDto } from '../dto/submit-post.dto'
 
 type File = Express.Multer.File
@@ -68,6 +69,14 @@ export class PostController {
       limit: paginationQueryDto.limit,
     })
     return mapPage(page, GetPostDto.fromDomain)
+  }
+
+  /** Likes on the requesting user's posts, most recent first. Channels use them to learn what readers want. */
+  @Get('likes')
+  @UseGuards(JwtAuthGuard)
+  async getLikesOnMyPosts(@Req() req: RequestWithUser): Promise<GetReceivedLikeDto[]> {
+    const likes = await this.usecases.getLikesOnPostsOf(req.user)
+    return likes.map(GetReceivedLikeDto.fromDomain)
   }
 
   @Get(':postId')

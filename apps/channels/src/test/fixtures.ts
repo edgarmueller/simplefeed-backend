@@ -1,10 +1,10 @@
-import { Story } from '../sources/hacker-news'
+import { Story } from '../sources/story'
 import { JsonModel } from '../llm/llm'
 
 let nextId = 1
 
 export function story(title: string, overrides: Partial<Story> = {}): Story {
-  const id = overrides.id ?? nextId++
+  const id = overrides.id ?? String(nextId++)
   return {
     id,
     title,

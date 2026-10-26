@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
+import { FeedRepository } from '@simplefeed/feed'
 import { PostsRepository } from '@simplefeed/post'
 import { UsersRepository } from '@simplefeed/user'
 import { AddressInfo } from 'net'
@@ -20,6 +21,7 @@ export async function createTestApp(): Promise<INestApplication> {
 }
 
 export async function clearDatabase(app: INestApplication): Promise<void> {
+  await app.get(FeedRepository).deleteAll()
   await app.get(PostsRepository).deleteAll()
   await app.get(UsersRepository).deleteAll()
 }
@@ -150,8 +152,61 @@ export class ApiClient {
     return body
   }
 
+  async addFeed(token: string, url: string, expectedStatus = 201) {
+    const { body } = await this.http.post('/api/feeds').set('Authorization', token).send({ url }).expect(expectedStatus)
+    return body
+  }
+
+  async getMyFeeds(token: string) {
+    const { body } = await this.http.get('/api/feeds').set('Authorization', token).expect(200)
+    return body
+  }
+
+  async withdrawFeed(token: string, feedId: string): Promise<void> {
+    await this.http.delete(`/api/feeds/${feedId}`).set('Authorization', token).expect(204)
+  }
+
+  /** What the channels worker sees, authenticated with the registration key. */
+  async getWorkerFeeds(key: string | undefined, status = 'pending', expectedStatus = 200) {
+    const req = this.http.get(`/api/worker/feeds?status=${status}`)
+    if (key) req.set('x-bot-registration-key', key)
+    const { body } = await req.expect(expectedStatus)
+    return body
+  }
+
+  async activateFeed(key: string, feedId: string, activation: { feedUrl: string; title: string; channelUsername: string }) {
+    const { body } = await this.http
+      .post(`/api/worker/feeds/${feedId}/activate`)
+      .set('x-bot-registration-key', key)
+      .send(activation)
+      .expect(201)
+    return body
+  }
+
+  async failFeed(key: string, feedId: string, error: string) {
+    const { body } = await this.http
+      .post(`/api/worker/feeds/${feedId}/fail`)
+      .set('x-bot-registration-key', key)
+      .send({ error })
+      .expect(201)
+    return body
+  }
+
   async getMe(token: string) {
     const { body } = await this.http.get('/api/users/me').set('Authorization', token).expect(200)
+    return body
+  }
+
+  async likePost(token: string, postId: string): Promise<void> {
+    await this.http.post(`/api/posts/${postId}/like`).set('Authorization', token).expect(201)
+  }
+
+  async unlikePost(token: string, postId: string): Promise<void> {
+    await this.http.delete(`/api/posts/${postId}/like`).set('Authorization', token).expect(200)
+  }
+
+  async getLikesOnMyPosts(token: string) {
+    const { body } = await this.http.get('/api/posts/likes').set('Authorization', token).expect(200)
     return body
   }
 

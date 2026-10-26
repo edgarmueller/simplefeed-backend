@@ -37,4 +37,12 @@ describe('PostgresChannelStore', () => {
     expect(await store.countPostedSince(channel, before)).toBe(2)
     expect(await store.countPostedSince(channel, new Date(Date.now() + 60_000))).toBe(0)
   })
+
+  it('remembers what posts were about', async () => {
+    await store.rememberPost(channel, 'pos-1', 'Rust 2.0 is out')
+    await store.rememberPost(channel, 'pos-2', 'Bitcoin hits a new high')
+
+    expect(await store.postTitles(channel, ['pos-1', 'pos-3'])).toEqual(new Map([['pos-1', 'Rust 2.0 is out']]))
+    expect(await store.postTitles(`${channel}-other`, ['pos-1'])).toEqual(new Map())
+  })
 })

@@ -55,12 +55,12 @@ export class CommandTuner implements Tuner {
   }
 }
 
-const INSTRUCTIONS = `You manage the settings of a Hacker News channel for its one reader.
+const INSTRUCTIONS = `You manage the settings of a news channel for its one reader.
 The reader writes to you in chat. Update the settings to match what they ask for, then reply.
 Settings:
 - interests: short lowercase topics to favor
 - muted: short lowercase topics to leave out
-- minScore: skip stories with fewer points (0-5000)
+- minScore: skip stories with fewer points (0-5000); only applies to sources with points, such as Hacker News
 - maxPostsPerDay: how many stories to post per day (1-50)
 - notes: other wishes in the reader's words, e.g. "no paywalled sites", at most 500 characters
 If the message asks no change (a question, a greeting), keep the settings as they are and answer briefly.

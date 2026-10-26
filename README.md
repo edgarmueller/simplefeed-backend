@@ -31,6 +31,7 @@ flowchart LR
     notification
     auth
     search
+    feed
   end
 
   shared[shared-ddd]
@@ -53,6 +54,7 @@ The application in `apps/simplefeed` is a thin adapter layer: HTTP controllers, 
 | `chat`         | Conversations and messages                                             |
 | `notification` | Notifications and their read state                                     |
 | `auth`         | Registration, login, JWT access and refresh tokens                     |
+| `feed`         | Feeds users add by URL, until the worker makes them channels           |
 | `search`       | User search by name                                                    |
 | `s3`           | Uploading public files                                                 |
 | `shared-ddd`   | Aggregate root base class, domain event publishing, pagination helpers |
@@ -66,8 +68,9 @@ Aggregates record events when their state changes. For example, `post.like(user)
 | Event                   | Handled by                                                          |
 | ----------------------- | ------------------------------------------------------------------- |
 | `SubscribedToChannel`   | a new conversation between the subscriber and the channel           |
+| `FeedActivated`         | subscribes everyone who added the feed to its new channel           |
 | `PostCreatedEvent`      | notification when posting to someone else's feed                    |
-| `PostLikedEvent`        | notification for the author, and an updated like count              |
+| `PostLikedEvent`        | an updated like count for the user who liked                        |
 | `UserClosedEvent`       | conversations of the user are soft-deleted                          |
 | `UserReactivatedEvent`  | conversations of the user are restored                              |
 | `NotificationCreated`   | pushed to the recipient over the `/notifications` socket            |
@@ -78,8 +81,17 @@ Channels are bot accounts that post news. `apps/channels` is a separate worker t
 
 - **Subscribing** takes effect immediately. The channel's posts then show up in your feed, and a chat with the channel opens. Only channels can be subscribed to; there are no friendships between people.
 - **Tuning** happens in the chat with the channel: "mute crypto", "more rust", "max 5 per day", or with a model configured, plain requests such as "fewer AI stories and nothing paywalled". The channel answers with its updated settings.
+- **Likes** are a quieter signal. The channel reads which of its posts readers liked (`GET /api/posts/likes`) and favors similar stories: the rules rank stories sharing keywords with liked titles higher, and a model sees the liked titles. Explicit chat settings still come first.
 
-The first channel is **Hacker News**. Every hour it reads the front page from the [official API](https://github.com/HackerNews/API), skips stories that are too old, below your minimum score or already posted, and posts up to three new ones within your daily limit.
+The built-in channel is **Hacker News**. Every hour it reads the front page from the [official API](https://github.com/HackerNews/API), skips stories that are too old, below your minimum score or already posted, and posts up to three new ones within your daily limit.
+
+**Any RSS or Atom feed** can become a channel, too. Users add a feed's URL or a website's (`POST /api/feeds`), and the feed stays pending until the worker has read it:
+
+1. The worker lists pending feeds (`/api/worker/feeds`, authenticated with `BOT_REGISTRATION_KEY`) and looks for the feed: the URL itself, a feed the page links to with `<link rel="alternate">`, or a common path such as `/feed`.
+2. It creates a channel account named after the feed's title, e.g. `sz-munchen-3fa9c1`, and activates the feed. Everyone who added it is subscribed.
+3. From then on the feed's channel works like Hacker News, with a week's worth of items counting as news. Feeds that can't be read are marked failed with the reason; adding them again retries.
+
+Adding a feed that is a channel already subscribes right away, and two addresses that lead to the same feed share one channel. The worker fetches user-supplied URLs only over http(s), refuses hosts on private networks (checked on every redirect), and limits time and size.
 
 With `GROQ_API_KEY` set, a model on [Groq](https://groq.com) picks and summarizes the stories and interprets chat requests. Without a key, or when the model fails, the channel uses rules instead: muted topics are left out, your interests come first, and then stories are ranked by score. Chat then understands a fixed set of commands. The model sits behind a small interface (`JsonModel`), so another provider takes one adapter.
 
@@ -144,6 +156,7 @@ The channels worker reads:
 | `GROQ_API_KEY`, `GROQ_MODEL`                                               | Optional model for curating and chat (default model `openai/gpt-oss-20b`) |
 | `CHANNELS_POST_INTERVAL_MINUTES`, `CHANNELS_CHAT_INTERVAL_SECONDS`         | How often channels post (60) and catch up on new chats and messages (30)  |
 | `HACKER_NEWS_API_URL`                                                      | Defaults to the official API                                              |
+| `CHANNELS_ALLOW_PRIVATE_FEED_HOSTS`                                        | `true` lets users add feeds on private networks, e.g. localhost; only for development |
 
 ## Database migrations
 

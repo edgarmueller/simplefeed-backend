@@ -1,0 +1,7 @@
+{
+  "name": "feed",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/feed/src",
+  "projectType": "library",
+  "tags": ["type:domain"]
+}

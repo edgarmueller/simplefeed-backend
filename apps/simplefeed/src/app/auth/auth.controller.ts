@@ -62,7 +62,7 @@ export class AuthController {
         profile: Profile.create({
           username: user.username,
           firstName: user.firstName,
-          lastName: user.lastName,
+          lastName: user.lastName ?? '',
           imageUrl: user.imageUrl,
           bio: user.bio,
           isBot: true,

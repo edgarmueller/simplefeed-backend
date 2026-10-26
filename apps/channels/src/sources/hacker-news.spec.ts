@@ -36,11 +36,11 @@ const fakeFetch = (async (url: string) => {
 
 describe('HackerNewsSource', () => {
   it('reads top stories and skips jobs and missing items', async () => {
-    const stories = await new HackerNewsSource('https://hn.test/v0', fakeFetch).topStories(10)
+    const stories = await new HackerNewsSource('https://hn.test/v0', fakeFetch).latest(10)
 
     expect(stories).toEqual([
       {
-        id: 8863,
+        id: '8863',
         title: 'My YC app: Dropbox - Throw away your USB drive',
         url: 'http://www.getdropbox.com/u/2/screencast.html',
         domain: 'getdropbox.com',
@@ -50,13 +50,13 @@ describe('HackerNewsSource', () => {
         discussionUrl: 'https://news.ycombinator.com/item?id=8863',
       },
       expect.objectContaining({
-        id: 121003,
+        id: '121003',
         // Ask HN posts link to their discussion
         url: 'https://news.ycombinator.com/item?id=121003',
         domain: 'news.ycombinator.com',
       }),
       expect.objectContaining({
-        id: 5150,
+        id: '5150',
         // malformed links fall back to the discussion
         url: 'https://news.ycombinator.com/item?id=5150',
         domain: 'news.ycombinator.com',
@@ -65,14 +65,14 @@ describe('HackerNewsSource', () => {
   })
 
   it('only fetches as many items as asked for', async () => {
-    const stories = await new HackerNewsSource('https://hn.test/v0', fakeFetch).topStories(1)
+    const stories = await new HackerNewsSource('https://hn.test/v0', fakeFetch).latest(1)
 
-    expect(stories.map((story) => story.id)).toEqual([8863])
+    expect(stories.map((story) => story.id)).toEqual(['8863'])
   })
 
   it('reports API errors', async () => {
     const failing = (async () => new Response('down', { status: 503 })) as unknown as typeof fetch
 
-    await expect(new HackerNewsSource('https://hn.test/v0', failing).topStories(5)).rejects.toThrow('503')
+    await expect(new HackerNewsSource('https://hn.test/v0', failing).latest(5)).rejects.toThrow('503')
   })
 })

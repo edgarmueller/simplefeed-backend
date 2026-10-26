@@ -25,6 +25,9 @@
       "@simplefeed/chat": [
         "./libs/chat/src/index.ts"
       ],
+      "@simplefeed/feed": [
+        "./libs/feed/src/index.ts"
+      ],
       "@simplefeed/notification": [
         "./libs/notification/src/index.ts"
       ],

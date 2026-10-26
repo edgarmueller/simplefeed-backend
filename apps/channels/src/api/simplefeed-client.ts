@@ -26,6 +26,11 @@ export interface Conversation {
   messages: ChatMessage[]
 }
 
+export interface ReceivedLike {
+  postId: string
+  likedAt: string
+}
+
 /** Thrown for unsuccessful responses, with the status code. */
 export class ApiError extends Error {
   constructor(
@@ -122,10 +127,17 @@ export class SimplefeedClient {
     return this.userId
   }
 
-  async post(body: string): Promise<void> {
+  /** Posts to the channel's feed and returns the new post's id. */
+  async post(body: string): Promise<string> {
     const form = new FormData()
     form.append('body', body)
-    await this.request('/posts', { method: 'POST', body: form })
+    const { id } = await this.request<{ id: string }>('/posts', { method: 'POST', body: form })
+    return id
+  }
+
+  /** Readers' likes on the channel's posts, most recent first. */
+  likesOnMyPosts(): Promise<ReceivedLike[]> {
+    return this.request('/posts/likes')
   }
 
   conversations(): Promise<Conversation[]> {
@@ -159,6 +171,8 @@ export async function whenApiIsUp<T>(
 }
 
 export interface ChatConnection {
+  /** settles once the socket has connected for the first time */
+  ready: Promise<void>
   join(conversationId: string): Promise<void>
   send(conversationId: string, content: string): Promise<void>
   markAsRead(conversationId: string): Promise<void>
@@ -181,6 +195,8 @@ export function connectChat(
   let socket: Socket | undefined
   let closed = false
   const joined = new Set<string>()
+  let markReady: () => void = () => undefined
+  const ready = new Promise<void>((resolve) => (markReady = resolve))
 
   async function connect() {
     const [token, ownId] = await Promise.all([client.token(), client.id()])
@@ -189,6 +205,7 @@ export function connectChat(
       transports: ['websocket'],
       reconnection: false,
     })
+    socket.on('connect', () => markReady())
     socket.on('conversations_joined', ({ conversationIds }: { conversationIds: string[] }) => {
       conversationIds.forEach((id) => joined.add(id))
     })
@@ -218,6 +235,7 @@ export function connectChat(
   connect().catch((error) => logger.error(`chat connection failed: ${error}`))
 
   return {
+    ready,
     async join(conversationId) {
       if (!joined.has(conversationId)) {
         await emit('join_conversation', { conversationId })

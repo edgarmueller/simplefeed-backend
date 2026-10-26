@@ -16,6 +16,12 @@ export class PostgresChannelStore implements ChannelStore {
         posted_at timestamptz NOT NULL DEFAULT now(),
         PRIMARY KEY (channel, item_id)
       );
+      CREATE TABLE IF NOT EXISTS channels.posts (
+        channel text NOT NULL,
+        post_id text NOT NULL,
+        title text NOT NULL,
+        PRIMARY KEY (channel, post_id)
+      );
       CREATE TABLE IF NOT EXISTS channels.preferences (
         channel text PRIMARY KEY,
         data jsonb NOT NULL,
@@ -68,6 +74,25 @@ export class PostgresChannelStore implements ChannelStore {
       [channel, since]
     )
     return rows[0].count
+  }
+
+  async rememberPost(channel: string, postId: string, title: string): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO channels.posts (channel, post_id, title) VALUES ($1, $2, $3)
+       ON CONFLICT (channel, post_id) DO UPDATE SET title = EXCLUDED.title`,
+      [channel, postId, title]
+    )
+  }
+
+  async postTitles(channel: string, postIds: string[]): Promise<Map<string, string>> {
+    if (postIds.length === 0) {
+      return new Map()
+    }
+    const { rows } = await this.pool.query(
+      'SELECT post_id, title FROM channels.posts WHERE channel = $1 AND post_id = ANY($2)',
+      [channel, postIds]
+    )
+    return new Map(rows.map((row) => [row.post_id, row.title]))
   }
 
   async close(): Promise<void> {
