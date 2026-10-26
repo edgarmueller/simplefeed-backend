@@ -21,8 +21,17 @@ export interface SafeFetchOptions {
 }
 
 const MAX_REDIRECTS = 5
+const DNS_TIMEOUT_MS = 5_000
+/** some sites refuse or stall requests without one */
+const USER_AGENT = 'simplefeed/1.0 (+https://github.com/edgarmueller/simplefeed-backend)'
 
-const resolveAll = async (hostname: string) => (await lookup(hostname, { all: true })).map((entry) => entry.address)
+const resolveAll = (hostname: string) =>
+  Promise.race([
+    lookup(hostname, { all: true }).then((entries) => entries.map((entry) => entry.address)),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`looking up ${hostname} took too long`)), DNS_TIMEOUT_MS).unref()
+    ),
+  ])
 
 /** Loopback, private, link-local and other addresses that aren't the public internet. */
 export function isPrivateAddress(address: string): boolean {
@@ -79,11 +88,22 @@ export function createSafeFetch(options: SafeFetchOptions = {}): PageFetcher {
     let url = new URL(input)
     for (let redirects = 0; ; redirects++) {
       await checkUrl(url)
-      const response = await fetchFn(url, {
-        redirect: 'manual',
-        signal: AbortSignal.timeout(timeoutMs),
-        headers: { accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/html;q=0.9, */*;q=0.5' },
-      })
+      let response: Response
+      try {
+        response = await fetchFn(url, {
+          redirect: 'manual',
+          signal: AbortSignal.timeout(timeoutMs),
+          headers: {
+            accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/html;q=0.9, */*;q=0.5',
+            'user-agent': USER_AGENT,
+          },
+        })
+      } catch (error) {
+        if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+          throw new Error(`${url.host} didn't answer within ${timeoutMs / 1000} s`)
+        }
+        throw error
+      }
       const location = response.headers.get('location')
       if (response.status >= 300 && response.status < 400 && location) {
         if (redirects >= MAX_REDIRECTS) {
