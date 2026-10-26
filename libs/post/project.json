@@ -1,7 +1,0 @@
-{
-  "name": "post",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/post/src",
-  "projectType": "library",
-  "tags": ["type:domain"]
-}

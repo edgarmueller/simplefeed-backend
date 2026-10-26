@@ -61,7 +61,7 @@ export function describePreferences(preferences: Preferences): string {
     `Favoring: ${preferences.interests.length ? preferences.interests.join(', ') : 'nothing in particular'}`,
     `Leaving out: ${preferences.muted.length ? preferences.muted.join(', ') : 'nothing'}`,
     `Minimum score: ${preferences.minScore} points`,
-    `At most ${preferences.maxPostsPerDay} posts a day`,
+    `At most ${preferences.maxPostsPerDay} stories a day`,
   ]
   if (preferences.notes) {
     lines.push(`Notes: ${preferences.notes}`)

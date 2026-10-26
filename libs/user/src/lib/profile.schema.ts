@@ -35,24 +35,6 @@ export const ProfileSchema = new EntitySchema<Profile>({
       unique: false,
       nullable: true,
     },
-    isBot: {
-      type: Boolean,
-      name: 'is_bot',
-      nullable: false,
-      default: false,
-    },
-    nrOfPosts: {
-      type: Number,
-      unique: false,
-      default: 0,
-      nullable: false
-    },
-    nrOfLikes: {
-      type: Number,
-      unique: false,
-      default: 0,
-      nullable: false
-    },
     createdAt: {
       type: Date,
       unique: false,

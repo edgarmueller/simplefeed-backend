@@ -11,26 +11,8 @@ export class UserUsecases {
     private s3Service: S3Service
   ) { }
 
-  async getUserByUserName(
-    requestingUser: User,
-    username: string,
-  ): Promise<User> {
-    if (requestingUser.profile.username === username) {
-      return await this.getMe(requestingUser)
-    }
-    const user = await this.userRepository.findOneByUsernameWithFriendsOrFail(
-      username
-    )
-    return user;
-  }
-
-  /** The automated accounts users can subscribe to. */
-  getChannels(): Promise<User[]> {
-    return this.userRepository.findBots()
-  }
-
   async getMe(requestingUser: User): Promise<User> {
-    const user = await this.userRepository.findOneByIdWithFriendsOrFail(
+    const user = await this.userRepository.findOneByIdOrFail(
       requestingUser.id
     )
     return user;

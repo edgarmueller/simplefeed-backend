@@ -17,7 +17,7 @@ const HELP = `You can tell me things like:
 - "mute crypto" or "less ai" to leave a topic out
 - "unmute crypto" to forget a topic
 - "min score 200" to skip stories with fewer points
-- "max 5 per day" to limit how much I post
+- "max 5 per day" to limit how many stories I pick
 - "settings" to see what I'm doing now, "reset" to start over`
 
 const without = (topics: string[], topic: string) => topics.filter((t) => t !== topic)

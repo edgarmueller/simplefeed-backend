@@ -43,20 +43,6 @@ export const UserSchema = new EntitySchema<User>({
     },
   },
   relations: {
-    friends: {
-      type: 'many-to-many',
-      target: 'User',
-      joinTable: {
-        joinColumn: {
-          name: 'user_id',
-          referencedColumnName: 'id',
-        },
-        inverseJoinColumn: {
-          name: 'befriended_by_id',
-          referencedColumnName: 'id',
-        },
-      },
-    },
     profile: {
       type: 'one-to-one',
       target: 'Profile',

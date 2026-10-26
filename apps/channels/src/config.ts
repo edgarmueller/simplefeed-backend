@@ -1,18 +1,15 @@
 export interface ChannelsConfig {
   apiUrl: string
-  socketUrl: string
-  databaseUrl: string
-  botRegistrationKey: string
-  /** password for the channel accounts the worker creates */
-  channelPassword: string
+  /** lets the worker use the API's worker endpoints */
+  workerApiKey: string
   hackerNewsApiUrl: string
   /** lets users add feeds on private networks, e.g. localhost; for development only */
   allowPrivateFeedHosts: boolean
-  /** how often channels collect and post new items */
+  /** how often channels fetch and pick new items */
   postIntervalMinutes: number
-  /** how often channels join new subscribers' chats and catch up on messages */
+  /** how often the worker answers readers' chat messages */
   chatIntervalSeconds: number
-  /** how often the worker looks for feeds users added */
+  /** how often the worker looks for feeds users added and new subscriptions */
   feedIntervalSeconds: number
   groq?: {
     apiKey: string
@@ -37,14 +34,11 @@ function positiveNumber(value: string | undefined, fallback: number): number {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ChannelsConfig {
   return {
     apiUrl: env.CHANNELS_API_URL || 'http://localhost:5001/api',
-    socketUrl: env.CHANNELS_SOCKET_URL || 'http://localhost:5001',
-    databaseUrl: required(env, 'DATABASE_URL'),
-    botRegistrationKey: required(env, 'BOT_REGISTRATION_KEY'),
-    channelPassword: required(env, 'CHANNEL_PASSWORD'),
+    workerApiKey: required(env, 'WORKER_API_KEY'),
     hackerNewsApiUrl: env.HACKER_NEWS_API_URL || 'https://hacker-news.firebaseio.com/v0',
     allowPrivateFeedHosts: env.CHANNELS_ALLOW_PRIVATE_FEED_HOSTS === 'true',
     postIntervalMinutes: positiveNumber(env.CHANNELS_POST_INTERVAL_MINUTES, 60),
-    chatIntervalSeconds: positiveNumber(env.CHANNELS_CHAT_INTERVAL_SECONDS, 30),
+    chatIntervalSeconds: positiveNumber(env.CHANNELS_CHAT_INTERVAL_SECONDS, 5),
     feedIntervalSeconds: positiveNumber(env.CHANNELS_FEED_INTERVAL_SECONDS, 10),
     groq: env.GROQ_API_KEY
       ? {

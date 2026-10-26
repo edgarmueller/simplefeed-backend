@@ -8,9 +8,9 @@ primary_region = "ams"
 
 [build]
 
-# Both run from the same image: the API, and the worker that posts as the
-# news channels. Set its secrets with
-#   fly secrets set BOT_REGISTRATION_KEY=... CHANNEL_PASSWORD=... GROQ_API_KEY=...
+# Both run from the same image: the API, and the channels worker that fetches
+# and picks items through the API's worker endpoints. Set the shared key with
+#   fly secrets set WORKER_API_KEY=... GROQ_API_KEY=...
 [processes]
   app = "node simplefeed/main.js"
   channels = "node channels/main.js"
@@ -32,4 +32,3 @@ primary_region = "ams"
   S3_BUCKET_NAME="simplefeed"
   # the worker goes through the public URL, which wakes stopped API machines
   CHANNELS_API_URL = "https://simplefeed.fly.dev/api"
-  CHANNELS_SOCKET_URL = "https://simplefeed.fly.dev"

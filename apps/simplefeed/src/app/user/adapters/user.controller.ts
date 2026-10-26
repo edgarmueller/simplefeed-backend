@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Req,
   UploadedFile,
@@ -16,7 +15,6 @@ import { JwtAuthGuard, RequestWithUser } from '@simplefeed/auth'
 import { UserUsecases } from '@simplefeed/user'
 import { FileSizeValidationPipe } from '../../infra/file-size-validation.pipe'
 import { GetMeDto } from '../dto/get-me.dto'
-import { GetUserDto } from '../dto/get-user.dto'
 import { UpdateUserDto } from '../dto/update-user.dto'
 
 type File = Express.Multer.File
@@ -28,20 +26,6 @@ export class UserController {
   @Get('me')
   async me(@Req() request: RequestWithUser): Promise<GetMeDto> {
     return GetMeDto.fromDomain(await this.usecases.getMe(request.user))
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(':username')
-  async getUser(
-    @Param('username') username: string,
-    @Req() req: RequestWithUser
-  ): Promise<GetMeDto | GetUserDto> {
-    const user = await this.usecases.getUserByUserName(req.user, username)
-    if (req.user.profile.username === username) {
-      return GetMeDto.fromDomain(user)
-    }
-    const subscribed = user.profile.isBot ? user.isFriend(req.user) : undefined
-    return GetUserDto.fromDomain(user, subscribed)
   }
 
   @UseGuards(JwtAuthGuard)

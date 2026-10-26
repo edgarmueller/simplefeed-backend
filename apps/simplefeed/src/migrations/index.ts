@@ -3,6 +3,7 @@ import { AddBotFlag1792868551565 } from './1792868551565-add-bot-flag'
 import { SubscriptionsOnly1793200000000 } from './1793200000000-subscriptions-only'
 import { DropComments1793300000000 } from './1793300000000-drop-comments'
 import { AddFeeds1793400000000 } from './1793400000000-add-feeds'
+import { ReaderModel1793500000000 } from './1793500000000-reader-model'
 
 // Migrations are bundled into the build, so each one has to be listed here.
 export const migrations = [
@@ -11,4 +12,5 @@ export const migrations = [
   SubscriptionsOnly1793200000000,
   DropComments1793300000000,
   AddFeeds1793400000000,
+  ReaderModel1793500000000,
 ]

@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core'
 import { initializeTransactionalContext } from 'typeorm-transactional'
 import { AppModule } from './app/app.module'
 import { configureApp, GLOBAL_PREFIX } from './app/app.setup'
-import { RedisIoAdapter } from './app/chat/adapters/redis.adapter'
 
 async function bootstrap() {
   initializeTransactionalContext()
@@ -11,10 +10,6 @@ async function bootstrap() {
     abortOnError: true,
   })
   configureApp(app)
-
-  const redisIoAdapter = new RedisIoAdapter(app)
-  await redisIoAdapter.connectToRedis(app)
-  app.useWebSocketAdapter(redisIoAdapter)
 
   const port = process.env.PORT || 3333
   await app.listen(port)

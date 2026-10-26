@@ -4,7 +4,6 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProfileSchema } from "./profile.schema";
 import { UsersRepository } from './user.repository';
-import { SubscriptionUsecases } from './subscriptions.usecases';
 import { UserSchema } from './user.schema';
 import { UserUsecases } from './user.usecases';
 
@@ -16,7 +15,7 @@ import { UserUsecases } from './user.usecases';
 		CqrsModule
 	],
 	controllers: [],
-	providers: [UsersRepository, UserUsecases, SubscriptionUsecases],
-	exports: [S3Module, UsersRepository, UserUsecases, SubscriptionUsecases],
+	providers: [UsersRepository, UserUsecases],
+	exports: [S3Module, UsersRepository, UserUsecases],
 })
 export class UserModule {}

@@ -1,0 +1,7 @@
+{
+  "name": "reader",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/reader/src",
+  "projectType": "library",
+  "tags": ["type:domain"]
+}

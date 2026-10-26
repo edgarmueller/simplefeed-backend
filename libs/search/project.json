@@ -1,7 +1,0 @@
-{
-  "name": "search",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/search/src",
-  "projectType": "library",
-  "tags": ["type:domain"]
-}

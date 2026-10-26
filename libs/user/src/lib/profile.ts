@@ -12,10 +12,6 @@ export class Profile implements Entity {
   firstName?: string 
   lastName?: string 
   imageUrl?: string 
-  /** automated accounts, such as news channels */
-  isBot?: boolean
-  nrOfPosts?: number 
-  nrOfLikes?: number 
   createdAt?: Date 
   updatedAt?: Date 
   
@@ -29,22 +25,6 @@ export class Profile implements Entity {
   private constructor(props: Props<Profile>, readonly id: string) {
     Object.assign(this, props)
     this.id = id || createProfileId()
-  }
-
-  incrementPostCount() {
-    this.nrOfPosts++;
-  }
-
-  decrementPostCount() {
-    this.nrOfPosts--;
-  }
-
-  incrementLikeCount() {
-    this.nrOfLikes++;
-  }
-
-  decrementLikeCount() {
-    this.nrOfLikes--;
   }
 
   updateAvatar(location: string) {

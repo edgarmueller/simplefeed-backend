@@ -1,21 +1,17 @@
 import { loadConfig } from './config'
 
-const required = {
-  DATABASE_URL: 'postgres://localhost/test',
-  BOT_REGISTRATION_KEY: 'key',
-  CHANNEL_PASSWORD: 'password',
-}
+const required = { WORKER_API_KEY: 'key' }
 
 describe('loadConfig', () => {
   it('reads the intervals', () => {
     const config = loadConfig({
       ...required,
       CHANNELS_POST_INTERVAL_MINUTES: '15',
-      CHANNELS_CHAT_INTERVAL_SECONDS: '5',
+      CHANNELS_CHAT_INTERVAL_SECONDS: '7',
     })
 
     expect(config.postIntervalMinutes).toBe(15)
-    expect(config.chatIntervalSeconds).toBe(5)
+    expect(config.chatIntervalSeconds).toBe(7)
   })
 
   it.each(['abc', '0', '-5', ''])('falls back to the default interval for %j', (value) => {
@@ -26,6 +22,6 @@ describe('loadConfig', () => {
     })
 
     expect(config.postIntervalMinutes).toBe(60)
-    expect(config.chatIntervalSeconds).toBe(30)
+    expect(config.chatIntervalSeconds).toBe(5)
   })
 })

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DomainEvents } from '@simplefeed/shared-ddd'
 import { Transactional } from 'typeorm-transactional'
-import { In } from 'typeorm'
 import { QueryFailedError, Repository } from 'typeorm'
 import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -57,24 +56,6 @@ export class UsersRepository {
     }
   }
 
-  async findOneByIdWithFriendsOrFail(id: UserId): Promise<User> {
-    try {
-      const foundUser = await this.userRepository.findOneOrFail({
-        where: { id },
-        relations: {
-          profile: true,
-          friends: true,
-        },
-      })
-      return foundUser
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new UserNotFoundError()
-      }
-      throw error
-    }
-  }
-
   async findOneByUsernameOrFail(username: string): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOneOrFail({
@@ -88,23 +69,6 @@ export class UsersRepository {
       throw error
     }
   }
-  async findOneByUsernameWithFriendsOrFail(username: string): Promise<User> {
-    try {
-      const foundUser = await this.userRepository.findOneOrFail({
-        where: { profile: { username } },
-        relations: {
-          friends: true,
-        },
-      })
-      return foundUser
-    } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new UserNotFoundError(username)
-      }
-      throw error
-    }
-  }
-
   async findOneByEmailOrFail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
@@ -130,21 +94,6 @@ export class UsersRepository {
       .getMany()
   }
 
-  findBots(): Promise<User[]> {
-    return this.userRepository.find({
-      where: { profile: { isBot: true } },
-      relations: { profile: true },
-      order: { profile: { username: 'ASC' } },
-    })
-  }
-
-  findMany(userIds: string[]) {
-    return this.userRepository.find({
-      where: { id: In(userIds) },
-      relations: { profile: true },
-    })
-  }
-
   async deleteAll() {
     await this.userRepository.createQueryBuilder().delete().execute()
   }
@@ -164,7 +113,6 @@ export class UsersRepository {
   async restoreByEmail(email: string) {
     await this.userRepository.restore({ email })
     const user = await this.findOneByEmailOrFail(email);
-    user.restore();
     DomainEvents.publishOnCommit(user, this.publisher)
     return user;
   }

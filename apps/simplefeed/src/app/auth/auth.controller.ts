@@ -18,8 +18,7 @@ import {
 import { Profile, User } from '@simplefeed/user'
 import { GetTokenDto } from './dto/get-token.dto'
 import { GetUserDto } from './dto/get-user.dto'
-import { RegisterBotDto, RegisterUserDto } from './dto/register-user.dto'
-import { BotRegistrationGuard } from './bot-registration.guard'
+import { RegisterUserDto } from './dto/register-user.dto'
 import { UpdatePasswordDto } from './dto/update-password.dto'
 
 @Controller('auth')
@@ -43,29 +42,6 @@ export class AuthController {
           firstName: user.firstName,
           lastName: user.lastName,
           imageUrl: user.imageUrl,
-        }),
-      })
-    )
-    return { user: GetUserDto.fromDomain(registeredUser) }
-  }
-
-  /** Creates an automated account, such as a news channel. */
-  @UseGuards(BotRegistrationGuard)
-  @Post('register-bot')
-  async registerBot(
-    @Body() { user }: RegisterBotDto
-  ): Promise<{ user: GetUserDto }> {
-    const registeredUser = await this.usecases.register(
-      User.create({
-        email: user.email,
-        password: user.password,
-        profile: Profile.create({
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName ?? '',
-          imageUrl: user.imageUrl,
-          bio: user.bio,
-          isBot: true,
         }),
       })
     )
