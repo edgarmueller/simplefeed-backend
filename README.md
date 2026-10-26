@@ -68,6 +68,7 @@ Aggregates record events when their state changes. For example, `post.like(user)
 | Event                   | Handled by                                                          |
 | ----------------------- | ------------------------------------------------------------------- |
 | `SubscribedToChannel`   | a new conversation between the subscriber and the channel           |
+| `FeedActivated`         | subscribes everyone who added the feed to its new channel           |
 | `PostCreatedEvent`      | notification when posting to someone else's feed                    |
 | `PostLikedEvent`        | an updated like count for the user who liked                        |
 | `UserClosedEvent`       | conversations of the user are soft-deleted                          |
