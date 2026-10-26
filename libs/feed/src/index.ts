@@ -1,0 +1,7 @@
+export { Feed, FeedStatus, normalizeFeedUrl } from './lib/feed'
+export { FeedSchema } from './lib/feed.schema'
+export { FeedRepository } from './lib/feed.repository'
+export { FeedUsecases } from './lib/feed.usecases'
+export { FeedModule } from './lib/feed.module'
+export { FeedActivated } from './lib/events/feed-activated.event'
+export { InvalidFeedUrlError } from './lib/errors/invalid-feed-url.error'
