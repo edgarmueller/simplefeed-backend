@@ -1,14 +1,4 @@
-export interface Story {
-  id: number
-  title: string
-  url: string
-  /** where the link points, e.g. "github.com"; "news.ycombinator.com" for Ask HN */
-  domain: string
-  score: number
-  comments: number
-  postedAt: Date
-  discussionUrl: string
-}
+import { Source, Story, hostname } from './story'
 
 interface HackerNewsItem {
   id: number
@@ -24,14 +14,6 @@ interface HackerNewsItem {
 
 const discussionUrl = (id: number) => `https://news.ycombinator.com/item?id=${id}`
 
-const hostname = (url: string) => {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return undefined
-  }
-}
-
 function toStory(item: HackerNewsItem | null): Story | undefined {
   if (!item || item.type !== 'story' || item.dead || item.deleted || !item.title) {
     return undefined
@@ -40,7 +22,7 @@ function toStory(item: HackerNewsItem | null): Story | undefined {
   const domain = item.url ? hostname(item.url) : undefined
   const url = domain && item.url ? item.url : discussionUrl(item.id)
   return {
-    id: item.id,
+    id: String(item.id),
     title: item.title,
     url,
     domain: domain ?? 'news.ycombinator.com',
@@ -52,7 +34,7 @@ function toStory(item: HackerNewsItem | null): Story | undefined {
 }
 
 /** Reads the official Hacker News API (https://github.com/HackerNews/API). */
-export class HackerNewsSource {
+export class HackerNewsSource implements Source {
   constructor(
     private readonly baseUrl: string,
     private readonly fetchFn: typeof fetch = fetch
@@ -67,7 +49,7 @@ export class HackerNewsSource {
   }
 
   /** The current top stories, best first. */
-  async topStories(limit: number): Promise<Story[]> {
+  async latest(limit: number): Promise<Story[]> {
     const ids = await this.get<number[]>('topstories.json')
     const items = await Promise.all(
       ids.slice(0, limit).map((id) => this.get<HackerNewsItem | null>(`item/${id}.json`))

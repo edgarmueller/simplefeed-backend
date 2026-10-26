@@ -25,6 +25,13 @@ describe('channels api', () => {
     await api.registerBot(hackerNews, 'wrong-key-of-same-length!', 403)
   })
 
+  it('should register channels named after a single title', async () => {
+    const bartToken = await api.signUp(bart)
+    await api.registerBot({ ...hackerNews, username: 'heise', firstName: 'heise online', lastName: undefined as unknown as string }, REGISTRATION_KEY)
+
+    expect(await api.getChannels(bartToken)).toEqual([expect.objectContaining({ username: 'heise', firstName: 'heise online', lastName: '' })])
+  })
+
   it('should list bots as channels, but not regular users', async () => {
     const bartToken = await api.signUp(bart)
     await api.registerBot(hackerNews, REGISTRATION_KEY)

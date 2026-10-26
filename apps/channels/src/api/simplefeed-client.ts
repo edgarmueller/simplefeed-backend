@@ -26,12 +26,12 @@ export interface Conversation {
   messages: ChatMessage[]
 }
 
-/** Thrown for unsuccessful responses, with the status code. */
 export interface ReceivedLike {
   postId: string
   likedAt: string
 }
 
+/** Thrown for unsuccessful responses, with the status code. */
 export class ApiError extends Error {
   constructor(
     readonly status: number,

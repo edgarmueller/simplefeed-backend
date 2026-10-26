@@ -1,11 +1,18 @@
-import { ApiError, SimplefeedClient, connectChat, whenApiIsUp } from './api/simplefeed-client'
-import { HACKER_NEWS_ACCOUNT, HackerNewsChannel } from './channel/hacker-news-channel'
+import { Account, ApiError, SimplefeedClient, connectChat, whenApiIsUp } from './api/simplefeed-client'
+import { WorkerApi } from './api/worker-api'
+import { Channel, HACKER_NEWS_ACCOUNT } from './channel/channel'
 import { Curator, ModelCurator, RuleBasedCurator } from './channel/curator'
+import { FeedChannels } from './channel/feed-channels'
 import { CommandTuner, ModelTuner, Tuner } from './channel/tuning'
 import { loadConfig } from './config'
 import { GroqModel } from './llm/groq'
 import { HackerNewsSource } from './sources/hacker-news'
+import { createSafeFetch } from './sources/safe-fetch'
+import { Source } from './sources/story'
 import { PostgresChannelStore } from './state/postgres-store'
+
+/** Feeds often post a few times a week; their stories stay news longer. */
+const FEED_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
 /** Runs `task` now and then every `intervalMs`, logging instead of crashing on errors. */
 function every(intervalMs: number, name: string, task: () => Promise<unknown>) {
@@ -34,40 +41,52 @@ async function main() {
   const tuner: Tuner = model ? new ModelTuner(model) : new CommandTuner()
   console.log(model ? `curating with ${model.name}` : 'no GROQ_API_KEY set, curating with rules')
 
-  const client = new SimplefeedClient(config.apiUrl, HACKER_NEWS_ACCOUNT, config.channelPassword)
+  let stopping = false
+  const timers: NodeJS.Timeout[] = []
+  const chats: { close(): void }[] = []
+  const createClient = (account: Account) => new SimplefeedClient(config.apiUrl, account, config.channelPassword)
+
+  /** Posts the source's stories as the client's channel and answers its chats. */
+  function start(client: SimplefeedClient, source: Source, maxAgeMs?: number) {
+    const channel = new Channel({ client, source, curator, tuner, store, maxAgeMs })
+    const chat = connectChat(config.socketUrl, client, (message) => {
+      channel.handleMessage(message, chat).catch((error) => console.error(`${channel.name} could not answer a message: ${error}`))
+    })
+    chats.push(chat)
+    timers.push(every(config.postIntervalMinutes * 60 * 1000, `${channel.name}: posting stories`, () => channel.postNewStories()))
+    // joining chats needs the socket, which connects in the background
+    void chat.ready.then(() => {
+      if (!stopping) {
+        timers.push(every(config.chatIntervalSeconds * 1000, `${channel.name}: syncing chats`, () => channel.syncChats(chat)))
+      }
+    })
+    console.log(`${channel.name} is running`)
+  }
+
+  const hackerNews = createClient(HACKER_NEWS_ACCOUNT)
   try {
-    await whenApiIsUp(() => client.ensureAccount(config.botRegistrationKey))
+    await whenApiIsUp(() => hackerNews.ensureAccount(config.botRegistrationKey))
   } catch (error) {
     if (error instanceof ApiError && error.status === 403) {
       throw new Error('the API refused to create the channel account: BOT_REGISTRATION_KEY must be set to the same value for the API and the worker')
     }
     throw error
   }
-  const channel = new HackerNewsChannel({
-    client,
-    source: new HackerNewsSource(config.hackerNewsApiUrl),
-    curator,
-    tuner,
-    store,
-  })
-  const chat = connectChat(config.socketUrl, client, (message) => {
-    channel.handleMessage(message, chat).catch((error) => console.error(`could not answer a message: ${error}`))
-  })
+  start(hackerNews, new HackerNewsSource(config.hackerNewsApiUrl))
 
-  let stopping = false
-  const timers = [every(config.postIntervalMinutes * 60 * 1000, 'posting stories', () => channel.postNewStories())]
-  // joining chats needs the socket, which connects in the background
-  void chat.ready.then(() => {
-    if (!stopping) {
-      timers.push(every(config.chatIntervalSeconds * 1000, 'syncing chats', () => channel.syncChats(chat)))
-    }
+  const feeds = new FeedChannels({
+    api: new WorkerApi(config.apiUrl, config.botRegistrationKey),
+    fetchPage: createSafeFetch({ allowPrivateHosts: config.allowPrivateFeedHosts }),
+    registrationKey: config.botRegistrationKey,
+    createClient,
+    start: (client, source) => start(client, source, FEED_MAX_AGE_MS),
   })
-  console.log(`${HACKER_NEWS_ACCOUNT.username} is running`)
+  timers.push(every(config.chatIntervalSeconds * 1000, 'syncing feeds', () => feeds.sync()))
 
   const shutdown = async () => {
     stopping = true
     timers.forEach(clearInterval)
-    chat.close()
+    chats.forEach((chat) => chat.close())
     await store.close()
     process.exit(0)
   }

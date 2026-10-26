@@ -1,6 +1,6 @@
 import { Account, ChatConnection, ChatMessage, SimplefeedClient } from '../api/simplefeed-client'
 import { Logger } from '../logger'
-import { HackerNewsSource, Story } from '../sources/hacker-news'
+import { Source, Story } from '../sources/story'
 import { ChannelStore } from '../state/store'
 import { Curator, Pick } from './curator'
 import { DEFAULT_PREFERENCES, Preferences } from './preferences'
@@ -14,10 +14,10 @@ export const HACKER_NEWS_ACCOUNT: Account = {
   bio: "The Hacker News front page, picked for you. Message me to tune what I post.",
 }
 
-/** how many top stories to look at per run */
+/** how many stories to look at per run */
 const CANDIDATE_COUNT = 60
-/** stories older than this are no longer news */
-const MAX_AGE_MS = 48 * 60 * 60 * 1000
+/** by default, stories older than this are no longer news */
+const DEFAULT_MAX_AGE_MS = 48 * 60 * 60 * 1000
 /** spreads a day's posts over several runs */
 const MAX_POSTS_PER_RUN = 3
 /** how many liked stories to learn from */
@@ -25,37 +25,52 @@ const MAX_LIKED = 20
 
 const escapeMarkdown = (text: string) => text.replace(/([[\]*_`\\])/g, '\\$1')
 
+/** A linked title, the summary if there is one, and a line about the source. */
 export function formatPost({ story, summary }: Pick): string {
   const lines = [`**[${escapeMarkdown(story.title)}](${story.url})**`]
   if (summary) {
     lines.push('', escapeMarkdown(summary))
   }
-  lines.push('', `▲ ${story.score} points · [${story.comments} comments](${story.discussionUrl}) · ${story.domain}`)
+  const about: string[] = []
+  if (story.score !== undefined) {
+    about.push(`▲ ${story.score} points`)
+  }
+  if (story.discussionUrl) {
+    about.push(`[${story.comments ?? 0} comments](${story.discussionUrl})`)
+  }
+  if (story.sourceName && story.sourceName !== story.domain) {
+    about.push(escapeMarkdown(story.sourceName))
+  }
+  about.push(story.domain)
+  lines.push('', about.join(' · '))
   return lines.join('\n')
 }
 
-export interface HackerNewsChannelDependencies {
+export interface ChannelDependencies {
   client: SimplefeedClient
-  source: HackerNewsSource
+  source: Source
   curator: Curator
   tuner: Tuner
   store: ChannelStore
   logger?: Logger
   now?: () => Date
+  /** stories older than this are skipped; feeds that post rarely want longer */
+  maxAgeMs?: number
 }
 
-export class HackerNewsChannel {
+/** Posts the best new stories from its source and is tuned by chatting with it. */
+export class Channel {
   private readonly logger: Logger
   private readonly now: () => Date
   /** messages answered already, as they can arrive both live and when catching up */
   private readonly answered = new Set<string>()
 
-  constructor(private readonly deps: HackerNewsChannelDependencies) {
+  constructor(private readonly deps: ChannelDependencies) {
     this.logger = deps.logger ?? console
     this.now = deps.now ?? (() => new Date())
   }
 
-  private get name() {
+  get name() {
     return this.deps.client.username
   }
 
@@ -74,16 +89,17 @@ export class HackerNewsChannel {
       return []
     }
 
-    const stories = await this.deps.source.topStories(CANDIDATE_COUNT)
+    const stories = await this.deps.source.latest(CANDIDATE_COUNT)
+    const maxAgeMs = this.deps.maxAgeMs ?? DEFAULT_MAX_AGE_MS
     // stories that weren't picked get another chance in later runs, e.g. once they rise
     const eligible = stories.filter(
       (story) =>
-        story.score >= preferences.minScore && this.now().getTime() - story.postedAt.getTime() < MAX_AGE_MS
+        // only stories with points can be too low-scoring
+        (story.score === undefined || story.score >= preferences.minScore) &&
+        this.now().getTime() - story.postedAt.getTime() < maxAgeMs
     )
-    const notPosted = new Set(
-      await this.deps.store.notPosted(this.name, eligible.map((story) => String(story.id)))
-    )
-    const candidates = eligible.filter((story) => notPosted.has(String(story.id)))
+    const notPosted = new Set(await this.deps.store.notPosted(this.name, eligible.map((story) => story.id)))
+    const candidates = eligible.filter((story) => notPosted.has(story.id))
     const picks = await this.deps.curator.pick(
       candidates,
       preferences,
@@ -97,7 +113,7 @@ export class HackerNewsChannel {
       try {
         const postId = await this.deps.client.post(formatPost(pick))
         // remember each post right away, so a crash can't post it twice
-        await this.deps.store.markPosted(this.name, [String(pick.story.id)], this.now())
+        await this.deps.store.markPosted(this.name, [pick.story.id], this.now())
         await this.deps.store.rememberPost(this.name, postId, pick.story.title)
         posted.push(pick.story)
       } catch (error) {

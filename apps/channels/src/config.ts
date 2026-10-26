@@ -6,6 +6,8 @@ export interface ChannelsConfig {
   /** password for the channel accounts the worker creates */
   channelPassword: string
   hackerNewsApiUrl: string
+  /** lets users add feeds on private networks, e.g. localhost; for development only */
+  allowPrivateFeedHosts: boolean
   /** how often channels collect and post new items */
   postIntervalMinutes: number
   /** how often channels join new subscribers' chats and catch up on messages */
@@ -38,6 +40,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ChannelsConfig
     botRegistrationKey: required(env, 'BOT_REGISTRATION_KEY'),
     channelPassword: required(env, 'CHANNEL_PASSWORD'),
     hackerNewsApiUrl: env.HACKER_NEWS_API_URL || 'https://hacker-news.firebaseio.com/v0',
+    allowPrivateFeedHosts: env.CHANNELS_ALLOW_PRIVATE_FEED_HOSTS === 'true',
     postIntervalMinutes: positiveNumber(env.CHANNELS_POST_INTERVAL_MINUTES, 60),
     chatIntervalSeconds: positiveNumber(env.CHANNELS_CHAT_INTERVAL_SECONDS, 30),
     groq: env.GROQ_API_KEY

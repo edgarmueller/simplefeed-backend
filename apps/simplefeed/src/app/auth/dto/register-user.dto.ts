@@ -34,7 +34,32 @@ export class UserDto {
   password: string
 }
 
-export class BotDto extends UserDto {
+/** Channels are named after a single title, so they need no last name. */
+export class BotDto {
+  @IsString()
+  @IsNotEmpty()
+  username: string
+
+  @IsString()
+  @IsNotEmpty()
+  firstName: string
+
+  @IsString()
+  @IsOptional()
+  lastName?: string
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string
+
+  @IsString()
+  @IsNotEmpty()
+  password: string
+
   @IsString()
   @IsOptional()
   bio?: string
